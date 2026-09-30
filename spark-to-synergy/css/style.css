@@ -67,11 +67,9 @@ button { font: inherit; color: inherit; }
   padding: 16px 20px 8px;
 }
 .board-wrap { display: flex; flex-direction: column; align-items: center; min-width: 0; }
-.board-stage { position: relative; width: min(100%, 78vh, 820px); aspect-ratio: 1; perspective: 1400px; }
+.board-stage { position: relative; width: min(100%, 78vh, 820px); aspect-ratio: 1; max-width: 100%; }
 .board-tilt {
   position: absolute; inset: 0;
-  transform-style: preserve-3d;
-  transition: transform 1.2s cubic-bezier(.2, .9, .25, 1.25);
   z-index: 2;
 }
 .board-tilt.wobble { animation: wobble 2.4s ease-in-out infinite; }
@@ -86,7 +84,7 @@ button { font: inherit; color: inherit; }
   background: radial-gradient(ellipse at 50% 30%, rgba(233, 196, 106, 0.18), transparent 70%);
   z-index: 1;
 }
-#board { width: 100%; height: 100%; display: block; overflow: visible; user-select: none; -webkit-user-select: none; }
+#board { width: 100%; height: 100%; display: block; overflow: visible; user-select: none; -webkit-user-select: none; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .board-hint { margin-top: 10px; color: var(--muted); font-size: 0.92rem; text-align: center; min-height: 1.3em; }
 
 /* ---------- SVG-Knoten ---------- */
@@ -298,7 +296,6 @@ button { font: inherit; color: inherit; }
 }
 @keyframes drift { 0% { opacity: 0; } 8% { opacity: 1; } 90% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)); } }
 
-body.celebrate .board-tilt { transform: none !important; }
 body.celebrate #board .node, body.celebrate #board .link { transition: opacity 1.2s, transform 1.6s cubic-bezier(.6, 0, .4, 1); }
 
 /* Schwebender Funken-Knopf (nur mobil) */

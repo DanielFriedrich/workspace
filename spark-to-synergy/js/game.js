@@ -189,6 +189,9 @@
   const linkEls = [];
   const ringEls = [];
   let centerEl = null;
+  let plate = null;
+  const tiltNow = { x: 0, y: 0 };
+  const tiltTarget = { x: 0, y: 0 };
 
   function arcPath(r, a0, a1) {
     // Für den unteren Teil des Kreises Text gegen den Uhrzeigersinn führen, damit er lesbar bleibt
@@ -271,13 +274,13 @@
     });
 
     // Sterne im Hintergrund
-    const stars = el('g', { opacity: 0.5 }, svg);
+    const stars = el('g', { opacity: 0.5, 'pointer-events': 'none' }, svg);
     for (let i = 0; i < 70; i++) {
       el('circle', { cx: Math.random() * 1000, cy: Math.random() * 1000, r: Math.random() * 1.6 + 0.3, fill: '#cfe6dc', opacity: Math.random() * 0.6 + 0.2 }, stars);
     }
 
     // Sektoren (Bamboleo-Scheibe)
-    const disc = el('g', {}, svg);
+    const disc = el('g', { 'pointer-events': 'none' }, svg);
     el('circle', { cx: CX, cy: CY, r: 470, fill: 'rgba(255,255,255,0.015)', stroke: 'rgba(255,255,255,0.08)', 'stroke-width': 2 }, disc);
     SECTORS.forEach((s) => {
       const a = C.sectors[s].angle;
@@ -292,12 +295,17 @@
     });
     el('circle', { cx: CX, cy: CY, r: 478, fill: 'none', stroke: 'rgba(233,196,106,0.18)', 'stroke-width': 1.5, 'stroke-dasharray': '2 14', class: 'spin-slow' }, disc);
 
+    // Schattierung für die Bamboleo-Neigung
+    defs.insertAdjacentHTML('beforeend', `<linearGradient id="g-shade" gradientUnits="userSpaceOnUse" x1="${CX}" y1="${CY - 470}" x2="${CX}" y2="${CY + 470}">
+      <stop offset="0%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity="0"/></linearGradient>`);
+    el('circle', { cx: CX, cy: CY, r: 470, fill: 'url(#g-shade)', 'pointer-events': 'none' }, disc);
+
     // Ringe
     RING_R.forEach((r, i) => {
-      ringEls[i] = el('circle', { cx: CX, cy: CY, r, fill: 'none', stroke: '#1f3a32', 'stroke-width': 2, 'stroke-dasharray': '4 10', class: 'ring' }, svg);
+      ringEls[i] = el('circle', { cx: CX, cy: CY, r, fill: 'none', 'pointer-events': 'none', stroke: '#1f3a32', 'stroke-width': 2, 'stroke-dasharray': '4 10', class: 'ring' }, svg);
     });
     // Verbindungen
-    const links = el('g', {}, svg);
+    const links = el('g', { 'pointer-events': 'none' }, svg);
     const addLink = (a, b, color, dashed) => {
       const pa = a === 'center' ? { x: CX, y: CY } : NODES[a];
       const pb = NODES[b];
@@ -323,7 +331,6 @@
     ct.textContent = 'SYNERGIE';
     const cs = el('text', { x: CX, y: CY + 26, 'text-anchor': 'middle', fill: '#e6f2ed', 'font-size': 13, class: 'core-sub', opacity: 0.8 }, centerEl);
     cs.textContent = '';
-    centerEl.addEventListener('click', onCenterClick);
     centerEl.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onCenterClick(); } });
 
     // Knoten
@@ -359,11 +366,40 @@
         el('circle', { cx: (n.r + 8) * Math.cos(a), cy: (n.r + 8) * Math.sin(a), r: 3.4, fill: 'rgba(255,255,255,0.15)' }, pips);
       }
       g.setAttribute('aria-label', `${dn(n)}${n.kind === 'bridge' ? ' (Brücke)' : ''}`);
-      g.addEventListener('click', () => openNode(id));
       g.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openNode(id); } });
       nodeEls[id] = { g, body: g.querySelector('.body'), cost: g.querySelector('.cost'), pips: [...pips.children], lastState: '' };
     });
+
+    // Alles außer Hintergrund in die „Bamboleo-Scheibe“ legen, die sich neigt (2D-SVG-Transform: überall zuverlässig klickbar)
+    plate = el('g', { id: 'plate' });
+    [...svg.children].filter((c) => c !== defs && c !== stars).forEach((c) => plate.appendChild(c));
+    svg.appendChild(plate);
   }
+
+  /* Ein zentraler Klick-Handler: öffnet den getroffenen oder nächstgelegenen Knoten */
+  function svgPoint(clientX, clientY) {
+    const m = plate && plate.getScreenCTM();
+    if (!m) return null;
+    const pt = svg.createSVGPoint();
+    pt.x = clientX; pt.y = clientY;
+    return pt.matrixTransform(m.inverse());
+  }
+  svg.addEventListener('click', (e) => {
+    const t = e.target;
+    const g = t && t.closest ? t.closest('g.node') : null;
+    if (g) { openNode(g.dataset.id); return; }
+    if (t && t.closest && t.closest('.core-center')) { onCenterClick(); return; }
+    const p = svgPoint(e.clientX, e.clientY);
+    if (!p) return;
+    let best = null, bestD = Infinity;
+    ALL_IDS.forEach((id) => {
+      const n = NODES[id];
+      const d = Math.hypot(n.x - p.x, n.y - p.y);
+      if (d < n.r + 24 && d < bestD) { best = id; bestD = d; }
+    });
+    if (best) openNode(best);
+    else if (Math.hypot(p.x - CX, p.y - CY) < CENTER_R + 20) onCenterClick();
+  });
 
   /* ------------------------------------------------------------------ */
   /* Darstellung aktualisieren                                           */
@@ -422,21 +458,43 @@
   function updateTilt() {
     const c = counts();
     let vx = 0, vy = 0;
-    SECTORS.forEach((s) => {
-      const a = C.sectors[s].angle * Math.PI / 180;
-      vx += c[s] * Math.sin(a);
-      vy += -c[s] * Math.cos(a);
+    SECTORS.forEach((sec) => {
+      const a = C.sectors[sec].angle * Math.PI / 180;
+      vx += c[sec] * Math.sin(a);
+      vy += -c[sec] * Math.cos(a);
     });
-    const k = 4.2;
-    let rx = -vy * k, ry = vx * k;
-    const mag = Math.hypot(rx, ry);
-    if (mag > 12) { rx *= 12 / mag; ry *= 12 / mag; }
-    const tilt = $('#board-tilt');
-    if (!document.body.classList.contains('celebrate')) {
-      tilt.style.transform = `rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`;
-    }
-    tilt.classList.toggle('wobble', imbalance(c) >= 2);
+    // Neigungsvektor zur schwersten Seite (0 = waagerecht, max. 1)
+    const mag = Math.min(Math.hypot(vx, vy) / 2.5, 1);
+    const celebrating = document.body.classList.contains('celebrate') || S.won;
+    const len = Math.hypot(vx, vy) || 1;
+    tiltTarget.x = celebrating ? 0 : (vx / len) * mag;
+    tiltTarget.y = celebrating ? 0 : (vy / len) * mag;
+    $('#board-tilt').classList.toggle('wobble', imbalance(c) >= 2);
   }
+
+  // Neigung weich animieren: Scheibe wird zur schweren Seite hin verkürzt, verschoben und abgedunkelt
+  function applyTilt() {
+    const dx = tiltTarget.x - tiltNow.x, dy = tiltTarget.y - tiltNow.y;
+    if (!plate || (Math.abs(dx) < 0.0005 && Math.abs(dy) < 0.0005 && tiltNow.done)) return;
+    const settle = Math.abs(dx) < 0.0005 && Math.abs(dy) < 0.0005;
+    tiltNow.x = settle ? tiltTarget.x : tiltNow.x + dx * 0.08;
+    tiltNow.y = settle ? tiltTarget.y : tiltNow.y + dy * 0.08;
+    tiltNow.done = settle;
+    const mag = Math.hypot(tiltNow.x, tiltNow.y);
+    if (mag < 0.002) { plate.removeAttribute('transform'); return; }
+    const ux = tiltNow.x / mag, uy = tiltNow.y / mag;
+    const ang = Math.atan2(uy, ux) * 180 / Math.PI;
+    const sc = 1 - 0.09 * mag;
+    const shift = 22 * mag;
+    plate.setAttribute('transform', `translate(${(CX + ux * shift).toFixed(2)} ${(CY + uy * shift).toFixed(2)}) rotate(${ang.toFixed(2)}) scale(${sc.toFixed(4)} 1) rotate(${(-ang).toFixed(2)}) translate(${-CX} ${-CY})`);
+    const grad = svg.querySelector('#g-shade');
+    if (grad) {
+      grad.setAttribute('x1', CX - ux * 470); grad.setAttribute('y1', CY - uy * 470);
+      grad.setAttribute('x2', CX + ux * 470); grad.setAttribute('y2', CY + uy * 470);
+      grad.children[1].setAttribute('stop-opacity', (0.38 * mag).toFixed(3));
+    }
+  }
+
 
   function refreshPanel() {
     const ps = perSec();
@@ -799,7 +857,7 @@
   /* ------------------------------------------------------------------ */
   function nodeScreenPos(id) {
     const n = id === 'center' ? { x: CX, y: CY } : NODES[id];
-    const m = svg.getScreenCTM();
+    const m = (plate || svg).getScreenCTM();
     if (!m) return { x: innerWidth / 2, y: innerHeight / 2 };
     const pt = svg.createSVGPoint();
     pt.x = n.x; pt.y = n.y;
@@ -915,7 +973,7 @@
     S.code = S.code || makeCode();
     save();
     document.body.classList.add('celebrate');
-    $('#board-tilt').style.transform = 'rotateX(0deg) rotateY(0deg)';
+    updateTilt();
     sfx.win();
 
     // Ringe von außen nach innen golden aufleuchten lassen
@@ -1184,6 +1242,7 @@
   const frame = (t) => {
     const dt = Math.min((t - lastT) / 1000, 1);
     lastT = t;
+    applyTilt();
     const gain = perSec() * dt;
     S.funken += gain;
     S.total += gain;
