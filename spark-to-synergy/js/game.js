@@ -978,15 +978,16 @@
       } catch (e2) { ok = false; }
     }
     if (!ok && !dup) {
-      // Fallback ohne Server: vorausgefüllte E-Mail
+      // Fallback ohne Server: vorbereitete E-Mail (Adresse und Code bleiben sichtbar, falls der Link nicht öffnet)
       const body = `Hallo variado-Team,\n\nich habe bei „Spark to Synergy“ die Synergie erreicht und möchte am Gewinnspiel teilnehmen.\n\nName: ${name}\nE-Mail: ${email}\nSynergie-Code: ${S.code}\nNewsletter: ${payload.newsletter ? 'ja' : 'nein'}\n\nViele Grüße`;
-      location.href = `mailto:${C.meta.contactEmail}?subject=${encodeURIComponent(`Spark to Synergy – Teilnahme ${S.code}`)}&body=${encodeURIComponent(body)}`;
-      $('#win-done').innerHTML = '<p class="win-thanks">Fast geschafft! Dein E-Mail-Programm öffnet sich mit einer vorbereiteten Nachricht – bitte schicke sie ab. 🍀</p>';
+      const href = `mailto:${C.meta.contactEmail}?subject=${encodeURIComponent(`Spark to Synergy – Teilnahme ${S.code}`)}&body=${encodeURIComponent(body)}`;
+      $('#win-done').innerHTML = `<p class="win-thanks">Fast geschafft! Schick uns bitte eine kurze E-Mail mit deinem Namen und deinem Synergie-Code an <b class="gold" style="user-select:all">${esc(C.meta.contactEmail)}</b>.</p>
+        <a class="btn btn-primary" href="${esc(href)}">E-Mail vorbereiten ✉️</a>`;
     } else if (dup) {
       $('#win-done').innerHTML = '<p class="win-thanks">Du bist bereits im Lostopf – wir drücken dir die Daumen! 🍀</p>';
     }
-    S.submitted = true;
-    save();
+    // Nur als „eingegangen“ merken, wenn der Server die Teilnahme bestätigt hat
+    if (ok || dup) { S.submitted = true; save(); }
     $('#win-form-wrap').hidden = true;
     $('#win-done').hidden = false;
     submit.disabled = false;
@@ -1160,14 +1161,13 @@
     save();
   });
   $('#btn-sound').textContent = S.sound ? '🔊' : '🔇';
-  $('#btn-reset').addEventListener('click', () => {
-    if (confirm('Wirklich von vorne beginnen? Dein Fortschritt geht verloren.')) {
-      try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* ignorieren */ }
-      S = fresh();
-      S.seenHelp = true;
-      save();
-      location.reload();
-    }
+  $('#btn-reset').addEventListener('click', () => showModal('#reset-modal'));
+  $('#reset-confirm').addEventListener('click', () => {
+    try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* ignorieren */ }
+    S = fresh();
+    S.seenHelp = true;
+    save();
+    location.reload();
   });
 
   refreshAll();

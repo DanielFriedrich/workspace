@@ -136,6 +136,18 @@
   </div>
 
   <button class="spark-fab" id="spark-fab" aria-label="Funken schlagen"><span class="spark-core"></span></button>
+  <!-- Neustart bestätigen -->
+  <div class="modal" id="reset-modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="reset-title">
+      <h2 id="reset-title">Neu starten?</h2>
+      <p>Dein gesamter Fortschritt in diesem Browser wird gelöscht.</p>
+      <div class="task-footer">
+        <button class="btn" data-close>Abbrechen</button>
+        <button class="btn btn-primary" id="reset-confirm">Neu starten</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast-stack" id="toasts" aria-live="polite"></div>
   <canvas id="fx" aria-hidden="true"></canvas>
 
