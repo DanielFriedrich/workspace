@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spark to Synergy – variado</title>
+  <meta name="description" content="Vom Funken zur Synergie: Ein Lernspiel von variado. Die ErLebenswerkstatt – Mensch, Natur und Technik im Gleichgewicht.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-logo">variado<span class="dot">.</span></span>
+      <span class="brand-title">Spark <span class="to">to</span> Synergy</span>
+    </div>
+    <div class="topbar-stats" aria-live="polite">
+      <span class="chip chip-spark" title="Funken"><span class="ico">✨</span><b id="hud-funken">0</b></span>
+      <span class="chip chip-sp" title="Synergiepunkte"><span class="ico">✦</span><b id="hud-sp">0</b></span>
+    </div>
+    <div class="topbar-actions">
+      <button class="icon-btn" id="btn-help" title="Spielanleitung" aria-label="Spielanleitung">?</button>
+      <button class="icon-btn" id="btn-sound" title="Ton an/aus" aria-label="Ton an/aus">🔊</button>
+      <button class="icon-btn" id="btn-reset" title="Neu starten" aria-label="Neu starten">↺</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="board-wrap" aria-label="Spielbrett">
+      <div class="board-stage">
+        <div class="board-tilt" id="board-tilt">
+          <svg id="board" viewBox="-20 -20 1040 1040" role="img" aria-label="Spielbrett Mensch, Natur, Technik"></svg>
+        </div>
+        <div class="bamboleo-base" aria-hidden="true"></div>
+      </div>
+      <div class="board-hint" id="board-hint">Starte außen – tippe einen leuchtenden Knoten an.</div>
+    </section>
+
+    <aside class="panel">
+      <div class="card spark-card">
+        <div class="spark-amount"><span id="p-funken">0</span> <small>Funken</small></div>
+        <div class="spark-rate"><span id="p-rate">0</span> Funken / Sek. <span class="factor" id="p-factor"></span></div>
+        <button class="spark-btn" id="spark-btn" aria-label="Funken schlagen">
+          <span class="spark-core"></span>
+          <span class="spark-label">Funken schlagen</span>
+          <span class="spark-sub" id="p-tap">+1</span>
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>Bamboleo-Balance</h3><span class="badge" id="balance-badge">im Gleichgewicht</span></div>
+        <div class="balance-bars" id="balance-bars"></div>
+        <p class="small muted" id="balance-text">Entwickle alle drei Bereiche gleichmäßig – sonst kippt das Brett.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>Phase</h3><span class="badge badge-sp"><span id="p-sp">0</span> ✦ Synergie</span></div>
+        <ol class="phase-list" id="phase-list"></ol>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>Weg zur Synergie</h3></div>
+        <ul class="goal-list" id="goal-list"></ul>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="foot">
+    <span>Ein Lernspiel von <a href="https://www.variado.de" target="_blank" rel="noopener">variado. Die ErLebenswerkstatt</a> · Mensch, Natur, Technik – kein Gegensatz, sondern Teile eines perfekten Puzzles.</span>
+  </footer>
+
+  <!-- Aufgaben-Dialog -->
+  <div class="modal" id="task-modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="task-title">
+      <button class="modal-close" data-close aria-label="Schließen">×</button>
+      <div class="task-head">
+        <div class="task-icon" id="task-icon"></div>
+        <div>
+          <div class="task-meta" id="task-meta"></div>
+          <h2 id="task-title"></h2>
+        </div>
+      </div>
+      <p class="task-blurb" id="task-blurb"></p>
+      <div id="task-body"></div>
+    </div>
+  </div>
+
+  <!-- Hilfe -->
+  <div class="modal" id="help-modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="help-title">
+      <button class="modal-close" data-close aria-label="Schließen">×</button>
+      <h2 id="help-title">Vom Funken zur Synergie</h2>
+      <p>Mensch, Natur und Technik sind kein Gegensatz, sondern Teile eines perfekten Puzzles. Arbeite dich von außen nach innen bis zur <b class="gold">Synergie</b> vor.</p>
+      <ol class="help-list">
+        <li><b>✨ Funken sammeln:</b> Tippe auf „Funken schlagen“. Jeder gelöste Knoten erzeugt danach automatisch Funken – wie ein kleines Kraftwerk.</li>
+        <li><b>Knoten lösen:</b> Leuchtende Knoten sind bereit. Löse die Aufgabe und investiere Funken, um den Knoten freizuschalten. Er öffnet den Weg zum nächsten Ring.</li>
+        <li><b>⚖️ Bamboleo-Balance:</b> Wie beim Balancespiel darf kein Bereich davonlaufen. Bei zwei Knoten Unterschied wackelt das Brett und produziert weniger, mehr lässt es gar nicht zu. Perfekte Balance gibt einen Harmonie-Bonus.</li>
+        <li><b>⬡ Brücken:</b> An den Grenzen zwischen zwei Bereichen warten Sonderaufgaben. Sie bringen viele Funken und <b>✦ Synergiepunkte</b>.</li>
+        <li><b>✦ Synergiepunkte:</b> Du bekommst sie für jeden Ring, der in allen drei Bereichen fertig ist, und für Brücken. Die inneren Ringe brauchen Synergiepunkte.</li>
+        <li><b>⬆ Stärken:</b> Tippe gelöste Knoten erneut an, um sie mit Funken zu verstärken.</li>
+        <li><b>🌟 Synergie:</b> Sind alle Bereiche vollständig und jede Überschneidung mindestens einmal verbunden, öffnet sich das Zentrum für die letzte Aufgabe – und es gibt etwas zu gewinnen!</li>
+      </ol>
+      <p class="small muted">Dein Fortschritt wird automatisch in diesem Browser gespeichert.</p>
+      <button class="btn btn-primary" data-close>Los geht's!</button>
+    </div>
+  </div>
+
+  <!-- Gewinn-Dialog -->
+  <div class="modal modal-win" id="win-modal" hidden>
+    <div class="modal-card win-card" role="dialog" aria-modal="true" aria-labelledby="win-title">
+      <div class="win-emblem" aria-hidden="true">
+        <span class="w w-m"></span><span class="w w-n"></span><span class="w w-t"></span><span class="w-core">✦</span>
+      </div>
+      <h2 id="win-title">Herzlichen Glückwunsch!</h2>
+      <p class="win-lead">Du hast die <b class="gold">Synergie</b> erreicht – Mensch, Natur und Technik sind im Gleichgewicht.</p>
+      <div class="win-stats" id="win-stats"></div>
+      <div id="win-form-wrap">
+        <p>Als kleines Dankeschön verlosen wir unter allen, die es bis zur Synergie geschafft haben, eine Überraschung von variado. Trag dich einfach ein:</p>
+        <form id="win-form" novalidate>
+          <label>Name<input type="text" id="win-name" name="name" autocomplete="name" required maxlength="120"></label>
+          <label>E-Mail-Adresse<input type="email" id="win-email" name="email" autocomplete="email" required maxlength="200"></label>
+          <label class="check"><input type="checkbox" id="win-consent" required> <span>Ich bin einverstanden, dass variado meinen Namen und meine E-Mail-Adresse zur Durchführung des Gewinnspiels speichert und mich im Gewinnfall kontaktiert. Die Einwilligung kann ich jederzeit widerrufen. (<a id="privacy-link" href="#" target="_blank" rel="noopener">Datenschutz</a>)</span></label>
+          <label class="check"><input type="checkbox" id="win-news"> <span>Ich möchte außerdem über neue Angebote von variado informiert werden (optional).</span></label>
+          <p class="form-error" id="win-error" hidden></p>
+          <button class="btn btn-primary btn-wide" type="submit" id="win-submit">Teilnehmen 🎁</button>
+        </form>
+      </div>
+      <div id="win-done" hidden>
+        <p class="win-thanks">Danke! Deine Teilnahme ist eingegangen. Wir drücken dir die Daumen. 🍀</p>
+      </div>
+      <p class="win-code">Dein Synergie-Code: <b id="win-code"></b></p>
+      <div class="win-actions">
+        <a class="btn" href="https://www.variado.de" target="_blank" rel="noopener">variado entdecken</a>
+        <button class="btn" data-close>Weiter ansehen</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="spark-fab" id="spark-fab" aria-label="Funken schlagen"><span class="spark-core"></span></button>
+  <div class="toast-stack" id="toasts" aria-live="polite"></div>
+  <canvas id="fx" aria-hidden="true"></canvas>
+
+  <script src="js/content.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
