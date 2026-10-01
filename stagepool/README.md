@@ -2,7 +2,7 @@
 
 Web-Plattform, über die ihr euer gemeinsames Event-Equipment (Scheinwerfer, Nebel, Flammen, Funken, Boxen, Mischpulte, Mikrofone, Laser …) an Leute verleiht, die **kleine Veranstaltungen** planen.
 
-**Technik:** PHP 7.3+ (getestet mit PHP 7.3.33 und 8.3), MySQL/MariaDB **oder** SQLite, keine Frameworks, kein Composer, kein Build-Schritt. Läuft auf jedem normalen Webhosting-Paket.
+**Technik:** PHP 7.3 bis 8.3 (getestet mit PHP 7.3.33 und 8.3; geprüft für 8.2), MySQL/MariaDB **oder** SQLite, keine Frameworks, kein Composer, kein Build-Schritt. Läuft auf jedem normalen Webhosting-Paket – mit Apache (`.htaccess`) oder nginx (Vorlage in `docs/nginx.conf.example`).
 
 > Der Name „Stagepool“ ist ein Arbeitstitel und lässt sich im Backend unter *Einstellungen → Allgemein* ändern.
 
@@ -56,7 +56,7 @@ Web-Plattform, über die ihr euer gemeinsames Event-Equipment (Scheinwerfer, Neb
 
 ## Schnellstart
 
-**Fertiges Upload-Paket:** [`dist/stagepool-1.2.0.zip`](dist/stagepool-1.2.0.zip) (neu bauen mit `./build-zip.sh`)
+**Fertiges Upload-Paket:** [`dist/stagepool-1.2.1.zip`](dist/stagepool-1.2.1.zip) (neu bauen mit `./build-zip.sh`)
 
 1. ZIP entpacken und den Inhalt per FTP auf den Webspace laden
 2. `https://eure-domain.de/install/` aufrufen und den Assistenten ausfüllen

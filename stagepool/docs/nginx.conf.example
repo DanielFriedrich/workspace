@@ -1,0 +1,75 @@
+# Stagepool – Beispielkonfiguration für nginx + PHP-FPM (PHP 7.3 bis 8.3)
+#
+# nginx liest keine .htaccess-Dateien. Diese Regeln übernehmen deren Aufgabe:
+# interne Ordner sperren, Uploads ohne PHP-Ausführung, Caching für Assets.
+#
+# Anpassen: server_name, root und den fastcgi_pass-Socket deiner PHP-Version
+# (z. B. /run/php/php8.2-fpm.sock). Bei Installation in einem Unterordner
+# siehe Hinweis am Ende.
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name verleih.example.de;
+
+    root /var/www/stagepool;
+    index index.php;
+
+    client_max_body_size 16m;          # Foto- und Beleg-Uploads (max. 10 MB)
+    charset utf-8;
+
+    # Sicherheits-Header
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+
+    # --- Interne Ordner und Dateien sperren -------------------------------
+    location ~ ^/(inc|config|storage|docs|dist)(/|$)  { deny all; return 404; }
+    location ~ /\.(?!well-known)                      { deny all; return 404; }
+    location ~* \.(md|sql|sqlite|lock|log|sh|example)$ { deny all; return 404; }
+
+    # --- Uploads: nur ausliefern, niemals PHP ausführen -------------------
+    location ^~ /uploads/ {
+        location ~* \.(php\d?|phtml|phar|pl|py|cgi)$ { deny all; return 404; }
+        expires 30d;
+        add_header X-Content-Type-Options "nosniff" always;
+        try_files $uri =404;
+    }
+
+    # --- Statische Dateien ------------------------------------------------
+    location ^~ /assets/ {
+        expires 30d;
+        add_header Cache-Control "public";
+        add_header X-Content-Type-Options "nosniff" always;
+        try_files $uri =404;
+    }
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    # --- PHP --------------------------------------------------------------
+    location ~ \.php$ {
+        try_files $uri =404;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param HTTPS $https if_not_empty;
+        fastcgi_pass unix:/run/php/php8.2-fpm.sock;
+        fastcgi_read_timeout 60s;
+    }
+}
+
+# HTTPS: am einfachsten mit certbot (`certbot --nginx -d verleih.example.de`),
+# das ergänzt den 443-Block und die Weiterleitung von http auf https automatisch.
+#
+# Unterordner (z. B. https://example.de/verleih/): root auf den Webroot lassen
+# und in den Sperr-Regeln den Pfad ergänzen, z. B.
+#   location ~ ^/verleih/(inc|config|storage|docs|dist)(/|$) { deny all; return 404; }
+#   location ^~ /verleih/uploads/ { … }
+# Die Anwendung erkennt den Unterordner selbst; notfalls in config/config.php
+# 'base_path' => '/verleih/' setzen.
+#
+# PHP-Einstellungen (php.ini bzw. Pool-Konfiguration von PHP-FPM), da nginx die
+# Datei .user.ini nur liest, wenn PHP-FPM sie auswertet (Standard: ja):
+#   upload_max_filesize = 12M
+#   post_max_size = 16M

@@ -8,11 +8,11 @@ Diese Anleitung führt Schritt für Schritt durch die Einrichtung auf einem norm
 
 | | Minimum | Hinweis |
 |---|---|---|
-| PHP | **7.3** (auch 7.4 und 8.x) | Im Hosting-Panel auswählbar |
+| PHP | **7.3 bis 8.3** (z. B. 7.4, 8.1, 8.2) | Im Hosting-Panel auswählbar |
 | PHP-Erweiterungen | `pdo`, `pdo_mysql` **oder** `pdo_sqlite`, `json`, `session`, `hash`, `mbstring` | bei allen gängigen Hostern Standard |
 | optional | `gd` | verkleinert große Fotos automatisch auf 1600 px |
 | Datenbank | MySQL 5.6+ / MariaDB 10.1+ **oder** SQLite | SQLite braucht keinen Datenbankserver |
-| Webserver | Apache mit `.htaccess` (empfohlen) oder nginx | für nginx siehe Abschnitt 8 |
+| Webserver | Apache mit `.htaccess` oder nginx + PHP-FPM | für nginx siehe Abschnitt 8 und `docs/nginx.conf.example` |
 | Speicherplatz | ca. 1 MB + Fotos | |
 
 **MySQL oder SQLite?**
@@ -126,16 +126,22 @@ Bitte prüfen:
 
 ## 8. nginx statt Apache
 
-nginx liest keine `.htaccess`-Dateien. Diese Regeln in die Server-Konfiguration aufnehmen (bei Managed-Hostern über den Support):
+Stagepool läuft auch mit **nginx + PHP-FPM** (getestet mit nginx 1.24 und PHP 8.3, Code geprüft für PHP 7.3 bis 8.3).
 
-```nginx
-location ~ ^/(inc|config|storage|docs)/ { deny all; }
-location ~ /\. { deny all; }
-location ~* ^/uploads/.*\.(php|phtml|phar)$ { deny all; }
-location ~* \.(md|sqlite|lock|log)$ { deny all; }
-```
+nginx liest keine `.htaccess`-Dateien. Die Schutzregeln (interne Ordner sperren, keine PHP-Ausführung in `uploads/`) müssen deshalb in die Server-Konfiguration. Eine fertige, getestete Vorlage liegt unter **`docs/nginx.conf.example`**:
 
-Bei Installation in einem Unterordner den Pfad davorsetzen, z. B. `^/verleih/(inc|config|storage|docs)/`.
+1. Vorlage nach `/etc/nginx/sites-available/stagepool` kopieren.
+2. `server_name`, `root` und den PHP-FPM-Socket anpassen (z. B. `/run/php/php8.2-fpm.sock`).
+3. Aktivieren: `ln -s /etc/nginx/sites-available/stagepool /etc/nginx/sites-enabled/`, dann `nginx -t && systemctl reload nginx`.
+4. HTTPS z. B. mit `certbot --nginx -d verleih.example.de`.
+5. Schreibrechte für den PHP-FPM-Benutzer (meist `www-data`): `chown -R www-data:www-data config storage uploads`.
+6. Prüfen: `https://…/config/config.php`, `https://…/storage/` und `https://…/inc/functions.php` müssen **404** liefern.
+
+Bei Managed-Hostern mit nginx (ohne eigenen Server-Zugang) bitte den Support bitten, die Sperr-Regeln aus der Vorlage zu übernehmen.
+
+**PHP-Module** (Debian/Ubuntu-Paketnamen für PHP 8.2): `php8.2-fpm php8.2-mysql` (oder `php8.2-sqlite3`) `php8.2-mbstring`, empfohlen `php8.2-gd`. `json`, `hash`, `session` und `iconv` sind in PHP 8 fest eingebaut.
+
+**Upload-Größe:** In der nginx-Vorlage ist `client_max_body_size 16m` gesetzt. Die Datei `.user.ini` (12 MB Upload) wertet PHP-FPM selbst aus; alternativ `upload_max_filesize`/`post_max_size` in der `php.ini` setzen.
 
 ---
 

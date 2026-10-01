@@ -2,12 +2,12 @@
 /**
  * Stagepool – zentraler Einstiegspunkt für alle Seiten.
  * Lädt Konfiguration, Datenbank, Session und Hilfsfunktionen.
- * Kompatibel mit PHP 7.3+.
+ * Kompatibel mit PHP 7.3 bis 8.3 (Apache oder nginx + PHP-FPM).
  */
 
 define('SP_APP', true);
 define('SP_ROOT', dirname(__DIR__));
-define('SP_VERSION', '1.2.0');
+define('SP_VERSION', '1.2.1');
 define('SP_SCHEMA_VERSION', 3); // bei Schema-Änderungen erhöhen, siehe inc/schema.php
 
 require SP_ROOT . '/inc/functions.php';

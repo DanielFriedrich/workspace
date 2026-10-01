@@ -199,7 +199,15 @@ function pdf_t($s)
         return mb_convert_encoding($s, 'Windows-1252', 'UTF-8');
     }
     $map = array('€' => "\x80", '‚' => "\x82", '„' => "\x84", '…' => "\x85", '‘' => "\x91", '’' => "\x92", '“' => "\x93", '”' => "\x94", '–' => "\x96", '—' => "\x97", '•' => "\x95");
-    return utf8_decode(strtr($s, $map));
+    // Letzter Ausweg ohne iconv/mbstring (utf8_decode ist ab PHP 8.2 veraltet)
+    $s = strtr($s, $map);
+    return preg_replace_callback('/[\xC0-\xDF][\x80-\xBF]|[\xE0-\xFF][\x80-\xBF]{2,3}/', function ($m) {
+        if (strlen($m[0]) === 2) {
+            $cp = ((ord($m[0][0]) & 0x1F) << 6) | (ord($m[0][1]) & 0x3F);
+            return $cp < 256 ? chr($cp) : '?';
+        }
+        return '?';
+    }, $s);
 }
 
 function pdf_money($v)
