@@ -61,7 +61,7 @@ function booking_write_items($bookingId, array $wanted, $from, $to)
             if (isset($existing[$pid])) {
                 $price = (float) $existing[$pid]['price_day'];
             }
-            $line = round($price * $qty * $days, 2);
+            $line = rental_price($price, $days, $qty);
             $total += $line;
             $deposit += $dep * $qty;
             db_insert('booking_items', array(

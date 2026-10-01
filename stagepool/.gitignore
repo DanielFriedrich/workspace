@@ -4,3 +4,6 @@
 /storage/logs/*.log
 /uploads/products/*
 !/uploads/products/index.php
+/storage/receipts/*
+!/storage/receipts/index.php
+/storage/logs/*.pdf

@@ -7,21 +7,27 @@ Das Backend erreicht ihr unter **`/admin/`** (Link „Team-Login“ unten auf je
 ## Der Ablauf einer Ausleihe
 
 ```
-Kunde fragt an ──▶ Angefragt ──▶ Bestätigt ──▶ Ausgegeben ──▶ Zurückgegeben
-   (reserviert)        │              │                         (wieder frei)
-                       ▼              ▼
-                   Abgelehnt      Storniert        (Geräte sofort wieder frei)
+Kunde fragt an ──▶ Angefragt ──▶ Angebot gesendet ──▶ Bestätigt ──▶ Ausgegeben ──▶ Zurückgegeben
+   (reserviert)        │          (optional, PDF)          │          (Rechnung)       (wieder frei)
+                       ▼                                   ▼
+                   Abgelehnt                           Storniert      (Geräte sofort wieder frei)
 ```
 
 | Status | Bedeutung | Blockt Geräte? |
 |---|---|---|
 | **Angefragt** | Kunde hat angefragt, Geräte sind *reserviert* | ja |
+| **Angebot gesendet** | ihr habt ein Angebot (PDF) geschickt, Geräte bleiben reserviert | ja |
 | **Bestätigt** | ihr habt zugesagt, *fest gebucht* | ja |
 | **Ausgegeben** | Technik wurde abgeholt | ja |
 | **Zurückgegeben** | alles zurück, Ausleihe abgeschlossen | nein |
 | **Abgelehnt / Storniert** | findet nicht statt | nein |
 
 Zu jeder Buchung blockt das System zusätzlich **einen Puffertag davor und danach** (einstellbar), damit Abholung und Rückgabe nicht mit anderen Buchungen kollidieren.
+
+### Preise
+
+Der erste Miettag kostet den vollen Tagespreis, **jeder weitere Tag 50 %** davon (einstellbar unter *Einstellungen → Buchungsregeln*).
+Beispiel 100 € pro Tag: 1 Tag = 100 €, 2 Tage = 150 €, 3 Tage = 200 €. Website, Anfragekorb, Buchungen und Rechnungen rechnen automatisch so.
 
 ---
 
@@ -53,6 +59,12 @@ In der Seitenleiste zeigt eine gelbe Zahl, wie viele Anfragen offen sind.
 
 **Preis anpassen:** Häkchen bei „Gesamtpreis manuell festlegen“ setzen, z. B. für Rabatte, Pauschalen oder Lieferkosten.
 
+**Angebot senden:** Bei neuen Anfragen gibt es den Knopf **„Angebot senden“**. Das erzeugt ein PDF-Angebot (Nummer z. B. `AN-2026-001`) mit allen Geräten und Preisen. Wahlweise geht es direkt per E-Mail mit PDF-Anhang an den Kunden; die Buchung steht dann auf *Angebot gesendet*. Sagt der Kunde zu, klickt ihr **„Angebot angenommen“**.
+
+**Rechnung erstellen:** Nach der Ausgabe (und nach der Rückgabe) erscheint **„Rechnung erstellen“**. Die Rechnung bekommt eine fortlaufende Nummer (z. B. `RE-2026-007`), kann per E-Mail verschickt und/oder als PDF heruntergeladen werden. Hat der Kunde schon bar bezahlt, direkt „Bereits bezahlt“ anhaken.
+
+Rechts unter **Angebote & Rechnungen** seht ihr alle Belege der Buchung. Tipp: Rabatte oder Lieferkosten *vorher* über „Gesamtpreis manuell festlegen“ eintragen – der Beleg übernimmt den Betrag und weist die Differenz als Anpassung aus.
+
 **Kundenlink:** Rechts steht der persönliche Link des Kunden. Darüber sieht er den Status und kann bis zum Mietbeginn selbst stornieren.
 
 **Verlauf:** Jede Änderung wird mit Zeitpunkt und Person protokolliert.
@@ -63,6 +75,40 @@ In der Seitenleiste zeigt eine gelbe Zahl, wie viele Anfragen offen sind.
 
 Für Anfragen per Telefon, WhatsApp oder direkt im Gespräch: **Übersicht → Buchung manuell anlegen** (oder „Neue Buchung“ in der Buchungsliste).
 Zeitraum, Status (meist „Bestätigt“), Kunde und Geräte eintragen und speichern. Die E-Mail-Adresse ist hier optional.
+
+---
+
+## Angebote & Rechnungen
+
+Liste aller Belege mit Filter nach Art, Status und Jahr. Oben seht ihr die Rechnungssumme des Jahres und was noch offen ist; überfällige Rechnungen sind rot markiert.
+
+In einem Beleg könnt ihr:
+- das **PDF ansehen/herunterladen**,
+- ihn **per E-Mail senden** (auch an eine andere Adresse),
+- bei Rechnungen die **Zahlung erfassen** (Datum + Zahlart) – sie wird automatisch als Einnahme in der Buchhaltung verbucht,
+- Angebote als **angenommen** markieren (bestätigt auch die Buchung),
+- Rechnungen **stornieren** (die Nummer bleibt vergeben, wie es das Steuerrecht verlangt).
+
+Positionen und Beträge eines Belegs sind nach dem Erstellen fest. Für Korrekturen: Rechnung stornieren, Buchung anpassen, neue Rechnung erstellen.
+
+Absender, Steuernummer, Bankverbindung, Nummern-Präfixe, Zahlungsziel und Texte stellt ihr unter **Einstellungen → Firma & Rechnungen** ein. Seid ihr umsatzsteuerpflichtig, tragt den Steuersatz (z. B. 19) ein – dann wird die enthaltene Umsatzsteuer ausgewiesen; bei 0 erscheint der Kleinunternehmer-Hinweis nach § 19 UStG.
+
+---
+
+## Buchhaltung
+
+Eine einfache Einnahmen-Überschuss-Übersicht für den Pool:
+
+- **Einnahmen** entstehen automatisch, sobald eine Rechnung bezahlt ist. Weitere Einnahmen (z. B. bar ohne Rechnung) erfasst ihr über **„+ Einnahme“**.
+- **Ausgaben** über **„Ausgabe erfassen“**: Datum, Betrag, Beschreibung, Kategorie (Miete, Anschaffung Equipment, Regale & Kisten, Versicherung, Reparatur …), Händler, Zahlart und **wer bezahlt bzw. ausgelegt hat**. Optional lässt sich ein Gerät verknüpfen (z. B. bei der Anschaffung).
+- **Belege** (PDF oder Handyfoto der Quittung) direkt hochladen. Sie werden geschützt gespeichert und sind nur im Backend abrufbar.
+- Oben: Einnahmen, Ausgaben und Ergebnis des Jahres, ein Monatsdiagramm (Klick auf einen Monat filtert die Liste) und die Ausgaben nach Kategorie.
+- **„Ausgelegt von“** zeigt, wer wie viel aus eigener Tasche bezahlt hat – praktisch für die interne Abrechnung.
+- **CSV-Export** pro Jahr für Excel oder die Steuerberatung (inkl. Kennzeichnung, ob ein Beleg vorliegt).
+
+Die Kategorien passt ihr unter **Einstellungen → Buchhaltung** an (eine pro Zeile).
+
+> Hinweis: Das ersetzt keine Steuerberatung. Für die Steuererklärung bitte den CSV-Export und die Belege an die Steuerberatung geben bzw. selbst prüfen.
 
 ---
 
@@ -119,7 +165,7 @@ Wenn ihr später einen gemeinsamen Lagerort habt: neuen Standort anlegen, Gerät
 
 | Rolle | darf |
 |---|---|
-| **Team** | Buchungen, Geräte, Kategorien, Standorte, Sperrzeiten |
+| **Team** | Buchungen, Angebote & Rechnungen, Buchhaltung, Geräte, Kategorien, Standorte, Sperrzeiten |
 | **Admin** | zusätzlich Team-Zugänge und Einstellungen |
 
 Unter **Mein Konto** ändert jede Person ihren Namen, ihre Telefonnummer und ihr Passwort.
@@ -131,7 +177,9 @@ Unter **Mein Konto** ändert jede Person ihren Namen, ihre Telefonnummer und ihr
 | Bereich | Inhalt |
 |---|---|
 | Allgemein | Name, Claim, Startseitentext, Kontaktdaten, wer bei neuen Anfragen eine Mail bekommt |
-| Buchungsregeln | Puffertage, Vorlauf (frühester Mietbeginn), Mindest- und Höchstdauer, Preishinweis |
+| Buchungsregeln | Puffertage, Preis weiterer Miettage (%), Vorlauf, Mindest- und Höchstdauer, Preishinweis |
+| Firma & Rechnungen | Absender, Anschrift, Steuernummer, USt-Satz, Bankverbindung, Nummernkreise, Zahlungsziel, Texte |
+| Buchhaltung | Kategorien für Einnahmen und Ausgaben |
 | Texte | Abholung & Lieferung, Mietbedingungen |
 | Rechtliches | Impressum, Datenschutzerklärung |
 | E-Mail-Versand | mail()/SMTP/Protokoll, Absender, Testmail |

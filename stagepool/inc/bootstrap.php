@@ -7,7 +7,8 @@
 
 define('SP_APP', true);
 define('SP_ROOT', dirname(__DIR__));
-define('SP_VERSION', '1.0.0');
+define('SP_VERSION', '1.1.0');
+define('SP_SCHEMA_VERSION', 2); // bei Schema-Änderungen erhöhen, siehe inc/schema.php
 
 require SP_ROOT . '/inc/functions.php';
 require SP_ROOT . '/inc/db.php';
@@ -18,6 +19,8 @@ require SP_ROOT . '/inc/mailer.php';
 require SP_ROOT . '/inc/auth.php';
 require SP_ROOT . '/inc/catalog.php';
 require SP_ROOT . '/inc/bookings.php';
+require SP_ROOT . '/inc/documents.php';
+require SP_ROOT . '/inc/accounting.php';
 
 $configFile = SP_ROOT . '/config/config.php';
 if (!is_file($configFile)) {
@@ -31,6 +34,13 @@ if (!is_file($configFile)) {
 }
 
 date_default_timezone_set(cfg('timezone', 'Europe/Berlin'));
+
+// Nach einem Update: Datenbank automatisch auf den neuesten Stand bringen.
+if (!defined('SP_INSTALLER') && cfg('db') && (int) setting('schema_version', '0') < SP_SCHEMA_VERSION) {
+    require_once SP_ROOT . '/inc/schema.php';
+    schema_migrate();
+    settings_all(true);
+}
 if (function_exists('mb_internal_encoding')) {
     mb_internal_encoding('UTF-8');
 }

@@ -94,7 +94,7 @@ function avail_grid(array $products, $from, $to, $excludeBookingId = 0, $data = 
                     $isReal = $it['start_date'] <= $d && $it['end_date'] >= $d;
                     if ($isReal) {
                         $usedReal += (int) $it['qty'];
-                        if ($it['status'] !== 'requested') {
+                        if (in_array($it['status'], array('confirmed', 'picked_up'), true)) {
                             $firm = true;
                         }
                     }

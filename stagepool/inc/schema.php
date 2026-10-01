@@ -100,6 +100,7 @@ function schema_statements($driver)
         handover VARCHAR(20) NOT NULL DEFAULT 'pickup',
         delivery_address VARCHAR(255) NOT NULL DEFAULT '',
         message TEXT NULL,
+        customer_address VARCHAR(255) NOT NULL DEFAULT '',
         total DECIMAL(10,2) NOT NULL DEFAULT 0,
         deposit_total DECIMAL(10,2) NOT NULL DEFAULT 0,
         price_override TINYINT NOT NULL DEFAULT 0,
@@ -147,10 +148,83 @@ function schema_statements($driver)
     )$tail";
     $s[] = "CREATE INDEX #__blocks_dates ON #__blocks (start_date, end_date)";
 
+    // Angebote & Rechnungen (Snapshot der Positionen als JSON, damit Belege unveränderlich bleiben)
+    $s[] = "CREATE TABLE IF NOT EXISTS #__documents (
+        id $id,
+        booking_id $fk NULL,
+        type VARCHAR(10) NOT NULL,
+        number VARCHAR(30) NOT NULL,
+        doc_date VARCHAR(10) NOT NULL,
+        due_date VARCHAR(10) NULL,
+        service_from VARCHAR(10) NULL,
+        service_to VARCHAR(10) NULL,
+        customer_name VARCHAR(160) NOT NULL DEFAULT '',
+        customer_address VARCHAR(255) NOT NULL DEFAULT '',
+        customer_email VARCHAR(190) NOT NULL DEFAULT '',
+        items $text NULL,
+        subtotal DECIMAL(10,2) NOT NULL DEFAULT 0,
+        adjustment DECIMAL(10,2) NOT NULL DEFAULT 0,
+        total DECIMAL(10,2) NOT NULL DEFAULT 0,
+        vat_rate DECIMAL(5,2) NOT NULL DEFAULT 0,
+        deposit_total DECIMAL(10,2) NOT NULL DEFAULT 0,
+        note TEXT NULL,
+        status VARCHAR(20) NOT NULL DEFAULT 'open',
+        sent_at VARCHAR(19) NULL,
+        paid_at VARCHAR(10) NULL,
+        created_by $fk NULL,
+        created_at VARCHAR(19) NOT NULL
+    )$tail";
+    $s[] = "CREATE UNIQUE INDEX #__documents_number ON #__documents (type, number)";
+    $s[] = "CREATE INDEX #__documents_booking ON #__documents (booking_id)";
+
+    // Buchhaltung: Einnahmen und Ausgaben
+    $s[] = "CREATE TABLE IF NOT EXISTS #__transactions (
+        id $id,
+        type VARCHAR(10) NOT NULL,
+        tx_date VARCHAR(10) NOT NULL,
+        category VARCHAR(80) NOT NULL DEFAULT '',
+        description VARCHAR(255) NOT NULL DEFAULT '',
+        counterparty VARCHAR(160) NOT NULL DEFAULT '',
+        amount DECIMAL(10,2) NOT NULL DEFAULT 0,
+        vat_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
+        payment_method VARCHAR(30) NOT NULL DEFAULT '',
+        paid_by $fk NULL,
+        document_id $fk NULL,
+        booking_id $fk NULL,
+        product_id $fk NULL,
+        receipt VARCHAR(190) NOT NULL DEFAULT '',
+        note TEXT NULL,
+        created_by $fk NULL,
+        created_at VARCHAR(19) NOT NULL,
+        updated_at VARCHAR(19) NOT NULL
+    )$tail";
+    $s[] = "CREATE INDEX #__transactions_date ON #__transactions (type, tx_date)";
+    $s[] = "CREATE INDEX #__transactions_doc ON #__transactions (document_id)";
+
     return $s;
 }
 
 /** Legt alle Tabellen an (bereits vorhandene bleiben unverändert). */
+/** Ergänzt fehlende Spalten (für Updates bestehender Installationen). */
+function schema_add_column($table, $column, $definition)
+{
+    try {
+        db()->query(db_sql('SELECT ' . $column . ' FROM #__' . $table . ' LIMIT 1'));
+        return false;
+    } catch (PDOException $ex) {
+        db()->exec(db_sql('ALTER TABLE #__' . $table . ' ADD COLUMN ' . $column . ' ' . $definition));
+        return true;
+    }
+}
+
+/** Bringt die Datenbank auf den aktuellen Stand. Wird automatisch aufgerufen. */
+function schema_migrate()
+{
+    schema_install(db_driver());
+    schema_add_column('bookings', 'customer_address', "VARCHAR(255) NOT NULL DEFAULT ''");
+    setting_set('schema_version', (string) SP_SCHEMA_VERSION);
+}
+
 function schema_install($driver)
 {
     foreach (schema_statements($driver) as $sql) {
@@ -273,13 +347,35 @@ function install_demo_data($ownerId)
         $dep = 0;
         foreach ($d[5] as $idx => $qty) {
             $p = $products[$idx];
-            $line = $p[4] * $qty * $days;
+            $line = rental_price($p[4], $days, $qty);
             $total += $line;
             $dep += $p[5] * $qty;
             db_insert('booking_items', array('booking_id' => $bid, 'product_id' => $ids[$idx], 'product_name' => $p[0], 'qty' => $qty, 'price_day' => $p[4], 'days' => $days, 'line_total' => $line, 'deposit' => $p[5] * $qty));
         }
         db_update('bookings', array('total' => $total, 'deposit_total' => $dep), 'id = ?', array($bid));
         db_insert('booking_log', array('booking_id' => $bid, 'user_id' => null, 'action' => 'created', 'note' => 'Demo-Daten', 'created_at' => now()));
+    }
+
+    // Buchhaltung: Rechnung für die abgeschlossene Demo-Buchung + Beispiel-Ausgaben
+    $done = db_one("SELECT id FROM #__bookings WHERE status = 'returned' ORDER BY id LIMIT 1");
+    if ($done) {
+        $docId = doc_create(booking_load($done['id']), 'invoice', '');
+        doc_mark_paid(doc_load($docId), date_add_days($t, -5), 'Überweisung');
+    }
+    $expenses = array(
+        array(-40, 'Lager & Ausstattung (Regale, Kisten)', '4 Schwerlastregale für das Lager', 'Baumarkt', 289.96),
+        array(-35, 'Versicherung', 'Inhaltsversicherung Equipment (Jahresbeitrag)', 'Versicherung AG', 186.00),
+        array(-20, 'Verbrauchsmaterial (Fluid, Granulat …)', 'Nebelfluid 5 l + Funkengranulat', 'Musikhaus', 64.80),
+        array(-12, 'Lager & Ausstattung (Regale, Kisten)', '10 Transportkisten mit Deckel', 'Onlineshop', 119.90),
+        array(-2, 'Miete', 'Lagermiete (Demo)', 'Vermieter', 150.00),
+    );
+    foreach ($expenses as $x) {
+        db_insert('transactions', array(
+            'type' => 'expense', 'tx_date' => date_add_days($t, $x[0]), 'category' => $x[1], 'description' => $x[2], 'counterparty' => $x[3],
+            'amount' => $x[4], 'vat_amount' => 0, 'payment_method' => 'Privat ausgelegt', 'paid_by' => $ownerId, 'document_id' => null,
+            'booking_id' => null, 'product_id' => null, 'receipt' => '', 'note' => 'Demo-Daten', 'created_by' => $ownerId,
+            'created_at' => now(), 'updated_at' => now(),
+        ));
     }
 
     db_insert('blocks', array('scope' => 'location', 'ref_id' => $loc2, 'start_date' => date_add_days($t, 24), 'end_date' => date_add_days($t, 30), 'reason' => 'Urlaub – keine Übergaben möglich', 'created_by' => $ownerId, 'created_at' => now()));

@@ -105,7 +105,7 @@ function cart_details()
             cart_set($pid, $qty);
         }
         $days = $period ? $period['days'] : 1;
-        $line = (float) $p['price_day'] * $qty * $days;
+        $line = $period ? rental_price($p['price_day'], $days, $qty) : (float) $p['price_day'] * $qty;
         $avail = $period ? $free[$pid] : null;
         $ok = $avail === null || $avail >= $qty;
         if (!$ok) {

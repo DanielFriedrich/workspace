@@ -42,7 +42,7 @@ Diese Anleitung führt Schritt für Schritt durch die Einrichtung auf einem norm
    Wichtig: auch die versteckten Dateien `.htaccess` und `.user.ini` mit hochladen (in FileZilla: *Server → Anzeige versteckter Dateien erzwingen*).
 3. **Schreibrechte** prüfen. Diese Ordner muss PHP beschreiben dürfen:
    - `config/`
-   - `storage/` und `storage/logs/`
+   - `storage/`, `storage/logs/` und `storage/receipts/`
    - `uploads/products/`
 
    Meist passt das automatisch. Falls der Installer meckert: per FTP-Programm Rechte `755` setzen, notfalls `775`. Nie `777`, außer der Hoster schreibt es vor.
@@ -70,12 +70,13 @@ Der Assistent schreibt `config/config.php`, legt alle Tabellen an und sperrt sic
 Unter `https://verleih.eure-domain.de/admin/` anmelden und dann:
 
 1. **Einstellungen → Allgemein:** Name der Plattform, Kontakt-E-Mail, Telefon, Benachrichtigungs-Adresse(n)
-2. **Einstellungen → Rechtliches:** **Impressum** und **Datenschutzerklärung** vollständig ausfüllen (in Deutschland Pflicht!)
-3. **Einstellungen → Buchungsregeln:** Puffertage (Standard 1), Vorlauf, Mindest- und Höchstdauer
-4. **Einstellungen → E-Mail-Versand** einrichten und eine Testmail senden (siehe Abschnitt 6)
-5. **Standorte** anlegen, an denen die Geräte stehen
-6. **Team:** Zugänge für alle anlegen, die Material einbringen
-7. **Geräte** anlegen oder die Demo-Geräte anpassen (Fotos hochladen!)
+2. **Einstellungen → Firma & Rechnungen:** Name, Anschrift, Steuernummer, Bankverbindung (erscheinen auf Angeboten und Rechnungen)
+3. **Einstellungen → Rechtliches:** **Impressum** und **Datenschutzerklärung** vollständig ausfüllen (in Deutschland Pflicht!)
+4. **Einstellungen → Buchungsregeln:** Puffertage (Standard 1), Preis weiterer Miettage (Standard 50 %), Vorlauf, Mindest- und Höchstdauer
+5. **Einstellungen → E-Mail-Versand** einrichten und eine Testmail senden (siehe Abschnitt 6)
+6. **Standorte** anlegen, an denen die Geräte stehen
+7. **Team:** Zugänge für alle anlegen, die Material einbringen
+8. **Geräte** anlegen oder die Demo-Geräte anpassen (Fotos hochladen!)
 
 Bedienung im Detail: [HANDBUCH.md](HANDBUCH.md).
 
@@ -83,7 +84,7 @@ Bedienung im Detail: [HANDBUCH.md](HANDBUCH.md).
 
 ## 6. E-Mail-Versand
 
-Die Plattform verschickt E-Mails bei neuen Anfragen (an Kunde und Team) und bei Statusänderungen.
+Die Plattform verschickt E-Mails bei neuen Anfragen (an Kunde und Team), bei Statusänderungen sowie Angebote und Rechnungen als PDF-Anhang. Im Modus „Nur protokollieren“ werden die PDFs zusätzlich in `storage/logs/` abgelegt.
 
 | Modus | Wann verwenden |
 |---|---|
@@ -143,6 +144,7 @@ Bei Installation in einem Unterordner den Pfad davorsetzen, z. B. `^/verleih/(in
 Regelmäßig sichern:
 - **Datenbank:** per phpMyAdmin → *Exportieren* (MySQL) bzw. die Datei `storage/stagepool-….sqlite` (SQLite)
 - **Fotos:** Ordner `uploads/products/`
+- **Buchhaltungsbelege:** Ordner `storage/receipts/` (wichtig – Aufbewahrungspflicht!)
 - **Konfiguration:** `config/config.php`
 
 Viele Hoster machen zusätzlich automatische Backups. Trotzdem lohnt es sich, vor Updates selbst zu sichern.
@@ -153,7 +155,7 @@ Viele Hoster machen zusätzlich automatische Backups. Trotzdem lohnt es sich, vo
 
 1. Backup machen (siehe oben).
 2. Neue Dateien hochladen und vorhandene überschreiben, **außer** `config/config.php`, `storage/` und `uploads/products/`.
-3. Fertig. Die Datenbank-Tabellen bleiben erhalten.
+3. Einmal eine beliebige Seite aufrufen. Neue Tabellen und Spalten werden dabei **automatisch** ergänzt, alle Daten bleiben erhalten.
 
 ---
 

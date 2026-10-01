@@ -101,6 +101,27 @@
     s.addEventListener('change', function () { var row = s.closest('[style]'); if (row) { row.style.setProperty('--accent', s.value); } });
   });
 
+  /* ---------- Buchhaltung: Kategorien passend zur Art ---------- */
+  $$('[data-tx-type]').forEach(function (group) {
+    var form = group.closest('form');
+    var select = $('select[name="category"]', form);
+    function apply(initial) {
+      var checked = $('input:checked', group);
+      var type = checked ? checked.value : 'expense';
+      $$('optgroup', select).forEach(function (og) {
+        var on = og.getAttribute('data-for') === type;
+        og.hidden = !on;
+        $$('option', og).forEach(function (o) { o.disabled = !on; });
+      });
+      if (!initial || select.selectedOptions[0].disabled) {
+        var first = $('optgroup[data-for="' + type + '"] option', select);
+        if (first) { first.selected = true; }
+      }
+    }
+    group.addEventListener('change', function () { apply(false); });
+    apply(true);
+  });
+
   /* ---------- In die Anfrage legen (ohne Neuladen) ---------- */
   $$('form[data-add-form]').forEach(function (form) {
     form.addEventListener('submit', function (ev) {
@@ -133,12 +154,13 @@
   var box = $('[data-book-box]');
   if (box) {
     var price = parseFloat(box.getAttribute('data-price')) || 0;
+    var extra = box.hasAttribute('data-extra') ? parseFloat(box.getAttribute('data-extra')) / 100 : 1;
     var sum = $('[data-sum]', box);
     var bStart = $('[data-range-start]', box), bEnd = $('[data-range-end]', box), qty = $('[data-qty]', box);
     var update = function () {
       if (!bStart.value || !bEnd.value || bEnd.value < bStart.value) { return; }
       var n = days(bStart.value, bEnd.value), q = parseInt(qty.value, 10) || 1;
-      sum.innerHTML = '<span>' + n + (n === 1 ? ' Tag' : ' Tage') + (q > 1 ? ' × ' + q : '') + '</span><b>' + euro(price * n * q) + '</b>';
+      sum.innerHTML = '<span>' + n + (n === 1 ? ' Tag' : ' Tage') + (q > 1 ? ' × ' + q : '') + '</span><b>' + euro(Math.round(price * (1 + (n - 1) * extra) * q * 100) / 100) + '</b>';
       markRange(bStart.value, bEnd.value);
     };
     box.addEventListener('rangechange', update);

@@ -17,7 +17,31 @@ $sections = array(
         'lead_days'   => array('Vorlauf in Tagen', 'number', 'Frühester Mietbeginn ab heute. 0 = gleicher Tag, 1 = ab morgen'),
         'min_days'    => array('Mindestmietdauer (Tage)', 'number'),
         'max_days'    => array('Maximale Mietdauer online (Tage)', 'number'),
+        'extra_day_percent' => array('Preis jedes weiteren Miettags (% vom Tagespreis)', 'number', '50 = 1 Tag 100 €, 2 Tage 150 €, 3 Tage 200 €. 100 = jeder Tag voller Preis.'),
         'price_note'  => array('Hinweis zu Preisen', 'text'),
+    )),
+    'firma' => array('Firma & Rechnungen', 'tag', array(
+        'company_name'     => array('Name / Firma (Absender auf Angeboten & Rechnungen)', 'text'),
+        'company_address'  => array('Anschrift', 'textarea', 'Straße Nr. und PLZ Ort, je eine Zeile'),
+        'tax_number'       => array('Steuernummer', 'text', 'Pflichtangabe auf Rechnungen (oder USt-IdNr.)'),
+        'vat_id'           => array('USt-IdNr. (falls vorhanden)', 'text'),
+        'vat_rate'         => array('Umsatzsteuersatz in % (0 = Kleinunternehmer)', 'number', 'Bei 19 % sind alle Preise Bruttopreise; die enthaltene Steuer wird auf der Rechnung ausgewiesen.'),
+        'tax_note'         => array('Steuerhinweis bei 0 %', 'text'),
+        'bank_holder'      => array('Kontoinhaber', 'text'),
+        'iban'             => array('IBAN', 'text'),
+        'bic'              => array('BIC', 'text'),
+        'bank_name'        => array('Bank', 'text'),
+        'offer_prefix'     => array('Präfix Angebotsnummern', 'text', 'z. B. AN → AN-2026-001'),
+        'invoice_prefix'   => array('Präfix Rechnungsnummern', 'text', 'z. B. RE → RE-2026-001 (fortlaufend pro Jahr)'),
+        'offer_valid_days' => array('Angebot gültig (Tage)', 'number'),
+        'payment_days'     => array('Zahlungsziel (Tage)', 'number'),
+        'offer_text'       => array('Einleitungstext Angebot', 'textarea'),
+        'invoice_text'     => array('Einleitungstext Rechnung', 'textarea'),
+        'doc_footer'       => array('Zusätzliche Fußzeile (optional)', 'textarea', 'z. B. Website oder Hinweise'),
+    )),
+    'buchhaltung' => array('Buchhaltung', 'grid', array(
+        'expense_categories' => array('Kategorien für Ausgaben', 'textarea', 'Eine Kategorie pro Zeile'),
+        'income_categories'  => array('Kategorien für Einnahmen', 'textarea', 'Eine Kategorie pro Zeile'),
     )),
     'texte' => array('Texte', 'edit', array(
         'pickup_info' => array('Abholung & Lieferung', 'textarea'),
@@ -57,7 +81,10 @@ if (is_post()) {
             continue;
         }
         if ($def[1] === 'number') {
-            $value = (string) max(0, (int) $value);
+            $value = (string) max(0, $key === 'vat_rate' ? round((float) str_replace(',', '.', $value), 2) : (int) $value);
+        }
+        if ($key === 'iban') {
+            $value = trim(chunk_split(strtoupper(preg_replace('/\s+/', '', $value)), 4, ' '));
         }
         setting_set($key, $value);
     }
@@ -85,7 +112,7 @@ admin_header('Einstellungen', 'einstellungen');
       <?php elseif ($def[1] === 'password'): ?>
         <input type="password" name="<?= e($key) ?>" value="" autocomplete="new-password" placeholder="<?= $val !== '' ? '•••••••• (gespeichert)' : '' ?>">
       <?php else: ?>
-        <input type="<?= e($def[1]) ?>" name="<?= e($key) ?>" value="<?= e($val) ?>"<?= $def[1] === 'number' ? ' min="0" max="365"' : '' ?>>
+        <input type="<?= e($def[1]) ?>" name="<?= e($key) ?>" value="<?= e($val) ?>"<?= $def[1] === 'number' ? ' min="0" max="365" step="any"' : '' ?>>
       <?php endif; ?>
       <?php if (!empty($def[2])): ?><small class="muted"><?= e($def[2]) ?></small><?php endif; ?>
     </label>

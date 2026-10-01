@@ -27,7 +27,7 @@ foreach (catalog_products(false) as $p) {
 }
 $upcoming = array();
 foreach (db_all("SELECT bi.product_id, COUNT(DISTINCT b.id) AS n FROM #__booking_items bi JOIN #__bookings b ON b.id = bi.booking_id
-                  WHERE b.status IN ('requested', 'confirmed', 'picked_up') AND b.end_date >= ? GROUP BY bi.product_id", array(today())) as $r) {
+                  WHERE b.status IN ('requested', 'offered', 'confirmed', 'picked_up') AND b.end_date >= ? GROUP BY bi.product_id", array(today())) as $r) {
     $upcoming[(int) $r['product_id']] = (int) $r['n'];
 }
 

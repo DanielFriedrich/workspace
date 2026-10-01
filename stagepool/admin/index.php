@@ -5,17 +5,19 @@ require_login();
 
 $t = today();
 $in7 = date_add_days($t, 7);
-$open = db_all("SELECT * FROM #__bookings WHERE status = 'requested' ORDER BY start_date LIMIT 20");
+$open = db_all("SELECT * FROM #__bookings WHERE status IN ('requested', 'offered') ORDER BY start_date LIMIT 20");
 $pickups = db_all("SELECT * FROM #__bookings WHERE status = 'confirmed' AND start_date <= ? ORDER BY start_date LIMIT 20", array($in7));
 $returns = db_all("SELECT * FROM #__bookings WHERE status = 'picked_up' ORDER BY end_date LIMIT 20");
 $stats = array(
-    'open'    => (int) db_value("SELECT COUNT(*) FROM #__bookings WHERE status = 'requested'"),
+    'open'    => (int) db_value("SELECT COUNT(*) FROM #__bookings WHERE status IN ('requested', 'offered')"),
     'today'   => (int) db_value("SELECT COUNT(*) FROM #__bookings WHERE status = 'confirmed' AND start_date = ?", array($t)),
     'out'     => (int) db_value("SELECT COUNT(*) FROM #__bookings WHERE status = 'picked_up'"),
     'overdue' => (int) db_value("SELECT COUNT(*) FROM #__bookings WHERE status = 'picked_up' AND end_date < ?", array($t)),
     'products'=> (int) db_value('SELECT COUNT(*) FROM #__products WHERE active = 1'),
     'revenue' => (float) db_value("SELECT COALESCE(SUM(total), 0) FROM #__bookings WHERE status IN ('confirmed', 'picked_up', 'returned') AND start_date >= ?", array(date('Y-01-01'))),
 );
+$unbilled = db_all("SELECT b.* FROM #__bookings b WHERE b.status IN ('picked_up', 'returned') AND NOT EXISTS (SELECT 1 FROM #__documents d WHERE d.booking_id = b.id AND d.type = 'invoice' AND d.status <> 'cancelled') ORDER BY b.end_date LIMIT 20");
+$openInvoices = db_all("SELECT * FROM #__documents WHERE type = 'invoice' AND status IN ('open', 'sent') ORDER BY due_date LIMIT 20");
 $blocks = db_all('SELECT * FROM #__blocks WHERE end_date >= ? ORDER BY start_date LIMIT 5', array($t));
 
 function booking_rows(array $rows, $mode)
@@ -60,6 +62,22 @@ admin_header('Übersicht', 'dashboard');
     <?php booking_rows($returns, 'return'); ?>
   </section>
   <section class="card-admin">
+    <div class="card-admin-head"><h2><?= icon('tag') ?>Abrechnung</h2><a class="link-btn" href="<?= e(url('admin/belege.php', array('status' => 'unbezahlt'))) ?>">Belege</a></div>
+    <?php if (!$unbilled && !$openInvoices): ?><p class="muted empty-line">Alles abgerechnet und bezahlt. ✓</p><?php endif; ?>
+    <?php if ($unbilled): ?>
+      <p class="muted small">Ausgegeben/zurück, aber noch ohne Rechnung:</p>
+      <?php booking_rows($unbilled, 'pickup'); ?>
+    <?php endif; ?>
+    <?php if ($openInvoices): ?>
+      <p class="muted small" style="margin-top:12px">Offene Rechnungen:</p>
+      <ul class="task-list">
+        <?php foreach ($openInvoices as $d): $late = $d['due_date'] < today(); ?>
+          <li<?= $late ? ' class="is-late"' : '' ?>><a href="<?= e(url('admin/beleg.php', array('id' => $d['id']))) ?>"><span class="code"><?= e($d['number']) ?></span><span class="task-name"><?= e(strtok($d['customer_name'], "\n")) ?></span><span class="task-when"><?= $late ? icon('alert') . 'überfällig seit ' : 'fällig ' ?><?= e(date_de($d['due_date'])) ?></span><span class="task-sum"><?= money($d['total'], true) ?></span></a></li>
+        <?php endforeach; ?>
+      </ul>
+    <?php endif; ?>
+  </section>
+  <section class="card-admin">
     <div class="card-admin-head"><h2><?= icon('ban') ?>Aktuelle Sperrzeiten</h2><a class="link-btn" href="<?= e(url('admin/sperrzeiten.php')) ?>">Verwalten</a></div>
     <?php if (!$blocks): ?><p class="muted empty-line">Keine Sperrzeiten geplant.</p><?php else: ?>
       <ul class="task-list">
@@ -71,6 +89,7 @@ admin_header('Übersicht', 'dashboard');
 
 <div class="quick-actions">
   <a class="btn btn-primary" href="<?= e(url('admin/buchung.php', array('neu' => 1))) ?>"><?= icon('plus') ?>Buchung manuell anlegen</a>
+  <a class="btn btn-ghost" href="<?= e(url('admin/buchhaltung.php', array('neu' => 'expense'))) ?>#eintrag"><?= icon('tag') ?>Ausgabe erfassen</a>
   <a class="btn btn-ghost" href="<?= e(url('admin/produkt.php')) ?>"><?= icon('box') ?>Neues Gerät</a>
   <a class="btn btn-ghost" href="<?= e(url('admin/sperrzeiten.php')) ?>#neu"><?= icon('ban') ?>Zeitraum sperren</a>
   <a class="btn btn-ghost" href="<?= e(url('admin/belegung.php')) ?>"><?= icon('timeline') ?>Belegungsplan</a>

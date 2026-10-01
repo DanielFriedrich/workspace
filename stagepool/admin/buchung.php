@@ -58,7 +58,7 @@ if (is_post()) {
                 redirect('admin/buchung.php', array('id' => $b['id']));
             }
         }
-        if ($to === 'confirmed' && $b['status'] === 'requested' && input('force') !== '1') {
+        if ($to === 'confirmed' && in_array($b['status'], array('requested', 'offered'), true) && input('force') !== '1') {
             // Sperrzeiten könnten nachträglich angelegt worden sein
             $c = avail_check(booking_items_wanted($b), $b['start_date'], $b['end_date'], $b['id']);
             if ($c) {
@@ -81,6 +81,31 @@ if (is_post()) {
             }
         }
         flash('success', $msg);
+        redirect('admin/buchung.php', array('id' => $b['id']));
+    }
+
+    /* ---------- Angebot / Rechnung erstellen ---------- */
+    if (($action === 'offer' || $action === 'invoice') && $b) {
+        if (!$b['items']) {
+            flash('error', 'Die Buchung enthält keine Geräte.');
+            redirect('admin/buchung.php', array('id' => $b['id']));
+        }
+        $docId = doc_create($b, $action, (string) input('doc_note'));
+        $doc = doc_load($docId);
+        $msg = doc_title($doc) . ' erstellt.';
+        if ($action === 'offer' && $b['status'] === 'requested') {
+            booking_set_status($b['id'], 'offered', 'Angebot ' . $doc['number']);
+        }
+        if ($action === 'invoice' && input('paid') === '1') {
+            doc_mark_paid($doc, input('paid_at'), (string) input('payment_method'));
+            $doc = doc_load($docId);
+            $msg .= ' Als bezahlt verbucht.';
+        }
+        if (input('send') === '1') {
+            $msg .= doc_send($doc, (string) input('message')) ? ' Per E-Mail an ' . $doc['customer_email'] . ' gesendet.' : ' (E-Mail konnte nicht gesendet werden – PDF bitte manuell schicken.)';
+        }
+        flash('success', $msg);
+        $_SESSION['sp_open_doc'] = $docId;
         redirect('admin/buchung.php', array('id' => $b['id']));
     }
 
@@ -113,6 +138,7 @@ if (is_post()) {
             'event_type' => (string) input('event_type'),
             'handover' => input('handover') === 'delivery' ? 'delivery' : 'pickup',
             'delivery_address' => (string) input('delivery_address'),
+            'customer_address' => (string) input('customer_address'),
             'message' => (string) input('message'),
             'admin_note' => (string) input('admin_note'),
         );
@@ -235,15 +261,52 @@ admin_header($isNew ? 'Neue Buchung' : 'Buchung ' . $b['code'], 'buchungen');
   <div class="booking-actions">
     <?php
     $actions = array();
+    $docAction = null;
     if ($b['status'] === 'requested') {
-        $actions = array(array('confirmed', 'Bestätigen', 'check', 'btn-primary'), array('rejected', 'Ablehnen', 'x', 'btn-ghost'));
+        $docAction = 'offer';
+        $actions = array(array('confirmed', 'Bestätigen', 'check', 'btn-ghost'), array('rejected', 'Ablehnen', 'x', 'btn-ghost'));
+    } elseif ($b['status'] === 'offered') {
+        $actions = array(array('confirmed', 'Angebot angenommen', 'check', 'btn-primary'), array('rejected', 'Ablehnen', 'x', 'btn-ghost'));
+        $docAction = 'offer';
     } elseif ($b['status'] === 'confirmed') {
         $actions = array(array('picked_up', 'Ausgabe erfassen', 'handover', 'btn-primary'), array('cancelled', 'Stornieren', 'x', 'btn-ghost'));
     } elseif ($b['status'] === 'picked_up') {
-        $actions = array(array('returned', 'Rückgabe erfassen', 'return', 'btn-primary'));
+        $actions = array(array('returned', 'Rückgabe erfassen', 'return', 'btn-ghost'));
+        $docAction = 'invoice';
+    } elseif ($b['status'] === 'returned') {
+        $docAction = 'invoice';
+        $actions = array(array('requested', 'Wieder öffnen', 'return', 'btn-ghost'));
     } else {
         $actions = array(array('requested', 'Wieder öffnen (reservieren)', 'return', 'btn-ghost'));
     }
+    $hasInvoice = (bool) db_value("SELECT COUNT(*) FROM #__documents WHERE booking_id = ? AND type = 'invoice' AND status <> 'cancelled'", array($b['id']));
+    if ($docAction === 'invoice' && $hasInvoice) {
+        $docAction = null;
+    }
+    if ($docAction): $isOffer = $docAction === 'offer'; ?>
+      <details class="action-pop">
+        <summary class="btn btn-primary"><?= icon($isOffer ? 'mail' : 'tag') ?><?= $isOffer ? ($b['status'] === 'offered' ? 'Neues Angebot' : 'Angebot senden') : 'Rechnung erstellen' ?></summary>
+        <form method="post" class="action-form">
+          <?= csrf_field() ?><input type="hidden" name="action" value="<?= $docAction ?>">
+          <p><b><?= $isOffer ? 'Angebot' : 'Rechnung' ?> über <?= money($b['total']) ?></b><br><span class="muted small">Positionen und Preis werden aus der Buchung übernommen. Vorher ggf. unten anpassen (z. B. Rabatt).</span></p>
+          <?php if ($b['email']): ?>
+            <label class="check"><input type="checkbox" name="send" value="1" checked><span>Als PDF per E-Mail an <?= e($b['email']) ?> senden</span></label>
+            <label class="field"><span>Nachricht in der E-Mail (optional)</span><textarea name="message" rows="2"></textarea></label>
+          <?php else: ?>
+            <p class="muted small">Keine E-Mail-Adresse hinterlegt – das PDF steht danach zum Download bereit.</p>
+          <?php endif; ?>
+          <label class="field"><span>Zusatztext im PDF (optional)</span><input type="text" name="doc_note" placeholder="<?= $isOffer ? 'z. B. inkl. Einweisung vor Ort' : 'z. B. Kaution bar erstattet' ?>"></label>
+          <?php if (!$isOffer): ?>
+            <label class="check"><input type="checkbox" name="paid" value="1" data-toggle="#paid-fields"><span>Bereits bezahlt</span></label>
+            <div id="paid-fields" class="form-grid" hidden>
+              <label class="field"><span>Bezahlt am</span><input type="date" name="paid_at" value="<?= e(today()) ?>"></label>
+              <label class="field"><span>Zahlart</span><select name="payment_method"><?php foreach (payment_methods() as $m): ?><option><?= e($m) ?></option><?php endforeach; ?></select></label>
+            </div>
+          <?php endif; ?>
+          <button class="btn btn-primary btn-sm" type="submit"><?= $isOffer ? 'Angebot erstellen' : 'Rechnung erstellen' ?></button>
+        </form>
+      </details>
+    <?php endif;
     foreach ($actions as $a): ?>
       <details class="action-pop">
         <summary class="btn <?= $a[3] ?>"><?= icon($a[2]) ?><?= e($a[1]) ?></summary>
@@ -338,6 +401,7 @@ admin_header($isNew ? 'Neue Buchung' : 'Buchung ' . $b['code'], 'buchungen');
       <label class="field"><span>Anlass</span><select name="event_type"><option value="">–</option>
         <?php foreach (event_types() as $t): ?><?= opt($t, $val('event_type'), $t) ?><?php endforeach; ?></select></label>
       <label class="field"><span>Übergabe</span><select name="handover"><?= opt('pickup', $val('handover', 'pickup'), 'Selbstabholung') ?><?= opt('delivery', $val('handover'), 'Lieferung') ?></select></label>
+      <label class="field field-wide"><span>Rechnungsadresse</span><input type="text" name="customer_address" value="<?= e($val('customer_address')) ?>" placeholder="Straße Nr., PLZ Ort"></label>
       <label class="field field-wide"><span>Lieferadresse</span><input type="text" name="delivery_address" value="<?= e($val('delivery_address')) ?>"></label>
       <label class="field field-wide"><span>Nachricht des Kunden</span><textarea name="message" rows="3"><?= e($val('message')) ?></textarea></label>
       <label class="field field-wide"><span>Interne Notiz</span><textarea name="admin_note" rows="2" placeholder="Nur für das Team sichtbar"><?= e($val('admin_note')) ?></textarea></label>
@@ -350,6 +414,23 @@ admin_header($isNew ? 'Neue Buchung' : 'Buchung ' . $b['code'], 'buchungen');
 
   <?php if ($b): ?>
   <aside class="admin-aside">
+    <?php $docs = booking_documents($b['id']); $openDoc = isset($_SESSION['sp_open_doc']) ? (int) $_SESSION['sp_open_doc'] : 0; unset($_SESSION['sp_open_doc']); ?>
+    <section class="card-admin">
+      <h2><?= icon('tag') ?>Angebote &amp; Rechnungen</h2>
+      <?php if (!$docs): ?>
+        <p class="muted small">Noch keine Belege. Ein Angebot erstellst du über „Angebot senden“, die Rechnung nach der Ausgabe über „Rechnung erstellen“.</p>
+      <?php else: ?>
+        <ul class="doc-list">
+          <?php foreach ($docs as $d): ?>
+            <li<?= (int) $d['id'] === $openDoc ? ' class="is-new"' : '' ?>>
+              <a class="doc-main" href="<?= e(url('admin/beleg.php', array('id' => $d['id'], 'pdf' => 1))) ?>" target="_blank"><?= icon('external') ?><b><?= e(doc_types()[$d['type']] . ' ' . $d['number']) ?></b></a>
+              <span class="doc-meta"><?= doc_status_badge($d['status']) ?> <?= money($d['total']) ?> · <?= e(date_de($d['doc_date'])) ?></span>
+              <a class="link-btn" href="<?= e(url('admin/beleg.php', array('id' => $d['id']))) ?>">Details</a>
+            </li>
+          <?php endforeach; ?>
+        </ul>
+      <?php endif; ?>
+    </section>
     <section class="card-admin">
       <h2><?= icon('user') ?>Kontakt</h2>
       <p><b><?= e($b['customer_name']) ?></b><?= $b['organisation'] ? '<br>' . e($b['organisation']) : '' ?></p>

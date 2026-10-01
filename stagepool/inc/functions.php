@@ -31,7 +31,28 @@ function settings_defaults()
         'lead_days'       => '1',
         'min_days'        => '1',
         'max_days'        => '21',
-        'price_note'      => 'Alle Preise pro Miettag. Privatvermietung, keine Ausweisung der MwSt.',
+        'price_note'      => 'Privatvermietung, alle Preise sind Endpreise.',
+        'extra_day_percent' => '50',
+        // Firma, Angebote & Rechnungen
+        'company_name'    => '',
+        'company_address' => '',
+        'tax_number'      => '',
+        'vat_id'          => '',
+        'vat_rate'        => '0',
+        'tax_note'        => 'Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.',
+        'bank_holder'     => '',
+        'bank_name'       => '',
+        'iban'            => '',
+        'bic'             => '',
+        'offer_prefix'    => 'AN',
+        'invoice_prefix'  => 'RE',
+        'offer_valid_days'=> '14',
+        'payment_days'    => '14',
+        'offer_text'      => "vielen Dank für deine Anfrage. Gern bieten wir dir die folgende Technik für deine Veranstaltung an. Die Geräte sind bis zur Annahme für dich reserviert.",
+        'invoice_text'    => "vielen Dank, dass du unsere Technik gemietet hast. Wir berechnen dir die folgenden Leistungen:",
+        'doc_footer'      => '',
+        'expense_categories' => "Anschaffung Equipment\nLager & Ausstattung (Regale, Kisten)\nMiete\nVersicherung\nReparatur & Wartung\nVerbrauchsmaterial (Fluid, Granulat …)\nFahrtkosten\nGebühren & Software\nMarketing\nSonstiges",
+        'income_categories'  => "Vermietung\nLieferung & Service\nVerkauf (Verbrauchsmaterial)\nSonstiges",
         'pickup_info'     => "Im Normalfall holst du die Technik selbst am angegebenen Standort ab und bringst sie nach dem Event wieder zurück. Den genauen Termin stimmen wir nach der Bestätigung mit dir ab.\n\nLieferung und Aufbau sind nach Absprache möglich – schreib uns dazu einfach eine Nachricht in der Anfrage.",
         'terms'           => "## Mietbedingungen (Entwurf)\n\n- Die Anfrage ist unverbindlich. Die Geräte werden ab Anfrage für dich reserviert und mit unserer Bestätigung fest gebucht.\n- Abgerechnet wird pro Miettag (Abholtag bis Rückgabetag). Ein Puffertag vor und nach dem Zeitraum wird für Abholung und Rückgabe automatisch freigehalten.\n- Bei Abholung kann eine Kaution fällig werden. Sie wird bei vollständiger und unbeschädigter Rückgabe erstattet.\n- Der Mieter haftet für Schäden und Verlust während der Mietzeit.\n- Flammen-, Funken- und Lasergeräte geben wir nur nach Einweisung heraus. Die Genehmigungen am Veranstaltungsort liegen in der Verantwortung des Mieters.",
         'impressum'       => "## Impressum\n\nAngaben gemäß § 5 DDG\n\nName / Firma\nStraße Hausnummer\nPLZ Ort\n\nE-Mail: info@example.de\n\n**Bitte im Backend unter Einstellungen → Rechtliches anpassen.**",
@@ -290,6 +311,36 @@ function money($amount, $short = false)
     return number_format($amount, 2, ',', '.') . ' €';
 }
 
+/**
+ * Staffelpreis: Der erste Miettag kostet den vollen Tagespreis, jeder weitere
+ * Tag nur einen Anteil davon (Einstellung extra_day_percent, Standard 50 %).
+ * Beispiel 100 €/Tag: 1 Tag = 100 €, 2 Tage = 150 €, 3 Tage = 200 €.
+ */
+function extra_day_percent()
+{
+    return max(0, min(100, (float) str_replace(',', '.', setting('extra_day_percent', '50'))));
+}
+
+function rental_factor($days)
+{
+    return 1 + max(0, (int) $days - 1) * extra_day_percent() / 100;
+}
+
+function rental_price($priceDay, $days, $qty = 1)
+{
+    return round((float) $priceDay * rental_factor($days) * (int) $qty, 2);
+}
+
+/** Kurze Erklärung der Preisstaffel für Hinweise. */
+function pricing_hint()
+{
+    $pct = extra_day_percent();
+    if ($pct >= 100) {
+        return 'Abgerechnet wird pro Miettag.';
+    }
+    return '1. Miettag voller Preis, jeder weitere Tag nur ' . str_replace('.', ',', (string) round($pct, 1)) . ' % davon.';
+}
+
 function parse_money($value)
 {
     $value = trim(str_replace(array('€', ' '), '', (string) $value));
@@ -485,6 +536,7 @@ function booking_statuses()
 {
     return array(
         'requested' => array('label' => 'Angefragt',      'hint' => 'Reserviert – wartet auf Bestätigung', 'blocks' => true),
+        'offered'   => array('label' => 'Angebot gesendet', 'hint' => 'Angebot verschickt – Geräte bleiben reserviert', 'blocks' => true),
         'confirmed' => array('label' => 'Bestätigt',      'hint' => 'Fest gebucht',                       'blocks' => true),
         'picked_up' => array('label' => 'Ausgegeben',     'hint' => 'Technik ist beim Mieter',            'blocks' => true),
         'returned'  => array('label' => 'Zurückgegeben',  'hint' => 'Abgeschlossen, Geräte wieder frei',   'blocks' => false),

@@ -227,7 +227,7 @@ view('header', array('active' => $active));
           <div class="card-foot">
             <div class="price">
               <b><?= money($p['price_day'], true) ?></b><span>/ Tag</span>
-              <?php if ($period): ?><small><?= plural($period['days'], 'Tag', 'Tage') ?>: <?= money($p['price_day'] * $period['days'], true) ?></small><?php endif; ?>
+              <?php if ($period): ?><small><?= plural($period['days'], 'Tag', 'Tage') ?>: <?= money(rental_price($p['price_day'], $period['days']), true) ?></small><?php endif; ?>
             </div>
             <form method="post" action="<?= e(url('warenkorb.php')) ?>" data-add-form>
               <?= csrf_field() ?>

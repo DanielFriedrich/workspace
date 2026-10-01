@@ -6,12 +6,14 @@ if (!defined('SP_APP')) { exit; }
 function admin_nav()
 {
     $nav = array(
-        array('index.php', 'Übersicht', 'grid', 'dashboard'),
+        array('index.php', 'Übersicht', 'sparkle', 'dashboard'),
         array('buchungen.php', 'Anfragen & Buchungen', 'list', 'buchungen'),
         array('belegung.php', 'Belegungsplan', 'timeline', 'belegung'),
+        array('belege.php', 'Angebote & Rechnungen', 'tag', 'belege'),
+        array('buchhaltung.php', 'Buchhaltung', 'grid', 'buchhaltung'),
         array('sperrzeiten.php', 'Sperrzeiten', 'ban', 'sperrzeiten'),
         array('produkte.php', 'Geräte', 'box', 'produkte'),
-        array('kategorien.php', 'Kategorien', 'tag', 'kategorien'),
+        array('kategorien.php', 'Kategorien', 'sliders', 'kategorien'),
         array('standorte.php', 'Standorte', 'pin', 'standorte'),
     );
     if (is_admin()) {
@@ -25,7 +27,7 @@ function admin_nav()
 function admin_header($title, $active = '')
 {
     $user = current_user();
-    $open = (int) db_value("SELECT COUNT(*) FROM #__bookings WHERE status = 'requested'");
+    $open = (int) db_value("SELECT COUNT(*) FROM #__bookings WHERE status IN ('requested', 'offered')");
     ?><!doctype html>
 <html lang="de">
 <head>

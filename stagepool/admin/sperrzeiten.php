@@ -25,7 +25,7 @@ if (is_post()) {
                 "SELECT DISTINCT b.id, b.code, b.customer_name FROM #__bookings b
                    JOIN #__booking_items bi ON bi.booking_id = b.id
                    LEFT JOIN #__products p ON p.id = bi.product_id
-                  WHERE b.status IN ('requested', 'confirmed', 'picked_up') AND b.start_date <= ? AND b.end_date >= ?"
+                  WHERE b.status IN ('requested', 'offered', 'confirmed', 'picked_up') AND b.start_date <= ? AND b.end_date >= ?"
                 . ($scope === 'location' ? ' AND p.location_id = ' . (int) $ref : '')
                 . ($scope === 'product' ? ' AND bi.product_id = ' . (int) $ref : ''),
                 array($to, $from)

@@ -16,6 +16,10 @@ Web-Plattform, über die ihr euer gemeinsames Event-Equipment (Scheinwerfer, Neb
 |---|---|---|
 | ![](docs/screenshots/backend-uebersicht.jpg) | ![](docs/screenshots/backend-buchung.jpg) | ![](docs/screenshots/backend-belegungsplan.jpg) |
 
+| Backend: Buchhaltung | Angebot als PDF |
+|---|---|
+| ![](docs/screenshots/backend-buchhaltung.jpg) | ![](docs/screenshots/angebot-pdf.jpg) |
+
 ## Funktionen
 
 **Für Besucher**
@@ -25,13 +29,16 @@ Web-Plattform, über die ihr euer gemeinsames Event-Equipment (Scheinwerfer, Neb
 - Geräte mit mehreren Exemplaren (z. B. 8 PAR-Scheinwerfer) mit Anzeige „x von y frei“
 - Produktseite mit Verfügbarkeitskalender (zwei Klicks = Zeitraum wählen) und Live-Preisberechnung
 - **Belegungskalender** (Geräte × Tage) zum Stöbern, wann was frei ist
-- **Anfragekorb:** Zeitraum + Geräte, Summe (Tagespreis × Miettage), Kaution, Abholstandorte
+- **Staffelpreise:** 1. Miettag voller Preis, jeder weitere Tag nur 50 % (einstellbar) – z. B. 100 € / 150 € / 200 € für 1 / 2 / 3 Tage
+- **Anfragekorb:** Zeitraum + Geräte, automatisch berechnete Summe, Kaution, Abholstandorte
 - Anfrage = **Reservierung**: Die Geräte sind ab dem Absenden für andere blockiert
 - Bestätigungs-E-Mail mit persönlichem Status-Link (inkl. Selbst-Storno)
 
 **Für euch (Backend, passwortgeschützt)**
 - Dashboard: offene Anfragen, anstehende Abholungen, Rückgaben (inkl. „überfällig“)
-- Buchungs-Workflow: **Angefragt → Bestätigt → Ausgegeben → Zurückgegeben** (oder Abgelehnt/Storniert), wahlweise mit E-Mail an den Kunden
+- Buchungs-Workflow: **Angefragt → Angebot gesendet → Bestätigt → Ausgegeben → Zurückgegeben** (oder Abgelehnt/Storniert), wahlweise mit E-Mail an den Kunden
+- **Angebote & Rechnungen als PDF:** per Klick erstellen, als PDF herunterladen und/oder per E-Mail (PDF im Anhang) verschicken; fortlaufende Rechnungsnummern, Zahlungseingang erfassen, Kunde kann Belege über seinen Status-Link abrufen
+- **Buchhaltung:** Einnahmen & Ausgaben (Miete, Anschaffungen, Regale/Kisten, Versicherung …) mit Beleg-Upload, „ausgelegt von“ pro Person, Jahres- und Monatsübersicht, CSV-Export für die Steuer; bezahlte Rechnungen werden automatisch als Einnahme verbucht
 - Buchungen bearbeiten oder manuell anlegen (z. B. Telefonanfragen), mit Konfliktprüfung und Preisanpassung (Rabatt/Pauschale)
 - **Sperrzeiten:** einzelnes Gerät, ganzer Standort (z. B. Urlaub) oder alles
 - Belegungsplan mit Buchungsnummern, Geräte (mit Foto-Upload), Kategorien, Standorte
@@ -42,7 +49,7 @@ Web-Plattform, über die ihr euer gemeinsames Event-Equipment (Scheinwerfer, Neb
 
 ## Schnellstart
 
-**Fertiges Upload-Paket:** [`dist/stagepool-1.0.0.zip`](dist/stagepool-1.0.0.zip) (neu bauen mit `./build-zip.sh`)
+**Fertiges Upload-Paket:** [`dist/stagepool-1.1.0.zip`](dist/stagepool-1.1.0.zip) (neu bauen mit `./build-zip.sh`)
 
 1. ZIP entpacken und den Inhalt per FTP auf den Webspace laden
 2. `https://eure-domain.de/install/` aufrufen und den Assistenten ausfüllen
@@ -69,7 +76,7 @@ stagepool/
 ├── install/        Installations-Assistent (nach der Installation gesperrt)
 ├── inc/            PHP-Logik (geschützt)
 ├── config/         config.php mit Zugangsdaten (geschützt, wird erzeugt)
-├── storage/        Logs, SQLite-Datenbank, Sperrdateien (geschützt)
+├── storage/        Logs, SQLite-Datenbank, Buchhaltungsbelege (geschützt)
 ├── uploads/        Gerätefotos (PHP-Ausführung gesperrt)
 ├── assets/         CSS, JavaScript, Schriften, Icons
 └── docs/           Dokumentation
@@ -77,4 +84,4 @@ stagepool/
 
 ## Lizenzen
 
-Schriften: [Unbounded](https://github.com/googlefonts/unbounded) und [Manrope](https://github.com/sharanda/manrope), beide SIL Open Font License 1.1 (siehe `assets/fonts/`). Icons: eigene Zeichnungen.
+PDF-Erzeugung: [FPDF](http://www.fpdf.org/) (freie Lizenz, siehe `inc/lib/fpdf/LICENSE.txt`). Schriften: [Unbounded](https://github.com/googlefonts/unbounded) und [Manrope](https://github.com/sharanda/manrope), beide SIL Open Font License 1.1 (siehe `assets/fonts/`). Icons: eigene Zeichnungen.

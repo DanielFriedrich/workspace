@@ -17,7 +17,10 @@ function mail_clean_address($addr)
     return filter_var($addr, FILTER_VALIDATE_EMAIL) ? $addr : '';
 }
 
-function send_mail($to, $subject, $body, $replyTo = '')
+/**
+ * Verschickt eine Text-E-Mail. $attachments = [['name' => 'x.pdf', 'data' => '…', 'type' => 'application/pdf'], …]
+ */
+function send_mail($to, $subject, $body, $replyTo = '', array $attachments = array())
 {
     $to = mail_clean_address($to);
     if ($to === '') {
@@ -36,19 +39,40 @@ function send_mail($to, $subject, $body, $replyTo = '')
         'From: ' . mail_header_encode(str_replace(array('"', "\r", "\n"), '', $fromName)) . ' <' . $from . '>',
         'Message-ID: <' . bin2hex(random_bytes(12)) . '@' . preg_replace('/^.*@/', '', $from) . '>',
         'MIME-Version: 1.0',
-        'Content-Type: text/plain; charset=UTF-8',
-        'Content-Transfer-Encoding: base64',
         'X-Mailer: Stagepool',
     );
     if ($replyTo !== '') {
         $headers[] = 'Reply-To: ' . $replyTo;
     }
     $encodedSubject = mail_header_encode($subject);
-    $encodedBody = rtrim(chunk_split(base64_encode(str_replace("\r\n", "\n", $body))));
+    $textPart = rtrim(chunk_split(base64_encode(str_replace("\r\n", "\n", $body))));
+    if ($attachments) {
+        $boundary = 'sp-' . bin2hex(random_bytes(12));
+        $headers[] = 'Content-Type: multipart/mixed; boundary="' . $boundary . '"';
+        $parts = array("--$boundary\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n" . $textPart);
+        foreach ($attachments as $att) {
+            $name = str_replace(array('"', "\r", "\n"), '', $att['name']);
+            $parts[] = "--$boundary\r\nContent-Type: " . (isset($att['type']) ? $att['type'] : 'application/octet-stream') . '; name="' . $name . "\"\r\n"
+                . "Content-Transfer-Encoding: base64\r\nContent-Disposition: attachment; filename=\"" . $name . "\"\r\n\r\n"
+                . rtrim(chunk_split(base64_encode($att['data'])));
+        }
+        $encodedBody = implode("\r\n", $parts) . "\r\n--$boundary--";
+    } else {
+        $headers[] = 'Content-Type: text/plain; charset=UTF-8';
+        $headers[] = 'Content-Transfer-Encoding: base64';
+        $encodedBody = $textPart;
+    }
+    $logBody = $body;
+    foreach ($attachments as $att) {
+        $logBody .= "\n[Anhang: " . $att['name'] . ', ' . round(strlen($att['data']) / 1024) . ' KB]';
+        if (setting('mail_mode') === 'log' && preg_match('/^[\w.-]+$/', $att['name'])) {
+            @file_put_contents(SP_ROOT . '/storage/logs/' . date('Ymd-His') . '-' . $att['name'], $att['data']);
+        }
+    }
 
     $mode = setting('mail_mode', 'mail');
     if ($mode === 'log') {
-        return mail_log($to, $subject, $body, 'protokolliert');
+        return mail_log($to, $subject, $logBody, 'protokolliert');
     }
     if ($mode === 'smtp') {
         $ok = smtp_send($from, $to, array_merge(array('To: ' . $to, 'Subject: ' . $encodedSubject), $headers), $encodedBody);
@@ -59,7 +83,7 @@ function send_mail($to, $subject, $body, $replyTo = '')
         }
     }
     if (!$ok) {
-        mail_log($to, $subject, $body, 'FEHLER beim Versand (' . $mode . ')');
+        mail_log($to, $subject, $logBody, 'FEHLER beim Versand (' . $mode . ')');
     }
     return $ok;
 }
@@ -128,7 +152,7 @@ function smtp_send($from, $to, array $headers, $body)
         $cmd('MAIL FROM:<' . $from . '>', 250);
         $cmd('RCPT TO:<' . $to . '>', 250);
         $cmd('DATA', 354);
-        $data = implode("\r\n", $headers) . "\r\n\r\n" . str_replace("\n", "\r\n", $body);
+        $data = implode("\r\n", $headers) . "\r\n\r\n" . preg_replace("/\r?\n/", "\r\n", $body);
         $data = preg_replace('/^\./m', '..', $data);
         fwrite($fp, $data . "\r\n.\r\n");
         $cmd(null, 250);

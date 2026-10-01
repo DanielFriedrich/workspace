@@ -597,7 +597,7 @@ button.day:hover { border-color: var(--green); }
 .status-top > div { display: grid; gap: 4px; justify-items: start; }
 .code { font-family: var(--display); font-weight: 700; letter-spacing: .04em; text-decoration: none; }
 .status-top .code { font-size: 1.3rem; }
-.progress { list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 0; margin: 0 0 28px; }
+.progress { list-style: none; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; padding: 0; margin: 0 0 28px; }
 .progress li { position: relative; display: grid; gap: 2px; justify-items: center; text-align: center; color: var(--dim); }
 .progress li::before { content: ""; position: absolute; top: 15px; left: calc(-50% + 18px); right: calc(50% + 18px); height: 2px; background: var(--line-2); }
 .progress li:first-child::before { display: none; }
@@ -615,6 +615,7 @@ button.day:hover { border-color: var(--green); }
 .status { display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px; border-radius: 999px; font-size: .76rem; font-weight: 800; white-space: nowrap; }
 .status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
 .status-requested { background: rgba(255, 181, 71, .14); color: var(--amber); }
+.status-offered { background: rgba(34, 211, 238, .12); color: var(--cyan); }
 .status-confirmed { background: rgba(255, 46, 147, .14); color: #ff7ab8; }
 .status-picked_up { background: rgba(139, 92, 246, .18); color: #b9a0ff; }
 .status-returned { background: rgba(61, 220, 151, .12); color: var(--green); }
@@ -668,3 +669,5 @@ button.day:hover { border-color: var(--green); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
 }
+.status-docs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.field > span small { text-transform: none; letter-spacing: 0; font-weight: 600; color: var(--dim); }

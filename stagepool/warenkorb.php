@@ -102,6 +102,7 @@ if (is_post()) {
             'event_type'    => (string) input('event_type'),
             'handover'      => input('handover') === 'delivery' ? 'delivery' : 'pickup',
             'delivery_address' => (string) input('delivery_address'),
+            'customer_address' => (string) input('customer_address'),
             'message'       => (string) input('message'),
         );
         $_SESSION['sp_form'] = $form;
@@ -128,7 +129,7 @@ if (is_post()) {
         if ($form['handover'] === 'delivery' && $len($form['delivery_address']) < 5) {
             $errors[] = 'Bitte gib für die Lieferung eine Adresse an.';
         }
-        if ($len($form['message']) > 3000 || $len($form['organisation']) > 160 || $len($form['delivery_address']) > 255) {
+        if ($len($form['message']) > 3000 || $len($form['organisation']) > 160 || $len($form['delivery_address']) > 255 || $len($form['customer_address']) > 255) {
             $errors[] = 'Einige Angaben sind zu lang.';
         }
         if (input('consent') !== '1') {
@@ -279,6 +280,7 @@ view('header', array('pageTitle' => 'Deine Anfrage', 'active' => 'warenkorb'));
           <label class="field"><span>Verein / Firma</span><input type="text" name="organisation" value="<?= e($fv('organisation')) ?>" autocomplete="organization" maxlength="160"></label>
           <label class="field"><span>E-Mail *</span><input type="email" name="email" value="<?= e($fv('email')) ?>" autocomplete="email" required maxlength="190"></label>
           <label class="field"><span>Telefon *</span><input type="tel" name="phone" value="<?= e($fv('phone')) ?>" autocomplete="tel" required maxlength="40"></label>
+          <label class="field field-wide"><span>Rechnungsadresse <small>(optional, für Angebot &amp; Rechnung)</small></span><input type="text" name="customer_address" value="<?= e($fv('customer_address')) ?>" autocomplete="street-address" maxlength="255" placeholder="Straße Nr., PLZ Ort"></label>
           <label class="field field-wide"><span>Anlass</span>
             <select name="event_type">
               <option value="">Bitte wählen</option>
@@ -317,7 +319,7 @@ view('header', array('pageTitle' => 'Deine Anfrage', 'active' => 'warenkorb'));
         <div><dt>Übergabe-Puffer</dt><dd>kostenlos</dd></div>
       </dl>
       <div class="summary-total"><span>Mietpreis gesamt</span><b><?= $period ? money($cart['total']) : '–' ?></b></div>
-      <p class="muted small"><?= e(setting('price_note')) ?></p>
+      <p class="muted small"><?= e(pricing_hint()) ?> <?= e(setting('price_note')) ?></p>
       <?php if ($cart['locations']): ?>
         <h3>Abholung</h3>
         <ul class="summary-locs">

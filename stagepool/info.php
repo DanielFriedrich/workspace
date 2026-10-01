@@ -37,7 +37,10 @@ view('header', array('pageTitle' => 'So funktioniert’s', 'active' => 'info'));
 
   <article class="panel">
     <h2><?= icon('tag') ?>Preise</h2>
-    <p>Jedes Gerät hat einen Tagespreis. Gezählt werden alle Tage von Start bis Ende deines Zeitraums – der Warenkorb rechnet automatisch zusammen.</p>
+    <p>Jedes Gerät hat einen Tagespreis. Gezählt werden alle Tage von Start bis Ende deines Zeitraums – der Anfragekorb rechnet automatisch zusammen.</p>
+    <?php if (extra_day_percent() < 100): ?>
+      <p><b>Mehrere Tage lohnen sich:</b> <?= e(pricing_hint()) ?> Beispiel bei 100 € pro Tag: 1 Tag <?= money(rental_price(100, 1), true) ?>, 2 Tage <?= money(rental_price(100, 2), true) ?>, 3 Tage <?= money(rental_price(100, 3), true) ?>.</p>
+    <?php endif; ?>
     <p class="muted"><?= e(setting('price_note')) ?></p>
     <p>Für manche Geräte fällt bei Abholung eine Kaution an, die du bei vollständiger Rückgabe zurückbekommst.</p>
   </article>

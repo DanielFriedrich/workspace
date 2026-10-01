@@ -104,8 +104,9 @@ if (!$locked && $checksOk && is_post()) {
             );
             unset($GLOBALS['sp_pdo']);
             db();
-            schema_install($dbConf['driver']);
+            schema_migrate();
             settings_all(true);
+            setting_set('schema_version', (string) SP_SCHEMA_VERSION);
 
             // Grundeinstellungen nur setzen, wenn noch nicht vorhanden
             if (!db_value("SELECT COUNT(*) FROM #__settings WHERE name = 'site_name'")) {

@@ -16,7 +16,7 @@ if (!$row || $token === '' || !hash_equals($row['token'], $token)) {
     exit;
 }
 $b = booking_load($row['id']);
-$canCancel = in_array($b['status'], array('requested', 'confirmed'), true) && $b['start_date'] > today();
+$canCancel = in_array($b['status'], array('requested', 'offered', 'confirmed'), true) && $b['start_date'] > today();
 
 if (is_post() && input('action') === 'cancel') {
     csrf_check();
@@ -36,6 +36,7 @@ if (is_post() && input('action') === 'cancel') {
 $isThanks = !empty($isThanks);
 $steps = array(
     'requested' => array('Angefragt', 'Reserviert für dich'),
+    'offered'   => array('Angebot', 'Per E-Mail erhalten'),
     'confirmed' => array('Bestätigt', 'Fest gebucht'),
     'picked_up' => array('Abgeholt', 'Viel Spaß beim Event'),
     'returned'  => array('Zurückgegeben', 'Abgeschlossen'),
@@ -88,6 +89,14 @@ view('header', array('pageTitle' => $isThanks ? 'Danke für deine Anfrage' : 'An
         <?php if ((float) $b['deposit_total'] > 0): ?><tr><td colspan="3">Kaution (bei Abholung)</td><td class="num"><?= money($b['deposit_total']) ?></td></tr><?php endif; ?>
       </tfoot>
     </table>
+
+    <?php $docs = array_filter(booking_documents($b['id']), function ($d) { return $d['status'] !== 'cancelled'; }); if ($docs): ?>
+      <div class="status-docs">
+        <?php foreach ($docs as $d): ?>
+          <a class="btn btn-ghost btn-sm" href="<?= e(url('beleg.php', array('code' => $b['code'], 't' => $b['token'], 'id' => $d['id']))) ?>" target="_blank"><?= icon('upload') ?><?= e(doc_types()[$d['type']] . ' ' . $d['number']) ?> (PDF)</a>
+        <?php endforeach; ?>
+      </div>
+    <?php endif; ?>
 
     <div class="status-foot">
       <p class="muted small"><?= $b['handover'] === 'delivery' ? icon('truck') . 'Lieferung angefragt' : icon('handover') . 'Selbstabholung' ?> · Wir stimmen den Übergabetermin mit dir ab.</p>

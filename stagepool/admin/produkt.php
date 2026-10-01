@@ -103,7 +103,7 @@ $full = $p ? product_find($p['id'], false) : null;
 // Belegung der nächsten 6 Wochen
 $bookings = $p ? db_all(
     "SELECT b.*, bi.qty FROM #__booking_items bi JOIN #__bookings b ON b.id = bi.booking_id
-      WHERE bi.product_id = ? AND b.end_date >= ? AND b.status IN ('requested', 'confirmed', 'picked_up') ORDER BY b.start_date LIMIT 20",
+      WHERE bi.product_id = ? AND b.end_date >= ? AND b.status IN ('requested', 'offered', 'confirmed', 'picked_up') ORDER BY b.start_date LIMIT 20",
     array($p['id'], today())
 ) : array();
 $blocks = $p ? db_all("SELECT * FROM #__blocks WHERE end_date >= ? AND ((scope = 'product' AND ref_id = ?) OR (scope = 'location' AND ref_id = ?) OR scope = 'all') ORDER BY start_date",
