@@ -1,0 +1,1266 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Teamentwicklung im Rhön Park</title>
+<meta name="description" content="Firmenangebote im Rhön Park Aktiv Resort mit variado. Die ErLebenswerkstatt: Teambuilding, Achtsamkeit, Resilienz, Führung und Unternehmensentwicklung für 10 bis 300 Personen in der Rhön.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap">
+<style>
+/* Layout: variado-Flyer ins Web übersetzt — steingraue Flächen, große Puzzleteile, blaue Candara-Headlines,
+   orange unterstrichene Kapitälchen-Labels, Faktentabellen "im Überblick". Bewusst ein helles CD-Thema. */
+:root {
+  color-scheme: light;
+  --blue: #005F98;        /* Technik · Headlines */
+  --blue-deep: #00466F;
+  --green: #007F5C;       /* Natur */
+  --orange: #F0A617;      /* Mensch · Akzentbalken */
+  --stone: #D6D6CE;       /* Flyer-Grund */
+  --stone-soft: #E9E8E2;
+  --paper: #FFFFFF;
+  --ink: #163E5C;         /* Fließtext, blau getönt wie im Flyer */
+  --ink-soft: #4A6378;
+  --line: #C3C2B9;
+
+  --font: Candara, "Fira Sans", "Segoe UI", Calibri, system-ui, sans-serif;
+
+  --fs-xs: .8125rem;
+  --fs-sm: .9375rem;
+  --fs-md: 1.0625rem;
+  --fs-lg: 1.3125rem;
+  --fs-xl: 1.75rem;
+  --fs-2xl: clamp(2rem, 4.2vw, 2.875rem);
+  --fs-3xl: clamp(2.5rem, 6.4vw, 4.5rem);
+
+  --wrap: 1180px;
+  --gutter: clamp(16px, 4vw, 40px);
+  --radius: 6px;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; animation: none !important; } }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: var(--fs-md);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+img { max-width: 100%; display: block; }
+a { color: var(--blue); }
+h1, h2, h3, h4 { color: var(--blue); line-height: 1.12; margin: 0; text-wrap: balance; font-weight: 700; }
+p { margin: 0; }
+:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; }
+
+.wrap { max-width: var(--wrap); margin-inline: auto; padding-inline: var(--gutter); }
+.section { padding-block: clamp(56px, 8vw, 104px); position: relative; overflow: hidden; }
+.section > .wrap { position: relative; z-index: 1; }
+.section--stone { background: var(--stone); }
+.section--soft { background: var(--stone-soft); }
+.section--blue { background: var(--blue); color: #fff; }
+.section--blue h2, .section--blue h3 { color: #fff; }
+.stack { display: grid; gap: 18px; }
+
+/* Flyer-Label: Versalien mit orangem Balken darunter */
+.label {
+  display: inline-block;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--blue);
+  background: linear-gradient(transparent 68%, var(--orange) 68%, var(--orange) 90%, transparent 90%);
+  padding-inline: 2px;
+  justify-self: start;
+  width: fit-content;
+}
+.section--blue .label { color: #fff; }
+.lead { font-size: var(--fs-lg); line-height: 1.5; max-width: 62ch; }
+.muted { color: var(--ink-soft); }
+.h2 { font-size: var(--fs-2xl); }
+.section-head { display: grid; gap: 14px; max-width: 760px; margin-bottom: clamp(32px, 5vw, 56px); }
+
+.pz-ico { width: 1em; height: 1em; flex: none; display: inline-block; vertical-align: -0.12em; }
+
+/* Puzzle-Outline-Deko wie im Flyer */
+.deco { position: absolute; pointer-events: none; fill: none; stroke-width: 1.2; }
+@media (max-width: 700px) { .deco { display: none; } }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; gap: .5em;
+  font: 700 var(--fs-md)/1 var(--font);
+  padding: .95em 1.4em;
+  border-radius: 999px;
+  text-decoration: none;
+  border: 2px solid var(--blue);
+  cursor: pointer;
+  transition: background .15s, color .15s, transform .15s;
+}
+.btn--primary { background: var(--blue); color: #fff; }
+.btn--primary:hover { background: var(--blue-deep); border-color: var(--blue-deep); }
+.btn--ghost { background: transparent; color: var(--blue); }
+.btn--ghost:hover { background: var(--paper); }
+.btn--orange { background: var(--orange); border-color: var(--orange); color: var(--blue-deep); }
+.btn--orange:hover { transform: translateY(-1px); }
+
+/* ---------- Header ---------- */
+.topbar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+  background: rgba(255,255,255,.96);
+  backdrop-filter: saturate(1.2) blur(6px);
+  border-bottom: 1px solid var(--stone);
+}
+.topbar .wrap { display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 68px; }
+.brand { display: flex; align-items: center; gap: 14px; text-decoration: none; color: var(--ink); min-width: 0; }
+.brand img { height: 42px; width: auto; }
+.brand .x { color: var(--orange); font-weight: 800; font-size: 1.2rem; }
+.brand .partner { font-weight: 700; color: var(--blue); line-height: 1.1; font-size: var(--fs-sm); }
+.brand .partner small { display: block; font-weight: 400; color: var(--ink-soft); font-size: var(--fs-xs); }
+.nav { display: flex; gap: 22px; align-items: center; }
+.nav a { text-decoration: none; color: var(--ink); font-weight: 600; font-size: var(--fs-sm); }
+.nav a:hover { color: var(--blue); }
+.nav .btn { padding: .7em 1.1em; font-size: var(--fs-sm); color: #fff; }
+@media (max-width: 980px) { .nav a:not(.btn) { display: none; } }
+@media (max-width: 520px) { .brand .partner, .brand .x { display: none; } }
+
+/* ---------- Hero ---------- */
+.hero { background: var(--stone); position: relative; overflow: hidden; }
+.hero .wrap { display: grid; grid-template-columns: 1.05fr .95fr; gap: clamp(24px, 4vw, 56px); align-items: center; padding-block: clamp(40px, 7vw, 88px); }
+.hero-copy { display: grid; gap: 22px; min-width: 0; position: relative; z-index: 1; }
+.hero h1 { font-size: clamp(1.85rem, 4.6vw, 3.6rem); font-weight: 800; letter-spacing: -.01em; hyphens: auto; overflow-wrap: break-word; }
+.hero h1 span { display: block; color: var(--green); }
+.hero .lead { color: var(--ink); }
+.hero-ctas { display: flex; flex-wrap: wrap; gap: 12px; }
+.hero-art { position: relative; min-width: 0; }
+.hero-art svg { width: 100%; height: auto; display: block; max-width: 560px; margin-inline: auto; }
+.facts { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); }
+.fact { padding: 20px 18px 22px 0; display: grid; gap: 2px; }
+.fact + .fact { padding-left: 18px; border-left: 1px solid var(--line); }
+.fact b { font-size: var(--fs-xl); color: var(--blue); font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.fact span { font-size: var(--fs-sm); color: var(--ink-soft); }
+@media (max-width: 480px) { .hero h1 { font-size: 7.6vw; } }
+@media (max-width: 900px) {
+  .hero .wrap { grid-template-columns: minmax(0, 1fr); }
+  .hero-art svg { max-width: 460px; }
+  .facts { grid-template-columns: repeat(2, 1fr); }
+  .fact:nth-child(3) { padding-left: 0; border-left: 0; }
+  .fact:nth-child(n+3) { border-top: 1px solid var(--line); }
+}
+
+/* ---------- Partnerschaft ---------- */
+.partners { display: grid; grid-template-columns: 1fr auto 1fr; gap: 0; align-items: stretch; }
+.partner-col { padding: clamp(24px, 3.5vw, 40px); display: grid; gap: 14px; align-content: start; }
+.partner-col--hotel { background: var(--blue); color: #fff; border-radius: var(--radius) 0 0 var(--radius); }
+.partner-col--hotel h3 { color: #fff; }
+.partner-col--variado { background: var(--orange); color: var(--blue-deep); border-radius: 0 var(--radius) var(--radius) 0; }
+.partner-col--variado h3 { color: var(--blue-deep); }
+.partner-col h3 { font-size: var(--fs-xl); }
+.partner-col .who { font-size: var(--fs-xs); letter-spacing: .1em; text-transform: uppercase; font-weight: 700; opacity: .85; }
+.partner-col ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.partner-col li { display: flex; gap: 10px; align-items: baseline; }
+.partner-col li::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; transform: translateY(-2px); opacity: .7; }
+.partner-join { width: 76px; display: grid; place-items: center; background: linear-gradient(90deg, var(--blue) 50%, var(--orange) 50%); }
+.partner-join svg { width: 76px; height: 76px; }
+.you-strip { margin-top: 18px; padding: 18px 22px; background: var(--stone-soft); border-radius: var(--radius); display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.you-strip b { color: var(--blue); }
+@media (max-width: 820px) {
+  .partners { grid-template-columns: 1fr; }
+  .partner-col--hotel { border-radius: var(--radius) var(--radius) 0 0; }
+  .partner-col--variado { border-radius: 0 0 var(--radius) var(--radius); }
+  .partner-join { width: auto; height: 56px; background: linear-gradient(180deg, var(--blue) 50%, var(--orange) 50%); }
+  .partner-join svg { width: 56px; height: 56px; transform: rotate(90deg); }
+}
+
+/* ---------- Mehrwert ---------- */
+.values { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(18px, 2.5vw, 28px); }
+.value { display: grid; gap: 10px; align-content: start; padding-top: 18px; border-top: 3px solid var(--blue); }
+.value:nth-child(3n+2) { border-top-color: var(--orange); }
+.value:nth-child(3n) { border-top-color: var(--green); }
+.value h3 { font-size: var(--fs-lg); }
+.value p { color: var(--ink); }
+@media (max-width: 820px) { .values { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 540px) { .values { grid-template-columns: 1fr; } }
+
+.mnt { display: inline-flex; gap: 0; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; font-size: var(--fs-sm); }
+.mnt .m { color: #C98500; } .mnt .n { color: var(--green); } .mnt .t { color: var(--blue); }
+
+/* ---------- Gruppengrößen + Filter ---------- */
+.finder { background: var(--paper); border-radius: var(--radius); padding: clamp(20px, 3vw, 32px); display: grid; gap: 22px; margin-bottom: 32px; }
+.finder-row { display: grid; gap: 10px; }
+.finder-row > span { font-size: var(--fs-xs); letter-spacing: .1em; text-transform: uppercase; font-weight: 700; color: var(--ink-soft); }
+.seg { display: flex; flex-wrap: wrap; gap: 8px; }
+.seg button {
+  font: 600 var(--fs-sm)/1 var(--font);
+  color: var(--blue);
+  background: var(--paper);
+  border: 2px solid var(--stone);
+  border-radius: 999px;
+  padding: .7em 1.1em;
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+}
+.seg button:hover { border-color: var(--blue); }
+.seg button[aria-pressed="true"] { background: var(--blue); border-color: var(--blue); color: #fff; }
+.size-info { display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: start; background: var(--stone-soft); border-radius: var(--radius); padding: 18px 20px; }
+.size-info .people { display: flex; gap: 3px; flex-wrap: wrap; width: 96px; }
+.size-info .people i { width: 9px; height: 9px; border-radius: 50%; background: var(--blue); display: block; }
+.size-info .people i.t { background: var(--orange); }
+.size-info h3 { font-size: var(--fs-lg); margin-bottom: 4px; }
+.size-info p { max-width: 70ch; }
+@media (max-width: 560px) { .size-info { grid-template-columns: 1fr; } .size-info .people { width: auto; } }
+.match-count { font-size: var(--fs-sm); color: var(--ink-soft); }
+.match-count b { color: var(--blue); }
+
+/* ---------- Pakete ---------- */
+.packages { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(16px, 2vw, 24px); }
+@media (max-width: 1020px) { .packages { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 660px) { .packages { grid-template-columns: 1fr; } }
+.pkg {
+  background: var(--paper);
+  border-radius: var(--radius);
+  display: flex; flex-direction: column;
+  min-width: 0;
+  transition: opacity .2s, filter .2s;
+  position: relative;
+}
+.pkg.dim { opacity: .38; filter: grayscale(.7); }
+.pkg-media { aspect-ratio: 16 / 9; overflow: hidden; border-radius: var(--radius) var(--radius) 0 0; background: var(--stone-soft); max-width: 100%; }
+.pkg-media img { width: 100%; height: 100%; object-fit: cover; }
+.pkg-body { padding: 22px 22px 24px; display: flex; flex-direction: column; gap: 14px; flex: 1; }
+.pkg-kicker { display: flex; align-items: center; gap: 8px; font-size: var(--fs-xs); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.pkg-kicker.m { color: #A36B00; } .pkg-kicker.n { color: var(--green); } .pkg-kicker.t { color: var(--blue); }
+.pkg h3 { font-size: var(--fs-xl); display: flex; gap: 10px; align-items: flex-start; }
+.pkg h3 .pz-ico { margin-top: .12em; }
+.pkg .claim { color: var(--ink); }
+.overview { display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; font-size: var(--fs-sm); margin: 0; padding-top: 12px; border-top: 1px solid var(--stone); }
+.overview dt { font-weight: 700; color: var(--blue); }
+.overview dd { margin: 0; font-variant-numeric: tabular-nums; min-width: 0; }
+.bricks { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: var(--fs-sm); }
+.bricks li { display: flex; gap: 8px; align-items: baseline; }
+.bricks li::before { content: "▹"; color: var(--orange); font-weight: 700; }
+.pkg details { font-size: var(--fs-sm); border-top: 1px solid var(--stone); padding-top: 10px; }
+.pkg summary { cursor: pointer; font-weight: 700; color: var(--blue); list-style: none; display: flex; justify-content: space-between; align-items: center; }
+.pkg summary::-webkit-details-marker { display: none; }
+.pkg summary::after { content: "+"; font-size: 1.3rem; line-height: 1; }
+.pkg details[open] summary::after { content: "–"; }
+.timeline { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 6px; }
+.timeline li { display: grid; grid-template-columns: 4.6em 1fr; gap: 10px; }
+.timeline time { font-weight: 700; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.timeline .day { grid-column: 1 / -1; font-weight: 700; color: var(--blue); margin-top: 6px; }
+.pkg-gain { background: var(--stone-soft); border-radius: var(--radius); padding: 12px 14px; font-size: var(--fs-sm); }
+.pkg-gain b { color: var(--blue); display: block; font-size: var(--fs-xs); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 2px; }
+.pkg-cta { margin-top: auto; padding-top: 6px; }
+.pkg-cta .btn { width: 100%; justify-content: center; padding: .8em 1em; font-size: var(--fs-sm); }
+.badge-fit { position: absolute; top: 12px; right: 12px; background: var(--green); color: #fff; font-size: var(--fs-xs); font-weight: 700; padding: .35em .75em; border-radius: 999px; }
+.price-note { margin-top: 28px; font-size: var(--fs-sm); color: var(--ink-soft); max-width: 80ch; }
+
+/* ---------- Bausteine ---------- */
+.modules { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.module { background: var(--paper); padding: 20px; display: grid; gap: 6px; align-content: start; }
+.module h3 { font-size: var(--fs-md); display: flex; gap: 8px; align-items: baseline; }
+.module p { font-size: var(--fs-sm); color: var(--ink-soft); }
+.module .cap { font-size: var(--fs-xs); font-weight: 700; color: var(--green); letter-spacing: .04em; }
+@media (max-width: 980px) { .modules { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .modules { grid-template-columns: 1fr; } }
+
+/* ---------- Ablauf ---------- */
+.steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(18px, 2.5vw, 32px); counter-reset: s; list-style: none; margin: 0; padding: 0; }
+.step { display: grid; gap: 10px; align-content: start; }
+.step .num {
+  font: 800 4.2rem/1 var(--font);
+  color: transparent;
+  -webkit-text-stroke: 2px var(--blue);
+  paint-order: stroke;
+}
+.step h3 { font-size: var(--fs-lg); }
+.step .who { font-size: var(--fs-xs); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--green); }
+@media (max-width: 860px) { .steps { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 480px) { .steps { grid-template-columns: 1fr; } }
+
+/* ---------- Familien-Retreat ---------- */
+.retreat { background: var(--green); color: #fff; }
+.retreat h2, .retreat h3 { color: #fff; }
+.retreat .label { color: #fff; }
+.retreat-top { display: grid; grid-template-columns: 1.1fr .9fr; gap: clamp(24px, 4vw, 56px); align-items: start; }
+.retreat-top .lead { color: #fff; }
+.promise { border-left: 4px solid var(--orange); padding: 6px 0 6px 18px; font-size: var(--fs-lg); font-weight: 700; }
+.pilot { display: inline-flex; gap: 8px; align-items: center; background: var(--orange); color: var(--blue-deep); font-weight: 700; padding: .4em .9em; border-radius: 999px; font-size: var(--fs-sm); width: fit-content; }
+.split { display: grid; gap: 10px; background: rgba(255,255,255,.1); border-radius: var(--radius); padding: 22px; }
+.split-bar { display: flex; height: 46px; border-radius: 4px; overflow: hidden; font-weight: 800; font-variant-numeric: tabular-nums; }
+.split-bar div { display: grid; place-items: center; font-size: var(--fs-md); }
+.split-bar .a { flex: 50; background: var(--blue); }
+.split-bar .b { flex: 30; background: var(--orange); color: var(--blue-deep); }
+.split-bar .c { flex: 20; background: #fff; color: var(--green); }
+.split-legend { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: var(--fs-sm); }
+.split-legend b { display: block; font-size: var(--fs-md); }
+.split .dur { font-size: var(--fs-sm); border-top: 1px solid rgba(255,255,255,.25); padding-top: 12px; }
+.tracks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: clamp(32px, 4vw, 48px); }
+.track { background: #fff; color: var(--ink); border-radius: var(--radius); padding: 22px; display: grid; gap: 10px; align-content: start; }
+.track h3 { color: var(--blue); font-size: var(--fs-lg); display: flex; gap: 10px; align-items: center; }
+.track .for { font-size: var(--fs-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--ink-soft); }
+.track ul { margin: 0; padding-left: 1.1em; font-size: var(--fs-sm); display: grid; gap: 4px; }
+.track .done { font-size: var(--fs-sm); background: var(--stone-soft); border-radius: var(--radius); padding: 10px 12px; }
+.track .done b { color: var(--green); }
+.journey { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin-top: clamp(32px, 4vw, 48px); list-style: none; padding: 0; }
+.journey li { padding: 18px 18px 18px 0; border-top: 2px solid rgba(255,255,255,.55); display: grid; gap: 6px; align-content: start; position: relative; }
+.journey li::before { content: ""; position: absolute; top: -8px; left: 0; width: 14px; height: 14px; border-radius: 50%; background: var(--orange); }
+.journey .phase { font-size: var(--fs-xs); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; opacity: .85; }
+.journey h4 { color: #fff; font-size: var(--fs-lg); }
+.journey q { font-style: italic; font-size: var(--fs-sm); }
+.together { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 10px 22px; font-size: var(--fs-sm); align-items: center; }
+.together b { letter-spacing: .1em; text-transform: uppercase; font-size: var(--fs-xs); }
+@media (max-width: 900px) {
+  .retreat-top { grid-template-columns: 1fr; }
+  .tracks { grid-template-columns: 1fr; }
+  .journey { grid-template-columns: 1fr 1fr; row-gap: 18px; }
+}
+@media (max-width: 480px) { .journey { grid-template-columns: 1fr; } .split-legend { grid-template-columns: 1fr; } }
+
+/* ---------- Orte ---------- */
+.places { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(18px, 3vw, 32px); }
+.place { background: var(--paper); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
+.place-visual { aspect-ratio: 16 / 8; max-width: 100%; position: relative; overflow: hidden; }
+.place-visual img { width: 100%; height: 100%; object-fit: cover; }
+.place-visual--hotel { background: var(--blue); display: grid; place-items: center; color: #fff; }
+.place-visual--hotel svg { width: 100%; height: 100%; }
+.place-body { padding: 24px; display: grid; gap: 14px; }
+.place h3 { font-size: var(--fs-xl); }
+.place .addr { font-size: var(--fs-sm); color: var(--ink-soft); }
+.feat { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; font-size: var(--fs-sm); }
+.feat li { display: flex; gap: 8px; align-items: baseline; }
+.feat li::before { content: ""; width: 8px; height: 8px; flex: none; background: var(--orange); border-radius: 2px; transform: rotate(45deg) translateY(-1px); }
+.neighbors { margin-top: 22px; background: var(--blue); color: #fff; border-radius: var(--radius); padding: 18px 22px; display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: center; justify-content: space-between; }
+.neighbors b { font-size: var(--fs-lg); }
+@media (max-width: 820px) { .places { grid-template-columns: 1fr; } }
+@media (max-width: 420px) { .feat { grid-template-columns: 1fr; } }
+
+/* ---------- Team / Kompetenzen ---------- */
+.team-grid { display: grid; grid-template-columns: .9fr 1.1fr; gap: clamp(24px, 4vw, 56px); align-items: center; }
+.team-photo { border-radius: var(--radius); overflow: hidden; max-width: 100%; }
+.team-photo img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+.skills { display: flex; flex-wrap: wrap; gap: 8px; }
+.skills span { background: var(--paper); border: 1px solid var(--line); border-radius: 999px; padding: .45em .9em; font-size: var(--fs-sm); font-weight: 600; color: var(--blue); }
+.eg { font-size: var(--fs-sm); background: var(--paper); border-radius: var(--radius); padding: 16px 18px; }
+@media (max-width: 860px) { .team-grid { grid-template-columns: 1fr; } }
+
+/* ---------- FAQ ---------- */
+.faq { display: grid; grid-template-columns: 1fr 1fr; gap: 0 clamp(24px, 4vw, 48px); }
+.faq details { border-top: 1px solid var(--line); padding-block: 16px; }
+.faq summary { cursor: pointer; font-weight: 700; color: var(--blue); font-size: var(--fs-md); list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; color: var(--orange); font-size: 1.4rem; line-height: 1; }
+.faq details[open] summary::after { content: "–"; }
+.faq details p { margin-top: 8px; font-size: var(--fs-sm); max-width: 62ch; }
+@media (max-width: 760px) { .faq { grid-template-columns: 1fr; } }
+
+/* ---------- Anfrage ---------- */
+.inquiry { display: grid; grid-template-columns: .8fr 1.2fr; gap: clamp(24px, 4vw, 56px); align-items: start; }
+.contacts { display: grid; gap: 16px; }
+.contact { display: grid; grid-template-columns: 64px 1fr; gap: 14px; align-items: center; }
+.contact img { width: 64px; height: 64px; object-fit: cover; border-radius: 50%; }
+.contact b { color: var(--blue); display: block; }
+.contact em { font-size: var(--fs-sm); color: var(--ink-soft); display: block; }
+.contact span { font-size: var(--fs-sm); user-select: all; }
+form { background: var(--paper); border-radius: var(--radius); padding: clamp(20px, 3vw, 32px); display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.field { display: grid; gap: 6px; min-width: 0; }
+.field--full { grid-column: 1 / -1; }
+.field label, .field legend { font-size: var(--fs-sm); font-weight: 700; color: var(--blue); }
+.field input, .field select, .field textarea {
+  font: 400 var(--fs-md)/1.4 var(--font);
+  color: var(--ink);
+  background: var(--paper);
+  border: 2px solid var(--stone);
+  border-radius: var(--radius);
+  padding: .7em .8em;
+  width: 100%;
+}
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--blue); outline: none; }
+.field textarea { min-height: 110px; resize: vertical; }
+.check { display: flex; gap: 10px; align-items: flex-start; font-size: var(--fs-sm); }
+.check input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--green); flex: none; }
+.form-foot { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; }
+.form-foot small { color: var(--ink-soft); font-size: var(--fs-xs); max-width: 46ch; }
+.result { grid-column: 1 / -1; background: var(--stone-soft); border-radius: var(--radius); padding: 18px; display: grid; gap: 12px; }
+.result pre { white-space: pre-wrap; font: 400 var(--fs-sm)/1.5 var(--font); margin: 0; background: var(--paper); padding: 14px; border-radius: var(--radius); max-height: 260px; overflow: auto; }
+.result .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.error { color: #A3260F; font-size: var(--fs-sm); font-weight: 600; grid-column: 1 / -1; }
+@media (max-width: 860px) { .inquiry { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { form { grid-template-columns: 1fr; } }
+
+/* ---------- Footer ---------- */
+footer { background: var(--blue-deep); color: #DCE6EE; font-size: var(--fs-sm); }
+footer .wrap { padding-block: 40px; display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 28px; }
+footer b { color: #fff; display: block; margin-bottom: 6px; }
+footer a { color: #fff; }
+footer .claim { font-weight: 800; color: #fff; font-size: var(--fs-lg); line-height: 1.2; }
+footer .claim span { color: var(--orange); }
+@media (max-width: 760px) { footer .wrap { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<!-- Wiederverwendbares Puzzleteil (100×100-Box) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <path id="pz" d="M20 20 H40 C42 16 36 12 40 6 C44 0 56 0 60 6 C64 12 58 16 60 20 H80 V40 C84 42 88 36 94 40 C100 44 100 56 94 60 C88 64 84 58 80 60 V80 H60 C58 76 64 72 60 66 C56 60 44 60 40 66 C36 72 42 76 40 80 H20 V60 C24 58 28 64 34 60 C40 56 40 44 34 40 C28 36 24 42 20 40 Z"/>
+    <symbol id="pz-ico" viewBox="14 0 88 86"><use href="#pz"/></symbol>
+  </defs>
+</svg>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="variado. Die ErLebenswerkstatt im Rhön Park">
+      <img src="img/logo.png" alt="variado. Die ErLebenswerkstatt" width="104" height="42">
+      <span class="x" aria-hidden="true">×</span>
+      <span class="partner">Rhön Park Aktiv Resort<small>Firmen &amp; Tagungen</small></span>
+    </a>
+    <nav class="nav" aria-label="Seitennavigation">
+      <a href="#pakete">Pakete</a>
+      <a href="#retreat">Familien-Retreat</a>
+      <a href="#bausteine">Bausteine</a>
+      <a href="#orte">Orte</a>
+      <a href="#faq">FAQ</a>
+      <a class="btn btn--primary" href="#anfrage">Anfragen</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- ================= HERO ================= -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-copy">
+      <span class="label">Firmenangebote · Rhön Park × variado</span>
+      <h1>Mehr als ein Tagungsraum. <span>Teams, die zusammenwachsen.</span></h1>
+      <p class="lead">Ihr bucht Zimmer und Tagungsräume im Rhön Park Aktiv Resort. variado gestaltet Euer Programm: Teambuilding, Achtsamkeit, Resilienz, Führung und Unternehmensentwicklung. Erfahrungsbasiert, mitten im UNESCO-Biosphärenreservat Rhön und direkt nebenan im Bildungszentrum Thüringer Hütte.</p>
+      <div class="hero-ctas">
+        <a class="btn btn--primary" href="#pakete">Passendes Paket finden</a>
+        <a class="btn btn--ghost" href="#anfrage">Unverbindlich anfragen</a>
+      </div>
+      <div class="facts" role="list">
+        <div class="fact" role="listitem"><b>10–300</b><span>Personen pro Gruppe</span></div>
+        <div class="fact" role="listitem"><b>½–3 Tage</b><span>vom Teamtag bis zur Klausur</span></div>
+        <div class="fact" role="listitem"><b>Nr. 2 + 3</b><span>Rother Kuppe: Hotel und Lernort sind Nachbarn</span></div>
+        <div class="fact" role="listitem"><b>365</b><span>Tage im Jahr, drinnen &amp; draußen</span></div>
+      </div>
+    </div>
+
+    <div class="hero-art">
+      <svg viewBox="0 0 560 540" role="img" aria-labelledby="heroArtTitle">
+        <title id="heroArtTitle">Puzzle aus drei Teilen: das Rhön Park Hotel, das variado-Programm und Euer Team</title>
+        <defs>
+          <clipPath id="clipTeam"><use href="#pz" transform="translate(-10 140) scale(4.1)"/></clipPath>
+        </defs>
+        <!-- Team-Foto im Puzzleteil -->
+        <g clip-path="url(#clipTeam)">
+          <image href="img/team-tauziehen.jpg" x="-10" y="140" width="410" height="410" preserveAspectRatio="xMidYMid slice"/>
+        </g>
+        <use href="#pz" transform="translate(-10 140) scale(4.1)" fill="none" stroke="#fff" stroke-width=".6"/>
+        <!-- Hotel (blau) -->
+        <g transform="translate(250 0) rotate(8 150 150)">
+          <use href="#pz" transform="scale(3.1)" fill="#005F98"/>
+          <text x="155" y="138" text-anchor="middle" fill="#fff" font-family="Candara, 'Fira Sans', sans-serif" font-weight="700" font-size="22">Rhön Park</text>
+          <text x="155" y="164" text-anchor="middle" fill="#fff" font-family="Candara, 'Fira Sans', sans-serif" font-size="15">Zimmer · Tagung</text>
+          <text x="155" y="184" text-anchor="middle" fill="#fff" font-family="Candara, 'Fira Sans', sans-serif" font-size="15">Verpflegung</text>
+        </g>
+        <!-- variado (orange) -->
+        <g transform="translate(318 268) rotate(-10 120 120)">
+          <use href="#pz" transform="scale(2.6)" fill="#F0A617"/>
+          <text x="130" y="122" text-anchor="middle" fill="#00466F" font-family="Candara, 'Fira Sans', sans-serif" font-weight="700" font-size="21">variado</text>
+          <text x="130" y="146" text-anchor="middle" fill="#00466F" font-family="Candara, 'Fira Sans', sans-serif" font-size="14">Programm · Trainer</text>
+          <text x="130" y="164" text-anchor="middle" fill="#00466F" font-family="Candara, 'Fira Sans', sans-serif" font-size="14">Transfer</text>
+        </g>
+        <!-- Natur (grün, klein) -->
+        <g transform="translate(40 10) rotate(-14 80 80)">
+          <use href="#pz" transform="scale(1.7)" fill="#007F5C"/>
+          <text x="85" y="88" text-anchor="middle" fill="#fff" font-family="Candara, 'Fira Sans', sans-serif" font-weight="700" font-size="16">Rhön</text>
+          <text x="85" y="106" text-anchor="middle" fill="#fff" font-family="Candara, 'Fira Sans', sans-serif" font-size="12">Natur als Lernraum</text>
+        </g>
+        <!-- feine Outline wie im Flyer -->
+        <use href="#pz" transform="translate(150 -40) scale(2.2) rotate(20 50 50)" fill="none" stroke="#F0A617" stroke-width=".55"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PARTNERSCHAFT ================= -->
+<section class="section" id="partner">
+  <svg class="deco" viewBox="0 0 100 100" style="width:360px;right:-120px;top:-60px;stroke:var(--orange)" aria-hidden="true"><use href="#pz"/></svg>
+  <div class="wrap">
+    <div class="section-head">
+      <span class="label">So arbeiten wir zusammen</span>
+      <h2 class="h2">Zwei Partner, ein Puzzle: Ihr bekommt Ort und Inhalt aus einer Hand.</h2>
+      <p class="lead muted">Das Rhön Park Aktiv Resort ist Euer Gastgeber. variado ist Euer Partner für das Programm. Eure Anfrage landet direkt bei unserem Team, wir klären Ziele und Inhalte mit Euch und stimmen Räume und Zimmer mit dem Hotel ab.</p>
+    </div>
+
+    <div class="partners">
+      <div class="partner-col partner-col--hotel">
+        <span class="who">Gastgeber</span>
+        <h3>Rhön Park Aktiv Resort</h3>
+        <ul>
+          <li>Zimmer und Apartments für kleine und sehr große Gruppen</li>
+          <li>Tagungsräume, Tagungsebene und RhönParkArena für bis zu 400 Personen</li>
+          <li>Verpflegung, Tagungstechnik, Abendgastronomie</li>
+          <li>Erlebnisbad, Bowling, Wellness für die freie Zeit</li>
+        </ul>
+      </div>
+      <div class="partner-join" aria-hidden="true">
+        <svg viewBox="14 0 88 86"><use href="#pz" fill="#fff"/></svg>
+      </div>
+      <div class="partner-col partner-col--variado">
+        <span class="who">Programm &amp; Inhalte</span>
+        <h3>variado. Die ErLebenswerkstatt</h3>
+        <ul>
+          <li>Vorgespräch zu Zielen, Gruppe und Fitness der Teilnehmenden</li>
+          <li>Konzept, Moderation und Trainer-Team, auch für Großgruppen</li>
+          <li>Gelände, Energiehaus, Feuerplatz und Raumschiff-Simulator der Thüringer Hütte</li>
+          <li>Reflexion und Transfer in Euren Arbeitsalltag</li>
+        </ul>
+      </div>
+    </div>
+    <div class="you-strip">
+      <svg class="pz-ico" style="color:var(--green);font-size:1.6rem" aria-hidden="true"><use href="#pz-ico" fill="currentColor"/></svg>
+      <p><b>Ihr:</b> eine Anfrage, ein Vorgespräch, ein abgestimmtes Programm. Ihr kümmert Euch um Euer Team, um den Rest kümmern wir uns.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MEHRWERT ================= -->
+<section class="section section--stone" id="mehrwert">
+  <svg class="deco" viewBox="0 0 100 100" style="width:420px;left:-180px;bottom:-140px;stroke:var(--blue)" aria-hidden="true"><use href="#pz"/></svg>
+  <div class="wrap">
+    <div class="section-head">
+      <span class="label">Der Mehrwert für Euer Unternehmen</span>
+      <h2 class="h2">Erlebnisse, die langfristig etwas verändern.</h2>
+      <p class="lead">Unsere Programme verbinden <span class="mnt"><span class="m">Mensch</span>&nbsp;·&nbsp;<span class="n">Natur</span>&nbsp;·&nbsp;<span class="t">Technik</span></span>. Vom Waldbaden bis zum Raumschiff-Simulator lernt Euer Team durch gemeinsames Tun, nicht durch Folien.</p>
+    </div>
+    <div class="values">
+      <article class="value">
+        <h3>Erfahrung statt Vortrag</h3>
+        <p>Jede Einheit folgt dem Dreiklang Erleben, Reflektieren, Übertragen. So bleibt das Gelernte im Alltag hängen.</p>
+      </article>
+      <article class="value">
+        <h3>Maßgeschneidert</h3>
+        <p>Ihr entscheidet, ob Kooperation, Kommunikation, Vertrauen, Gesundheit oder Strategie im Mittelpunkt steht. Wir berücksichtigen die Fitness aller Teilnehmenden.</p>
+      </article>
+      <article class="value">
+        <h3>Vertrauen und Kommunikation</h3>
+        <p>Teambuilding mindert Spannungen und hilft, Konflikte früh zu lösen. Das ist die Basis für motivierte, effiziente Teams.</p>
+      </article>
+      <article class="value">
+        <h3>Alles an einem Ort</h3>
+        <p>Hotel, Tagungsraum, Natur und Lernwerkstatt liegen auf der Rother Kuppe nebeneinander. Keine Transfers, mehr Zeit fürs Wesentliche.</p>
+      </article>
+      <article class="value">
+        <h3>Ein Team mit vielen Disziplinen</h3>
+        <p>Unternehmensberatung, Business-Coaching, Stressmanagement, Konfliktprävention und Erlebnispädagogik arbeiten bei uns Hand in Hand.</p>
+      </article>
+      <article class="value">
+        <h3>Gemeinnützig und auf Augenhöhe</h3>
+        <p>variado ist eine gemeinnützige Genossenschaft. Wir arbeiten demokratisch, und Eure Buchung stärkt Bildungsarbeit in der Rhön.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PAKETE ================= -->
+<section class="section section--soft" id="pakete">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="label">Unsere Pakete</span>
+      <h2 class="h2">Sechs Formate für Eure Ziele, von 10 bis 300 Personen.</h2>
+      <p class="lead muted">Wählt Gruppengröße und Ziel. Wir zeigen, welche Pakete passen. Jedes Paket passen wir im Vorgespräch an Euer Team an.</p>
+    </div>
+
+    <div class="finder" aria-label="Pakete filtern">
+      <div class="finder-row">
+        <span id="sizeLbl">Wie groß ist Eure Gruppe?</span>
+        <div class="seg" role="group" aria-labelledby="sizeLbl" id="sizeSeg">
+          <button type="button" data-size="all" aria-pressed="true">Alle Größen</button>
+          <button type="button" data-size="s" aria-pressed="false">10–30 Personen</button>
+          <button type="button" data-size="m" aria-pressed="false">30–80 Personen</button>
+          <button type="button" data-size="l" aria-pressed="false">80–300 Personen</button>
+        </div>
+      </div>
+      <div class="size-info" id="sizeInfo" aria-live="polite">
+        <div class="people" id="sizePeople" aria-hidden="true"></div>
+        <div>
+          <h3 id="sizeTitle">Von der Abteilung bis zum ganzen Unternehmen</h3>
+          <p id="sizeText">Kleine Gruppen arbeiten mit einem festen Trainer-Duo in voller Tiefe. Ab 30 Personen arbeiten mehrere variado-Teamer:innen parallel in Kleingruppen. Großgruppen bis 300 Personen erleben einen gemeinsamen Auftakt und rotieren dann durch Themeninseln.</p>
+        </div>
+      </div>
+      <div class="finder-row">
+        <span id="goalLbl">Was ist Euer Ziel?</span>
+        <div class="seg" role="group" aria-labelledby="goalLbl" id="goalSeg">
+          <button type="button" data-goal="all" aria-pressed="true">Alle Ziele</button>
+          <button type="button" data-goal="team" aria-pressed="false">Teamgeist</button>
+          <button type="button" data-goal="health" aria-pressed="false">Gesundheit &amp; Resilienz</button>
+          <button type="button" data-goal="lead" aria-pressed="false">Führung &amp; Kommunikation</button>
+          <button type="button" data-goal="strategy" aria-pressed="false">Strategie &amp; Innovation</button>
+        </div>
+      </div>
+      <p class="match-count" id="matchCount"><b>6 von 6</b> Paketen passen zu Eurer Auswahl.</p>
+    </div>
+
+    <div class="packages" id="packages">
+
+      <!-- 1 -->
+      <article class="pkg" data-sizes="s m l" data-goals="team" data-name="Teamtag „Gemeinsam stark“">
+        <div class="pkg-media"><img src="img/teamtraining.jpg" alt="Team hebt eine Person gemeinsam durch ein Seilnetz im Wald"></div>
+        <div class="pkg-body">
+          <span class="pkg-kicker m"><svg class="pz-ico" aria-hidden="true"><use href="#pz-ico" fill="currentColor"/></svg>Schwerpunkt Mensch · Teamgeist</span>
+          <h3>Teamtag „Gemeinsam stark“</h3>
+          <p class="claim">Ein Tag voller Kooperationsaufgaben, der Euer Team spürbar näher zusammenbringt.</p>
+          <dl class="overview">
+            <dt>Teilnehmende</dt><dd>10–300 (ab 30 im Stationsbetrieb)</dd>
+            <dt>Dauer</dt><dd>1 Tag, ca. 7 Stunden</dd>
+            <dt>Ort</dt><dd>Gelände Thüringer Hütte, Rhön-Natur</dd>
+            <dt>Ziel</dt><dd>Kooperation, Kommunikation, Vertrauen</dd>
+          </dl>
+          <ul class="bricks">
+            <li>Kooperation: Säureteich, Pipeline, Blinde Mathematik</li>
+            <li>Kommunikation: Teamkran, LandArt, Funkorientierungstour</li>
+            <li>Koordination: Turmbau, Mini-Floßbau, Speed-Ball</li>
+            <li>Reflexion und Transfer nach jeder Einheit</li>
+          </ul>
+          <details>
+            <summary>Beispielablauf</summary>
+            <ol class="timeline">
+              <li><time>09:00</time><span>Ankommen, Warm-up, Erwartungen</span></li>
+              <li><time>09:30</time><span>Einheit 1: Kooperation</span></li>
+              <li><time>11:15</time><span>Einheit 2: Kommunikation</span></li>
+              <li><time>12:30</time><span>Mittagessen im Rhön Park</span></li>
+              <li><time>13:30</time><span>Einheit 3: große Teamaufgabe</span></li>
+              <li><time>15:15</time><span>Reflexion und Transfer in den Alltag</span></li>
+              <li><time>16:00</time><span>Abschluss</span></li>
+            </ol>
+          </details>
+          <div class="pkg-gain"><b>Ihr nehmt mit</b>Ein gemeinsames Erfolgserlebnis und klare Spielregeln für die Zusammenarbeit.</div>
+          <div class="pkg-cta"><a class="btn btn--primary" href="#anfrage" data-pick>Dieses Paket anfragen</a></div>
+        </div>
+      </article>
+
+      <!-- 2 -->
+      <article class="pkg" data-sizes="s m" data-goals="team lead" data-name="Team-Klausur „Zusammenwachsen“">
+        <div class="pkg-media"><img src="img/feuer.jpg" alt="Gruppe am Lagerfeuer bei Nacht mit Funkenspuren"></div>
+        <div class="pkg-body">
+          <span class="pkg-kicker m"><svg class="pz-ico" aria-hidden="true"><use href="#pz-ico" fill="currentColor"/></svg>Schwerpunkt Mensch · Teamkultur</span>
+          <h3>Team-Klausur „Zusammenwachsen“</h3>
+          <p class="claim">Zwei Tage mit Übernachtung: draußen erleben, am Feuer zusammenrücken, am zweiten Tag gemeinsam Vereinbarungen treffen.</p>
+          <dl class="overview">
+            <dt>Teilnehmende</dt><dd>10–80</dd>
+            <dt>Dauer</dt><dd>2 Tage, 1 Übernachtung</dd>
+            <dt>Ort</dt><dd>Rhön Park + Thüringer Hütte</dd>
+            <dt>Ziel</dt><dd>Teamkultur, Rollen, Konfliktprävention</dd>
+          </dl>
+          <ul class="bricks">
+            <li>Outdoor-Teamtraining am ersten Tag</li>
+            <li>Feuerabend: Fackeln, Feuer ohne Feuerzeug, Gruppenritual, Gruppenfoto in Flammen</li>
+            <li>Pizza aus dem Holzbackofen</li>
+            <li>Tag 2: Rollen und Stärken, Kommunikation, Teamvereinbarung</li>
+          </ul>
+          <details>
+            <summary>Beispielablauf</summary>
+            <ol class="timeline">
+              <li class="day">Tag 1</li>
+              <li><time>10:00</time><span>Check-in, Auftakt im Tagungsraum</span></li>
+              <li><time>11:00</time><span>Teamtraining draußen</span></li>
+              <li><time>18:30</time><span>Pizza aus dem Holzbackofen</span></li>
+              <li><time>20:00</time><span>Feuerabend mit Gruppenritual</span></li>
+              <li class="day">Tag 2</li>
+              <li><time>09:00</time><span>Was haben wir erlebt? Rollen und Stärken im Team</span></li>
+              <li><time>11:00</time><span>Kommunikation und Konfliktprävention</span></li>
+              <li><time>14:00</time><span>Teamvereinbarung und nächste Schritte</span></li>
+              <li><time>15:30</time><span>Abschluss</span></li>
+            </ol>
+          </details>
+          <div class="pkg-gain"><b>Ihr nehmt mit</b>Eine schriftliche Teamvereinbarung mit Verantwortlichkeiten und nächsten Schritten.</div>
+          <div class="pkg-cta"><a class="btn btn--primary" href="#anfrage" data-pick>Dieses Paket anfragen</a></div>
+        </div>
+      </article>
+
+      <!-- 3 -->
+      <article class="pkg" data-sizes="s m l" data-goals="health" data-name="„Kraftquelle Rhön“ – Achtsamkeit &amp; Resilienz">
+        <div class="pkg-media"><img src="img/bachlauf.jpg" alt="Bachlauf mit moosbedeckten Steinen im Wald"></div>
+        <div class="pkg-body">
+          <span class="pkg-kicker n"><svg class="pz-ico" aria-hidden="true"><use href="#pz-ico" fill="currentColor"/></svg>Schwerpunkt Natur · Gesundheit</span>
+          <h3>„Kraftquelle Rhön“</h3>
+          <p class="claim">Achtsamkeit, Stressmanagement und Resilienz. Für Teams, die viel leisten und gesund bleiben wollen.</p>
+          <dl class="overview">
+            <dt>Teilnehmende</dt><dd>10–300</dd>
+            <dt>Dauer</dt><dd>1 oder 2 Tage</dd>
+            <dt>Ort</dt><dd>Rhön-Natur, Tagungsraum Rhön Park</dd>
+            <dt>Ziel</dt><dd>Stress senken, Resilienz stärken</dd>
+          </dl>
+          <ul class="bricks">
+            <li>Achtsamkeitswanderung und Waldbaden an der Rother Kuppe</li>
+            <li>Stressmanagement: eigene Stressmuster erkennen</li>
+            <li>Resilienztraining und Impulse aus dem Glücksmanagement</li>
+            <li>Persönlicher Kraftplan für den Arbeitsalltag</li>
+          </ul>
+          <details>
+            <summary>Beispielablauf (1 Tag)</summary>
+            <ol class="timeline">
+              <li><time>09:00</time><span>Ankommen mit Achtsamkeitsübung</span></li>
+              <li><time>09:45</time><span>Impuls: Was stresst uns, was stärkt uns?</span></li>
+              <li><time>11:00</time><span>Achtsamkeitswanderung und Waldbaden</span></li>
+              <li><time>13:00</time><span>Mittagessen im Rhön Park</span></li>
+              <li><time>14:00</time><span>Resilienzfaktoren trainieren, Teamroutinen</span></li>
+              <li><time>15:30</time><span>Persönlicher Kraftplan, Abschluss</span></li>
+            </ol>
+          </details>
+          <div class="pkg-gain"><b>Ihr nehmt mit</b>Konkrete Strategien gegen Überlastung und gesündere Routinen im Team.</div>
+          <div class="pkg-cta"><a class="btn btn--primary" href="#anfrage" data-pick>Dieses Paket anfragen</a></div>
+        </div>
+      </article>
+
+      <!-- 4 -->
+      <article class="pkg" data-sizes="s" data-goals="lead" data-name="LeaderShip „Kurs halten“">
+        <div class="pkg-media"><img src="img/spaceship.jpg" alt="Teilnehmende an Konsolen im blau beleuchteten Raumschiff-Simulator"></div>
+        <div class="pkg-body">
+          <span class="pkg-kicker t"><svg class="pz-ico" aria-hidden="true"><use href="#pz-ico" fill="currentColor"/></svg>Schwerpunkt Technik · Führung</span>
+          <h3>LeaderShip „Kurs halten“</h3>
+          <p class="claim">Was macht einen guten Captain aus? Führung live erleben im Raumschiff-Simulator und danach in den Alltag übertragen.</p>
+          <dl class="overview">
+            <dt>Teilnehmende</dt><dd>4–30 (Crews à 4–6, weitere beobachten)</dd>
+            <dt>Dauer</dt><dd>½ bis 2 Tage</dd>
+            <dt>Ort</dt><dd>Simulator in der Thüringer Hütte</dd>
+            <dt>Ziel</dt><dd>Führungs- und Teamkompetenz</dd>
+          </dl>
+          <ul class="bricks">
+            <li>Raumschiff-Simulator auf Basis von „Empty Epsilon“</li>
+            <li>Teamanalyse: Welche Rollen sind vertreten?</li>
+            <li>Feedbackkultur und klare Zielsetzung</li>
+            <li>Optional: Konfliktprävention und Business-Coaching</li>
+          </ul>
+          <details>
+            <summary>Ablauf der Raumfahrt</summary>
+            <ol class="timeline">
+              <li><time>Start</time><span>Kurzvorstellung Eures Unternehmens und Eurer Führungskultur</span></li>
+              <li><time>Briefing</time><span>Rollenanalyse, Feedbackregeln, Zielsetzung</span></li>
+              <li><time>Flug 1</time><span>Übungsflug, Auswahl der Mission</span></li>
+              <li><time>Flug 2</time><span>Mission, danach Feedback und Learnings</span></li>
+              <li><time>Transfer</time><span>Was heißt das für unseren Arbeitsalltag?</span></li>
+            </ol>
+          </details>
+          <div class="pkg-gain"><b>Ihr nehmt mit</b>Ein gemeinsames Führungsverständnis und persönliche Entwicklungsziele.</div>
+          <div class="pkg-cta"><a class="btn btn--primary" href="#anfrage" data-pick>Dieses Paket anfragen</a></div>
+        </div>
+      </article>
+
+      <!-- 5 -->
+      <article class="pkg" data-sizes="s" data-goals="strategy lead" data-name="Zukunftswerkstatt „Strategie &amp; Innovation“">
+        <div class="pkg-media"><img src="img/3d-netz.jpg" alt="Workshop mit Seilnetz und Karten auf dem Boden, Präsentation an der Wand"></div>
+        <div class="pkg-body">
+          <span class="pkg-kicker t"><svg class="pz-ico" aria-hidden="true"><use href="#pz-ico" fill="currentColor"/></svg>Schwerpunkt Technik · Strategie</span>
+          <h3>Zukunftswerkstatt</h3>
+          <p class="claim">Unternehmensanalyse mit dem Drei-Dimensionen-Netz und ThinkTank: vom Ist-Zustand zum umsetzbaren Prototyp.</p>
+          <dl class="overview">
+            <dt>Teilnehmende</dt><dd>5–30</dd>
+            <dt>Dauer</dt><dd>2–3 Tage</dd>
+            <dt>Ort</dt><dd>Energiehaus + Tagungsraum Rhön Park</dd>
+            <dt>Ziel</dt><dd>Potenziale finden, Umsetzung starten</dd>
+          </dl>
+          <ul class="bricks">
+            <li>3D-Netz: Euer Unternehmen in Mensch, Natur, Technik</li>
+            <li>Potenzialanalyse und Zoom-on-Innovation</li>
+            <li>ThinkTank in 5 Phasen bis zum Prototyp</li>
+            <li>Umsetzungsplan mit Verantwortlichkeiten</li>
+          </ul>
+          <details>
+            <summary>Die Phasen</summary>
+            <ol class="timeline">
+              <li><time>Phase 1</time><span>Ist-Analyse im Drei-Dimensionen-Netz</span></li>
+              <li><time>Phase 2</time><span>Verbesserungspotenziale erkennen und auswählen</span></li>
+              <li><time>Phase 3</time><span>Recherche, Mindmap des Unternehmens-Netzwerks</span></li>
+              <li><time>Phase 4</time><span>Innovationsphase und Prototyping</span></li>
+              <li><time>Phase 5</time><span>Präsentation und Planung der Umsetzung</span></li>
+            </ol>
+          </details>
+          <div class="pkg-gain"><b>Ihr nehmt mit</b>Priorisierte Handlungsfelder, einen Prototyp und einen konkreten Umsetzungsplan.</div>
+          <div class="pkg-cta"><a class="btn btn--primary" href="#anfrage" data-pick>Dieses Paket anfragen</a></div>
+        </div>
+      </article>
+
+      <!-- 6 -->
+      <article class="pkg" data-sizes="m l" data-goals="team health" data-name="Team-Festival „Großgruppe in Bewegung“">
+        <div class="pkg-media"><img src="img/thueringer-huette.jpg" alt="Menschenkette vor dem roten Energiehaus der Thüringer Hütte"></div>
+        <div class="pkg-body">
+          <span class="pkg-kicker n"><svg class="pz-ico" aria-hidden="true"><use href="#pz-ico" fill="currentColor"/></svg>Schwerpunkt Natur · Großgruppe</span>
+          <h3>Team-Festival „Großgruppe in Bewegung“</h3>
+          <p class="claim">Ein gemeinsamer Tag für Belegschaft, Bereich oder Kick-off. Alle starten zusammen und rotieren durch Themeninseln.</p>
+          <dl class="overview">
+            <dt>Teilnehmende</dt><dd>80–300</dd>
+            <dt>Dauer</dt><dd>1 Tag, optional mit Abendprogramm</dd>
+            <dt>Ort</dt><dd>RhönParkArena / Tagungsebene + Gelände</dd>
+            <dt>Ziel</dt><dd>Wir-Gefühl über Abteilungsgrenzen</dd>
+          </dl>
+          <ul class="bricks">
+            <li>Gemeinsamer Auftakt im Plenum</li>
+            <li>Themeninseln: Teamchallenges, Achtsamkeit, Feuer, LandArt</li>
+            <li>Gemischte Gruppen à 12–20 Personen mit eigenen Teamer:innen</li>
+            <li>Großes Finale: gemeinsame Aufgabe aller Gruppen</li>
+          </ul>
+          <details>
+            <summary>Beispielablauf</summary>
+            <ol class="timeline">
+              <li><time>09:30</time><span>Auftakt im Plenum, Gruppen einteilen</span></li>
+              <li><time>10:15</time><span>Rotation 1 und 2 durch die Themeninseln</span></li>
+              <li><time>12:30</time><span>Mittagessen im Rhön Park</span></li>
+              <li><time>13:30</time><span>Rotation 3 und 4</span></li>
+              <li><time>15:30</time><span>Finale: alle Gruppen lösen eine Aufgabe zusammen</span></li>
+              <li><time>16:30</time><span>Abschluss im Plenum</span></li>
+            </ol>
+          </details>
+          <div class="pkg-gain"><b>Ihr nehmt mit</b>Neue Verbindungen quer durchs Unternehmen und ein Erlebnis, über das man noch lange spricht.</div>
+          <div class="pkg-cta"><a class="btn btn--primary" href="#anfrage" data-pick>Dieses Paket anfragen</a></div>
+        </div>
+      </article>
+
+    </div>
+
+    <p class="price-note">Preise: Ihr erhaltet nach dem Vorgespräch ein individuelles Angebot. Programmbausteine von variado beginnen bei 60 € pro Person. Übernachtung, Tagungsräume und Verpflegung bucht Ihr zu den Konditionen des Rhön Park Aktiv Resorts. Mit Familie anreisen? Dann schaut Euch unser <a href="#retreat">Familien-Unternehmens-Retreat</a> an.</p>
+  </div>
+</section>
+
+<!-- ================= FAMILIEN-RETREAT ================= -->
+<section class="section retreat" id="retreat">
+  <svg class="deco" viewBox="0 0 100 100" style="width:520px;right:-200px;top:-120px;stroke:#fff;opacity:.35" aria-hidden="true"><use href="#pz"/></svg>
+  <div class="wrap">
+    <div class="retreat-top">
+      <div class="stack">
+        <span class="pilot"><svg class="pz-ico" aria-hidden="true"><use href="#pz-ico" fill="currentColor"/></svg>Neues Format · Pilotunternehmen gesucht</span>
+        <span class="label">Familien-Unternehmens-Retreat</span>
+        <h2 class="h2">Unternehmen entwickeln, ohne dass die Familie zurückbleibt.</h2>
+        <p class="lead">Klassische Retreats kosten Familienzeit. Bei uns reisen Mitarbeitende mit Partner:innen und Kindern an. Das Unternehmen arbeitet an Team, Kultur und Zukunft, Familien und Kinder erleben ihr eigenes Programm, und an den Übergängen kommen alle zusammen.</p>
+        <p class="promise">Stärkere Teams, tiefere Beziehungen, mehr Vertrauen und neue Perspektiven für die Zukunft.</p>
+      </div>
+      <div class="split">
+        <h3 style="font-size:var(--fs-lg)">So verteilt sich die Zeit</h3>
+        <div class="split-bar" role="img" aria-label="50 Prozent Unternehmensentwicklung, 30 Prozent Familienentwicklung, 20 Prozent Gemeinschaft und Freizeit">
+          <div class="a">50 %</div><div class="b">30 %</div><div class="c">20 %</div>
+        </div>
+        <div class="split-legend">
+          <span><b>Unternehmen</b>erfahrungsbasierte Entwicklung</span>
+          <span><b>Familie</b>gemeinsames Familienerleben</span>
+          <span><b>Gemeinschaft</b>Essen, Feuer, Abende</span>
+        </div>
+        <p class="dur"><b>Dauer:</b> Freitag bis Sonntag, optional Donnerstag bis Sonntag. Das Rhön Park ist als Familienhotel mit Erlebnisbad, Kinderbereichen und Familienzimmern die ideale Basis.</p>
+      </div>
+    </div>
+
+    <ol class="journey" aria-label="Die innere Reise des Retreats">
+      <li><span class="phase">Phase 1</span><h4>Ankommen</h4><q>Wo bin ich und mit wem bin ich hier?</q></li>
+      <li><span class="phase">Phase 2</span><h4>Erleben &amp; Entwickeln</h4><q>Was steckt eigentlich in uns?</q></li>
+      <li><span class="phase">Phase 3</span><h4>Verbinden &amp; Handeln</h4><q>Was bedeutet das für unser gemeinsames Leben?</q></li>
+      <li><span class="phase">Phase 4</span><h4>Integrieren &amp; Mitnehmen</h4><q>Wie lebt dieses Wochenende weiter?</q></li>
+    </ol>
+
+    <div class="tracks">
+      <article class="track">
+        <span class="for">Für Unternehmen &amp; Mitarbeitende</span>
+        <h3><svg class="pz-ico" style="color:var(--blue)" aria-hidden="true"><use href="#pz-ico" fill="currentColor"/></svg>Unternehmensentwicklung</h3>
+        <ul>
+          <li>Themen nach Wahl: Teamvertrauen, Führung, Kommunikation, Kultur, Strategie, Innovation</li>
+          <li>Werkzeuge: Teamtraining, LeaderShip im Simulator, 3D-Netz, Outdoor-Challenges</li>
+          <li>Optional ThinkTank: reale Fragestellungen, auch mit den Perspektiven von Familien und Jugendlichen</li>
+        </ul>
+        <p class="done"><b>Ergebnis:</b> Team gestärkt, Kultur entwickelt, Zukunftsthemen bearbeitet.</p>
+      </article>
+      <article class="track">
+        <span class="for">Für Partner:innen &amp; Familien</span>
+        <h3><svg class="pz-ico" style="color:#C98500" aria-hidden="true"><use href="#pz-ico" fill="currentColor"/></svg>Familienentwicklung</h3>
+        <ul>
+          <li>Keine Kinderbetreuung, sondern gemeinsames Familienerleben</li>
+          <li>Naturmurmelbahn, Sinnlose Maschine, Familien-Kunstwerk, Kreativwerkstatt</li>
+          <li>Familien-Challenges, Zukunftswerkstatt, gemeinsames Kochen, Gala-Dinner</li>
+          <li>Impulse und Coaching zu Partnerschaft und Familienkommunikation</li>
+        </ul>
+        <p class="done"><b>Ergebnis:</b> Qualitätszeit, stärkere Beziehungen, Verständnis für die Arbeitswelt.</p>
+      </article>
+      <article class="track">
+        <span class="for">Für Kinder ab Grundschulalter</span>
+        <h3><svg class="pz-ico" style="color:var(--green)" aria-hidden="true"><use href="#pz-ico" fill="currentColor"/></svg>Kinder- und Jugendprogramm</h3>
+        <ul>
+          <li>Auf Basis unserer Schullandheim-Pädagogik</li>
+          <li>Geländerallye, Leben im Wald, Feuer, Wasser, Energie erleben</li>
+          <li>Teamaufgaben, Abenteuer, Nachtwanderung, Lagerfeuer</li>
+        </ul>
+        <p class="done"><b>Ergebnis:</b> Selbstwirksamkeit, Gemeinschaft und Natur erleben.</p>
+      </article>
+    </div>
+
+    <div class="together">
+      <b>Gemeinsam für alle</b>
+      <span>Pizzaofen</span><span>Feuerküche</span><span>Lagerfeuer</span><span>Geschichten des Tages</span><span>Abendprogramme</span><span>Rituale</span>
+      <a class="btn btn--orange" href="#anfrage" data-pick-name="Familien-Unternehmens-Retreat" style="margin-left:auto">Als Pilotunternehmen anfragen</a>
+    </div>
+  </div>
+</section>
+
+<!-- ================= BAUSTEINE ================= -->
+<section class="section" id="bausteine">
+  <svg class="deco" viewBox="0 0 100 100" style="width:300px;right:-90px;bottom:-60px;stroke:var(--green)" aria-hidden="true"><use href="#pz"/></svg>
+  <div class="wrap">
+    <div class="section-head">
+      <span class="label">Baukasten</span>
+      <h2 class="h2">Alle Bausteine zum Kombinieren.</h2>
+      <p class="lead muted">Die Pakete sind ein Startpunkt. Aus diesen Modulen stellen wir Euer eigenes Programm zusammen, auch als Ergänzung zu Eurer Tagung im Rhön Park.</p>
+    </div>
+    <div class="modules">
+      <article class="module"><h3><svg class="pz-ico" style="color:#C98500" aria-hidden="true"><use href="#pz-ico" fill="currentColor"/></svg>Teamtraining</h3><p>Erlebnispädagogische Übungen für Kooperation, Kommunikation und Vertrauen.</p><span class="cap">10–300 Personen</span></article>
+      <article class="module"><h3><svg class="pz-ico" style="color:#C98500" aria-hidden="true"><use href="#pz-ico" fill="currentColor"/></svg>Feuertag</h3><p>Fackeln, Feuer ohne Feuerzeug, Feuer-Fakir, Gruppenritual. Sicherheit zuerst.</p><span class="cap">10–30 Personen · 4 h</span></article>
+      <article class="module"><h3><svg class="pz-ico" style="color:var(--blue)" aria-hidden="true"><use href="#pz-ico" fill="currentColor"/></svg>LeaderShip</h3><p>Führungskompetenz im Raumschiff-Simulator mit Auswertung und Transfer.</p><span class="cap">4–6 aktiv je Crew · 3 h</span></article>
+      <article class="module"><h3><svg class="pz-ico" style="color:var(--blue)" aria-hidden="true"><use href="#pz-ico" fill="currentColor"/></svg>Drei-Dimensionen-Netz</h3><p>Unternehmensanalyse in Mensch, Natur und Technik mit Umsetzungsplan.</p><span class="cap">5–30 Personen</span></article>
+      <article class="module"><h3><svg class="pz-ico" style="color:var(--blue)" aria-hidden="true"><use href="#pz-ico" fill="currentColor"/></svg>ThinkTank</h3><p>In 5 Phasen von der Fragestellung zum Prototyp für neue Ideen und Produkte.</p><span class="cap">5–30 Personen</span></article>
+      <article class="module"><h3><svg class="pz-ico" style="color:var(--green)" aria-hidden="true"><use href="#pz-ico" fill="currentColor"/></svg>Achtsamkeit &amp; Waldbaden</h3><p>Geführte Achtsamkeitswanderungen in der Rhön, Atem- und Wahrnehmungsübungen.</p><span class="cap">auch für Großgruppen</span></article>
+      <article class="module"><h3><svg class="pz-ico" style="color:var(--green)" aria-hidden="true"><use href="#pz-ico" fill="currentColor"/></svg>Stressmanagement &amp; Resilienz</h3><p>Stressmuster erkennen, Ressourcen stärken, gesunde Routinen im Team verankern.</p><span class="cap">10–300 Personen</span></article>
+      <article class="module"><h3><svg class="pz-ico" style="color:#C98500" aria-hidden="true"><use href="#pz-ico" fill="currentColor"/></svg>Konfliktprävention</h3><p>Gewaltfreie Kommunikation und Konfliktlösung, bevor Spannungen eskalieren.</p><span class="cap">10–30 Personen</span></article>
+      <article class="module"><h3><svg class="pz-ico" style="color:#C98500" aria-hidden="true"><use href="#pz-ico" fill="currentColor"/></svg>Glücksmanagement</h3><p>Was Menschen bei der Arbeit zufrieden macht, und wie Ihr es fördert.</p><span class="cap">Impuls oder Workshop</span></article>
+      <article class="module"><h3><svg class="pz-ico" style="color:#C98500" aria-hidden="true"><use href="#pz-ico" fill="currentColor"/></svg>Business-Coaching</h3><p>Einzel- und Teamcoaching für Führungskräfte und Persönlichkeitsentwicklung.</p><span class="cap">einzeln oder im Team</span></article>
+      <article class="module"><h3><svg class="pz-ico" style="color:var(--blue)" aria-hidden="true"><use href="#pz-ico" fill="currentColor"/></svg>Unternehmensberatung</h3><p>Organisations- und Unternehmensentwicklung, Potenzialanalyse, Zeitgewinnung.</p><span class="cap">vor Ort oder begleitend</span></article>
+      <article class="module"><h3><svg class="pz-ico" style="color:var(--green)" aria-hidden="true"><use href="#pz-ico" fill="currentColor"/></svg>Abendprogramme</h3><p>Pizza aus dem Holzbackofen, Lagerfeuer, Nachtwanderung, Geschichten des Tages.</p><span class="cap">für jede Gruppe</span></article>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ABLAUF ================= -->
+<section class="section section--stone" id="ablauf">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="label">In vier Schritten zum Programm</span>
+      <h2 class="h2">Von der Anfrage bis zum Transfer.</h2>
+    </div>
+    <ol class="steps">
+      <li class="step"><span class="num" aria-hidden="true">1</span><span class="who">Ihr</span><h3>Anfrage stellen</h3><p>Über das Formular unten oder über das Rhön Park. Eure Anfrage geht direkt an das variado-Team.</p></li>
+      <li class="step"><span class="num" aria-hidden="true">2</span><span class="who">variado</span><h3>Vorgespräch</h3><p>Wir klären Ziele, Gruppe, Themen und Fitness der Teilnehmenden. Kostenlos und unverbindlich.</p></li>
+      <li class="step"><span class="num" aria-hidden="true">3</span><span class="who">variado + Rhön Park</span><h3>Angebot aus einer Hand</h3><p>Euer Programm von variado, abgestimmt mit Zimmern, Tagungsräumen und Verpflegung im Rhön Park.</p></li>
+      <li class="step"><span class="num" aria-hidden="true">4</span><span class="who">Gemeinsam</span><h3>Erleben &amp; Transfer</h3><p>Durchführung, Reflexion und konkrete nächste Schritte. Auf Wunsch mit Follow-up-Termin.</p></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ================= ORTE ================= -->
+<section class="section section--soft" id="orte">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="label">Zwei Orte, ein Gelände</span>
+      <h2 class="h2">Tagen im Hotel, lernen in der Natur.</h2>
+      <p class="lead muted">Das Rhön Park Aktiv Resort und das Bildungszentrum Thüringer Hütte liegen auf der Rother Kuppe direkt nebeneinander, im UNESCO-Biosphärenreservat Rhön.</p>
+    </div>
+    <div class="places">
+      <article class="place">
+        <div class="place-visual place-visual--hotel">
+          <svg viewBox="0 0 400 200" role="img" aria-label="Rhön Park Aktiv Resort">
+            <rect width="400" height="200" fill="#005F98"/>
+            <use href="#pz" transform="translate(220 -30) scale(2.6) rotate(12 50 50)" fill="#00466F"/>
+            <use href="#pz" transform="translate(-40 70) scale(2) rotate(-18 50 50)" fill="none" stroke="#F0A617" stroke-width=".7"/>
+            <text x="32" y="92" fill="#fff" font-family="Candara, 'Fira Sans', sans-serif" font-weight="700" font-size="30">Rhön Park</text>
+            <text x="32" y="122" fill="#fff" font-family="Candara, 'Fira Sans', sans-serif" font-size="18">Aktiv Resort · Hausen-Roth</text>
+          </svg>
+        </div>
+        <div class="place-body">
+          <h3>Rhön Park Aktiv Resort</h3>
+          <p class="addr">Rother Kuppe 2 · 97647 Hausen-Roth</p>
+          <ul class="feat">
+            <li>Mehrere hundert Zimmer und Apartments</li>
+            <li>Tagungsräume und Tagungsebene</li>
+            <li>RhönParkArena für bis zu 400 Personen</li>
+            <li>Tagungstechnik und Verpflegung</li>
+            <li>Erlebnisbad „Rother Lagune“</li>
+            <li>Bowling, Minigolf, Wellness</li>
+          </ul>
+        </div>
+      </article>
+      <article class="place">
+        <div class="place-visual"><img src="img/herbst.jpg" alt="Herbstlich rote Buche vor dem Holzhaus der Thüringer Hütte"></div>
+        <div class="place-body">
+          <h3>Bildungszentrum Thüringer Hütte</h3>
+          <p class="addr">Rother Kuppe 3 · 97647 Hausen · betrieben von variado eG</p>
+          <ul class="feat">
+            <li>Energiehaus: Seminarraum + 4 Gruppenräume</li>
+            <li>Raumschiff-Simulator</li>
+            <li>Lagerfeuerplatz und Holzbackofen</li>
+            <li>ErLebenswerkstatt mit Bastelwerkstatt</li>
+            <li>Gelände mit Bachlauf und Kräuterbeet</li>
+            <li>Volleyball- und Fußballplatz</li>
+          </ul>
+        </div>
+      </article>
+    </div>
+    <div class="neighbors">
+      <b>Rother Kuppe 2 + 3</b>
+      <span>Kein Bus, kein Transfer: vom Frühstück ins Programm zu Fuß.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TEAM ================= -->
+<section class="section section--stone" id="team">
+  <div class="wrap team-grid">
+    <div class="team-photo"><img src="img/variado-team.jpg" alt="Das variado-Team in weinroten T-Shirts, winkend"></div>
+    <div class="stack">
+      <span class="label">Wer mit Euch arbeitet</span>
+      <h2 class="h2">Ein Team, viele Kompetenzen.</h2>
+      <p class="lead">Bei variado arbeiten Menschen aus Beratung, Coaching, Pädagogik und Technik zusammen. Für Euer Programm stellen wir das passende Team zusammen, bei Großgruppen mit mehreren Teamer:innen gleichzeitig.</p>
+      <div class="skills">
+        <span>Unternehmensberatung</span><span>Unternehmensentwicklung</span><span>Business-Coaching</span><span>Stressmanagement</span><span>Resilienztraining</span><span>Gewalt- &amp; Konfliktprävention</span><span>Glücksmanagement</span><span>Achtsamkeit</span><span>Erlebnispädagogik</span><span>Naturpädagogik</span><span>Persönlichkeitsentwicklung</span><span>Innovation &amp; ThinkTank</span>
+      </div>
+      <p class="eg"><b>variado eG</b> ist eine gemeinnützige eingetragene Genossenschaft. Unsere Struktur basiert auf Demokratie, Mitbestimmung und Gemeinschaft. Diese Werte spiegeln sich in unserer Arbeit: Wir begegnen Euch auf Augenhöhe.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FAQ ================= -->
+<section class="section" id="faq">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="label">Häufige Fragen</span>
+      <h2 class="h2">Gut zu wissen.</h2>
+    </div>
+    <div class="faq">
+      <div>
+        <details><summary>Wer ist unser Ansprechpartner?</summary><p>Für das Programm ist variado Euer Ansprechpartner, vom Vorgespräch bis zur Durchführung. Zimmer, Tagungsräume und Verpflegung organisiert das Rhön Park. Wir stimmen uns im Hintergrund ab, damit alles zusammenpasst.</p></details>
+        <details><summary>Wie viele Personen sind möglich?</summary><p>10 bis 30 Personen gehen immer und in allen Formaten. Mit 30 bis 80 Personen arbeiten wir mit mehreren Teamer:innen parallel. Für 80 bis 300 Personen eignen sich Teambuilding, Achtsamkeit und Outdoor-Formate, bei denen sich die Gruppe auf Themeninseln aufteilt.</p></details>
+        <details><summary>Was passiert bei Regen?</summary><p>Wir arbeiten das ganze Jahr. Viele Übungen funktionieren auch bei Regen, und mit Energiehaus, Tagungsräumen und RhönParkArena gibt es genügend Ausweichflächen drinnen.</p></details>
+      </div>
+      <div>
+        <details><summary>Muss man dafür sportlich sein?</summary><p>Nein. Wir fragen im Vorgespräch nach der Fitness aller Teilnehmenden und wählen die Übungen so, dass alle mitmachen können.</p></details>
+        <details><summary>Können wir Pakete kombinieren?</summary><p>Ja. Die Pakete sind Vorschläge. Aus unserem Baukasten stellen wir Euer eigenes Programm zusammen, etwa eine Fachtagung im Rhön Park mit einem Teambuilding-Nachmittag und Feuerabend.</p></details>
+        <details><summary>Was kostet ein Programm?</summary><p>Das hängt von Dauer, Gruppengröße und Bausteinen ab. Programmbausteine beginnen bei 60 € pro Person. Nach dem Vorgespräch bekommt Ihr ein konkretes Angebot. Hotelleistungen rechnet das Rhön Park ab.</p></details>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ANFRAGE ================= -->
+<section class="section section--stone" id="anfrage">
+  <svg class="deco" viewBox="0 0 100 100" style="width:380px;left:-200px;bottom:-150px;stroke:var(--orange)" aria-hidden="true"><use href="#pz"/></svg>
+  <div class="wrap inquiry">
+    <div class="stack">
+      <span class="label">Anfrage</span>
+      <h2 class="h2">Erzählt uns von Eurem Team.</h2>
+      <p class="lead">Wir melden uns innerhalb von zwei Werktagen für ein kostenloses Vorgespräch.</p>
+      <div class="contacts">
+        <div class="contact"><img src="img/teresa.jpg" alt="Teresa Radovic"><div><b>Teresa Radovic</b><em>Buchung und Anfragen</em><span>anfrage@variado.de · +49 176 77860490</span></div></div>
+        <div class="contact"><img src="img/jonas.jpg" alt="Jonas Dietz"><div><b>Jonas Dietz</b><em>Fragen zum Programm</em><span>jonas@variado.de · +49 176 77860492</span></div></div>
+        <div class="contact"><img src="img/daniel.jpg" alt="Daniel Friedrich"><div><b>Daniel Friedrich</b><em>Unternehmensentwicklung &amp; Kooperation</em><span>daniel@variado.de · +49 176 77860491</span></div></div>
+      </div>
+    </div>
+
+    <form id="inqForm" novalidate>
+      <div class="field"><label for="f-company">Unternehmen *</label><input id="f-company" name="company" autocomplete="organization" required></div>
+      <div class="field"><label for="f-name">Ansprechperson *</label><input id="f-name" name="name" autocomplete="name" required></div>
+      <div class="field"><label for="f-mail">E-Mail *</label><input id="f-mail" name="mail" type="email" autocomplete="email" required></div>
+      <div class="field"><label for="f-phone">Telefon</label><input id="f-phone" name="phone" type="tel" autocomplete="tel"></div>
+      <div class="field"><label for="f-size">Gruppengröße *</label>
+        <select id="f-size" name="size" required>
+          <option value="">Bitte wählen</option>
+          <option>10–30 Personen</option>
+          <option>30–80 Personen</option>
+          <option>80–150 Personen</option>
+          <option>150–300 Personen</option>
+        </select>
+      </div>
+      <div class="field"><label for="f-pkg">Interesse an</label>
+        <select id="f-pkg" name="pkg">
+          <option>Noch offen, bitte beraten</option>
+          <option>Teamtag „Gemeinsam stark“</option>
+          <option>Team-Klausur „Zusammenwachsen“</option>
+          <option>„Kraftquelle Rhön“ – Achtsamkeit &amp; Resilienz</option>
+          <option>LeaderShip „Kurs halten“</option>
+          <option>Zukunftswerkstatt „Strategie &amp; Innovation“</option>
+          <option>Team-Festival „Großgruppe in Bewegung“</option>
+          <option>Familien-Unternehmens-Retreat</option>
+          <option>Eigenes Programm aus Bausteinen</option>
+        </select>
+      </div>
+      <div class="field"><label for="f-date">Wunschzeitraum</label><input id="f-date" name="date" placeholder="z. B. Mai 2027, 2 Tage"></div>
+      <div class="field"><label for="f-stay">Übernachtung im Rhön Park</label>
+        <select id="f-stay" name="stay">
+          <option>Ja, mit Übernachtung</option>
+          <option>Nein, nur Tagesprogramm</option>
+          <option>Noch unklar</option>
+        </select>
+      </div>
+      <div class="field field--full"><label for="f-msg">Was soll sich in Eurem Team bewegen?</label><textarea id="f-msg" name="msg" placeholder="Ziele, Anlass, besondere Wünsche …"></textarea></div>
+      <label class="check field--full" for="f-family"><input type="checkbox" id="f-family" name="family"><span>Wir interessieren uns dafür, Familien mitzubringen (Familien-Unternehmens-Retreat).</span></label>
+      <p class="error" id="formError" hidden></p>
+      <div class="form-foot">
+        <small>Eure Angaben gehen ausschließlich an variado eG und werden nur zur Bearbeitung der Anfrage genutzt.</small>
+        <button class="btn btn--primary" type="submit">Anfrage absenden</button>
+      </div>
+      <div class="result" id="formResult" hidden>
+        <p><b style="color:var(--blue)">Eure Anfrage ist vorbereitet.</b> Schickt sie bitte per E-Mail an <span style="user-select:all;font-weight:700">anfrage@variado.de</span>. Ihr könnt den Text kopieren oder Euer E-Mail-Programm öffnen.</p>
+        <pre id="resultText"></pre>
+        <div class="row">
+          <button class="btn btn--primary" type="button" id="copyBtn">Text kopieren</button>
+          <a class="btn btn--ghost" id="mailBtn" href="mailto:anfrage@variado.de">E-Mail-Programm öffnen</a>
+          <span id="copyState" class="muted" aria-live="polite"></span>
+        </div>
+      </div>
+    </form>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="stack" style="gap:10px">
+      <p class="claim">Wir. Ihr. <span>Gemeinsam.</span></p>
+      <p>variado. Die ErLebenswerkstatt in Kooperation mit dem Rhön Park Aktiv Resort.</p>
+    </div>
+    <div>
+      <b>variado eG</b>
+      gemeinnützige eingetragene Genossenschaft<br>
+      Abtsleitenweg 8, 97074 Würzburg<br>
+      info@variado.de · +49 176 77860491<br>
+      <a href="https://www.variado.de" target="_blank" rel="noopener">www.variado.de</a>
+    </div>
+    <div>
+      <b>Programmorte</b>
+      Bildungszentrum Thüringer Hütte<br>Rother Kuppe 3, 97647 Hausen<br><br>
+      Rhön Park Aktiv Resort<br>Rother Kuppe 2, 97647 Hausen-Roth
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  const sizeInfo = {
+    all: { t: 'Von der Abteilung bis zum ganzen Unternehmen', p: 'Kleine Gruppen arbeiten mit einem festen Trainer-Duo in voller Tiefe. Ab 30 Personen arbeiten mehrere variado-Teamer:innen parallel in Kleingruppen. Großgruppen bis 300 Personen erleben einen gemeinsamen Auftakt und rotieren dann durch Themeninseln.', n: 40, tr: 4 },
+    s:   { t: 'Kleine Gruppe, volle Tiefe', p: 'Ein festes Trainer-Duo begleitet Euch durchgehend. Alle Bausteine sind möglich, auch Raumschiff-Simulator und ThinkTank. Viel Raum für Reflexion und Eure individuellen Themen.', n: 20, tr: 2 },
+    m:   { t: 'Mittlere Gruppe, parallel arbeiten', p: 'Mehrere Teamer:innen arbeiten mit Kleingruppen von 10 bis 15 Personen gleichzeitig. Im Plenum kommt alles zusammen. Ideal für Abteilungen, Bereichsklausuren und Führungskreise mit Teams.', n: 55, tr: 5 },
+    l:   { t: 'Großgruppe, ein gemeinsames Erlebnis', p: 'Gemeinsamer Auftakt und Abschluss in der RhönParkArena oder Tagungsebene, dazwischen Rotation durch Themeninseln. Besonders geeignet: Teambuilding, Achtsamkeit und Outdoor-Formate. Ein großes variado-Team ist vor Ort.', n: 90, tr: 9 }
+  };
+  let size = 'all', goal = 'all';
+  const cards = Array.from(document.querySelectorAll('.pkg'));
+  const people = document.getElementById('sizePeople');
+
+  function renderPeople(n, tr) {
+    people.innerHTML = '';
+    for (let i = 0; i < n; i++) {
+      const d = document.createElement('i');
+      if (i < tr) d.className = 't';
+      people.appendChild(d);
+    }
+  }
+
+  function apply() {
+    let hits = 0;
+    cards.forEach(c => {
+      const ok = (size === 'all' || c.dataset.sizes.split(' ').includes(size)) &&
+                 (goal === 'all' || c.dataset.goals.split(' ').includes(goal));
+      c.classList.toggle('dim', !ok);
+      let b = c.querySelector('.badge-fit');
+      const filtered = size !== 'all' || goal !== 'all';
+      if (ok && filtered) {
+        if (!b) { b = document.createElement('span'); b.className = 'badge-fit'; b.textContent = 'Passt'; c.appendChild(b); }
+      } else if (b) { b.remove(); }
+      if (ok) hits++;
+    });
+    document.getElementById('matchCount').innerHTML = hits
+      ? '<b>' + hits + ' von ' + cards.length + '</b> Paketen passen zu Eurer Auswahl.'
+      : '<b>Kein Paket passt genau.</b> Kein Problem: Aus unseren Bausteinen stellen wir Euer eigenes Programm zusammen.';
+    const s = sizeInfo[size];
+    document.getElementById('sizeTitle').textContent = s.t;
+    document.getElementById('sizeText').textContent = s.p;
+    renderPeople(s.n, s.tr);
+  }
+
+  function bindSeg(id, key, setter) {
+    const seg = document.getElementById(id);
+    seg.addEventListener('click', e => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      seg.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+      setter(btn.dataset[key]);
+      apply();
+    });
+  }
+  bindSeg('sizeSeg', 'size', v => size = v);
+  bindSeg('goalSeg', 'goal', v => goal = v);
+  apply();
+
+  // Paket aus Karte ins Formular übernehmen
+  const pkgSelect = document.getElementById('f-pkg');
+  function preselect(name) {
+    const opt = Array.from(pkgSelect.options).find(o => o.text.replace(/\s+/g, ' ').trim() === name.replace(/\s+/g, ' ').trim());
+    if (opt) pkgSelect.value = opt.value;
+    if (name === 'Familien-Unternehmens-Retreat') document.getElementById('f-family').checked = true;
+  }
+  document.querySelectorAll('[data-pick]').forEach(a => a.addEventListener('click', () => {
+    const tmp = document.createElement('textarea');
+    tmp.innerHTML = a.closest('.pkg').dataset.name;
+    preselect(tmp.value);
+  }));
+  document.querySelectorAll('[data-pick-name]').forEach(a => a.addEventListener('click', () => preselect(a.dataset.pickName)));
+
+  // Anfrage
+  const form = document.getElementById('inqForm');
+  const err = document.getElementById('formError');
+  const result = document.getElementById('formResult');
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const v = id => document.getElementById(id).value.trim();
+    const missing = [];
+    if (!v('f-company')) missing.push('Unternehmen');
+    if (!v('f-name')) missing.push('Ansprechperson');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v('f-mail'))) missing.push('gültige E-Mail');
+    if (!v('f-size')) missing.push('Gruppengröße');
+    if (missing.length) {
+      err.textContent = 'Bitte ergänzt noch: ' + missing.join(', ') + '.';
+      err.hidden = false;
+      return;
+    }
+    err.hidden = true;
+    const text = [
+      'Anfrage Firmenprogramm Rhön Park × variado',
+      '',
+      'Unternehmen: ' + v('f-company'),
+      'Ansprechperson: ' + v('f-name'),
+      'E-Mail: ' + v('f-mail'),
+      'Telefon: ' + (v('f-phone') || '–'),
+      'Gruppengröße: ' + v('f-size'),
+      'Interesse an: ' + v('f-pkg'),
+      'Wunschzeitraum: ' + (v('f-date') || '–'),
+      'Übernachtung im Rhön Park: ' + v('f-stay'),
+      'Familien mitbringen: ' + (document.getElementById('f-family').checked ? 'ja' : 'nein'),
+      '',
+      'Ziele / Nachricht:',
+      v('f-msg') || '–'
+    ].join('\n');
+    document.getElementById('resultText').textContent = text;
+    document.getElementById('mailBtn').href = 'mailto:anfrage@variado.de?subject=' +
+      encodeURIComponent('Anfrage Firmenprogramm Rhön Park – ' + v('f-company')) + '&body=' + encodeURIComponent(text);
+    result.hidden = false;
+    result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+
+  document.getElementById('copyBtn').addEventListener('click', () => {
+    const pre = document.getElementById('resultText');
+    const state = document.getElementById('copyState');
+    const fallback = () => {
+      const r = document.createRange(); r.selectNodeContents(pre);
+      const s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      state.textContent = 'Text markiert, bitte mit Strg+C kopieren.';
+    };
+    try {
+      navigator.clipboard.writeText(pre.textContent)
+        .then(() => { state.textContent = 'Kopiert.'; })
+        .catch(fallback);
+    } catch (_) { fallback(); }
+  });
+})();
+</script>
+</body>
+</html>
