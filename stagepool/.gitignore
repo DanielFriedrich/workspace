@@ -1,0 +1,6 @@
+/config/config.php
+/storage/*.sqlite
+/storage/*.lock
+/storage/logs/*.log
+/uploads/products/*
+!/uploads/products/index.php

@@ -1,0 +1,40 @@
+# Stagepool – Apache-Konfiguration
+DirectoryIndex index.php
+Options -Indexes
+
+# Interne Ordner sperren (zusätzlich zu den .htaccess-Dateien darin)
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^(inc|config|storage|docs)(/|$) - [F,L]
+  RewriteRule (^|/)\.(?!well-known) - [F,L]
+</IfModule>
+
+<FilesMatch "\.(md|sql|sqlite|lock|log|sh|dist)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css "access plus 30 days"
+  ExpiresByType application/javascript "access plus 30 days"
+  ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 30 days"
+  ExpiresByType image/jpeg "access plus 30 days"
+  ExpiresByType image/png "access plus 30 days"
+  ExpiresByType image/webp "access plus 30 days"
+</IfModule>
+
+<IfModule mod_mime.c>
+  AddType font/woff2 .woff2
+</IfModule>
