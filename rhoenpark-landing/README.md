@@ -1,13 +1,12 @@
-# Rhön Park × variado – Landingpage Firmenangebote
+# variado Firmenpakete – Landingpage
 
-Seitenvorschlag für das Rhön Park Aktiv Resort: Firmenpakete von variado. Die ErLebenswerkstatt
-(Teambuilding, Achtsamkeit & Resilienz, Führung, Strategie, Großgruppen, Familien-Unternehmens-Retreat).
+Angebotsseite für Unternehmenskunden (z. B. zur Weitergabe an das Rhön Park Aktiv Resort):
+sechs Pakete mit Filter nach Gruppengröße und Ziel, Familien-Unternehmens-Retreat, Baukasten mit 12 Modulen,
+Ablauf, Team, FAQ und Anfrageformular.
 
-- `index.html` – komplette Seite (HTML/CSS/JS in einer Datei, keine Abhängigkeiten außer optional Google Fonts)
+- `index.html` – komplette Seite (HTML/CSS/JS in einer Datei; Schriften Bricolage Grotesque + Figtree via Google Fonts)
 - `img/` – Logo und Fotos aus dem variado-Unternehmensflyer (web-optimiert)
 
-Corporate Design aus dem Flyer: Blau `#005F98`, Grün `#007F5C`, Orange `#F0A617`, Steingrau `#D6D6CE`,
-Schrift Candara (Fallback Fira Sans).
+Farben aus dem variado-Logo: Blau `#005F98` (Technik), Grün `#007F5C` (Natur), Orange `#F0A617` (Mensch).
 
-Offene Punkte vor Livegang: Formular an Backend/Hotel-Formular anbinden (aktuell: Text kopieren / mailto),
-Hotel-Kennzahlen und Fotos vom Rhön Park bestätigen bzw. ergänzen, Preise prüfen.
+Offen vor Livegang: Formular an Backend anbinden (aktuell: Text kopieren / mailto), Preise und Gruppengrößen prüfen.
