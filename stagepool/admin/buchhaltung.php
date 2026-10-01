@@ -212,6 +212,24 @@ admin_header('Buchhaltung', 'buchhaltung');
   </section>
 </div>
 
+<?php $owners = owner_revenue($year); if ($owners): $ownerSum = 0; foreach ($owners as $o) { $ownerSum += $o['total']; } ?>
+<section class="card-admin">
+  <div class="card-admin-head"><h2><?= icon('users') ?>Mietumsatz nach Eigentümer <?= $year ?></h2></div>
+  <p class="muted small">Aus ausgegebenen und zurückgegebenen Buchungen (Mietbeginn <?= $year ?>), aufgeteilt nach den zugeteilten Exemplaren. Rabatte werden anteilig verrechnet. Grundlage für die interne Abrechnung, unabhängig davon, ob schon bezahlt wurde.</p>
+  <div class="table-wrap table-wrap-flat">
+  <table class="table">
+    <thead><tr><th>Eigentümer</th><th class="num">Buchungen</th><th class="num">davon intern</th><th class="num">Mietumsatz</th><th class="num">Anteil</th></tr></thead>
+    <tbody>
+      <?php foreach ($owners as $name => $o): ?>
+        <tr><td><?= icon('user') ?> <?= e($name) ?></td><td class="num"><?= count($o['bookings']) ?></td><td class="num"><?= money($o['internal']) ?></td><td class="num"><b><?= money($o['total']) ?></b></td><td class="num"><?= $ownerSum > 0 ? round($o['total'] / $ownerSum * 100) : 0 ?> %</td></tr>
+      <?php endforeach; ?>
+    </tbody>
+    <tfoot><tr><th colspan="3">Gesamt</th><th class="num"><?= money($ownerSum) ?></th><th></th></tr></tfoot>
+  </table>
+  </div>
+</section>
+<?php endif; ?>
+
 <div class="admin-cols">
   <section class="card-admin" id="liste">
     <div class="card-admin-head">

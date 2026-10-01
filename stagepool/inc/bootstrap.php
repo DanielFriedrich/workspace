@@ -7,8 +7,8 @@
 
 define('SP_APP', true);
 define('SP_ROOT', dirname(__DIR__));
-define('SP_VERSION', '1.1.0');
-define('SP_SCHEMA_VERSION', 2); // bei Schema-Änderungen erhöhen, siehe inc/schema.php
+define('SP_VERSION', '1.2.0');
+define('SP_SCHEMA_VERSION', 3); // bei Schema-Änderungen erhöhen, siehe inc/schema.php
 
 require SP_ROOT . '/inc/functions.php';
 require SP_ROOT . '/inc/db.php';
@@ -21,6 +21,7 @@ require SP_ROOT . '/inc/catalog.php';
 require SP_ROOT . '/inc/bookings.php';
 require SP_ROOT . '/inc/documents.php';
 require SP_ROOT . '/inc/accounting.php';
+require SP_ROOT . '/inc/stock.php';
 
 $configFile = SP_ROOT . '/config/config.php';
 if (!is_file($configFile)) {

@@ -34,7 +34,7 @@ $counts = array();
 $products = array();
 $needle = lower($q);
 foreach ($all as $p) {
-    if ($locId && (int) $p['location_id'] !== $locId) {
+    if ($locId && !product_at_location($p, $locId)) {
         continue;
     }
     if ($needle !== '') {
@@ -74,10 +74,10 @@ if ($catSlug !== '') {
 /* ---------- Sortieren ---------- */
 usort($products, function ($a, $b) use ($sort) {
     if ($sort === 'preis-auf') {
-        return (float) $a['price_day'] <=> (float) $b['price_day'];
+        return unit_price($a) <=> unit_price($b);
     }
     if ($sort === 'preis-ab') {
-        return (float) $b['price_day'] <=> (float) $a['price_day'];
+        return unit_price($b) <=> unit_price($a);
     }
     if ($sort === 'name') {
         return strcasecmp($a['name'], $b['name']);
@@ -95,6 +95,7 @@ foreach ($all as $p) {
     $deviceCount += (int) $p['quantity'];
 }
 
+$isTeam = price_tier() === 'internal';
 $active = 'katalog';
 view('header', array('active' => $active));
 ?>
@@ -223,11 +224,13 @@ view('header', array('active' => $active));
         <div class="card-body">
           <h3><a href="<?= e(url('produkt.php', array('id' => $pid))) ?>"><?= e($p['name']) ?></a></h3>
           <p class="card-desc"><?= e(excerpt($p['short_desc'], 110)) ?></p>
-          <p class="card-loc"><?= icon('pin') ?><?= e($p['location_name'] ?: 'Standort nach Absprache') ?></p>
+          <p class="card-loc"><?= icon('pin') ?><?= e(product_location_label($p)) ?></p>
           <div class="card-foot">
             <div class="price">
-              <b><?= money($p['price_day'], true) ?></b><span>/ Tag</span>
-              <?php if ($period): ?><small><?= plural($period['days'], 'Tag', 'Tage') ?>: <?= money(rental_price($p['price_day'], $period['days']), true) ?></small><?php endif; ?>
+              <?php if ($isTeam): ?><em class="price-tag">Team</em><?php endif; ?>
+              <b><?= money(unit_price($p), true) ?></b><span>/ Tag</span>
+              <?php if ($isTeam): ?><small class="price-alt">Endkunde <?= money($p['price_day'], true) ?></small><?php endif; ?>
+              <?php if ($period): ?><small><?= plural($period['days'], 'Tag', 'Tage') ?>: <?= money(rental_price(unit_price($p), $period['days']), true) ?></small><?php endif; ?>
             </div>
             <form method="post" action="<?= e(url('warenkorb.php')) ?>" data-add-form>
               <?= csrf_field() ?>

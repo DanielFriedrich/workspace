@@ -14,7 +14,7 @@ $loc = (int) input('standort');
 $products = array();
 foreach (catalog_products(false) as $p) {
     if ($cat && (int) $p['category_id'] !== $cat) continue;
-    if ($loc && (int) $p['location_id'] !== $loc) continue;
+    if ($loc && !product_at_location($p, $loc)) continue;
     $products[] = $p;
 }
 $base = array('kategorie' => $cat ?: '', 'standort' => $loc ?: '', 'tage' => $days);

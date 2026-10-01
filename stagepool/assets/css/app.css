@@ -671,3 +671,13 @@ button.day:hover { border-color: var(--green); }
 }
 .status-docs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
 .field > span small { text-transform: none; letter-spacing: 0; font-weight: 600; color: var(--dim); }
+.team-chip { display: inline-flex; align-items: center; gap: 8px; height: 42px; padding: 0 14px; border-radius: 999px; background: rgba(61, 220, 151, .12); border: 1px solid rgba(61, 220, 151, .4); color: var(--green); font-weight: 800; font-size: .85rem; text-decoration: none; white-space: nowrap; }
+@media (max-width: 1100px) { .team-chip span { display: none; } .team-chip { width: 42px; padding: 0; justify-content: center; } }
+.price-tag { display: block; font-style: normal; font-size: .66rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--green); margin-bottom: 2px; }
+.price small.price-alt { color: var(--muted); font-weight: 600; margin-top: 2px; }
+.loc-line { display: flex; align-items: center; gap: 4px; }
+.team-note { display: flex; gap: 10px; align-items: flex-start; padding: 14px 18px; border-radius: var(--radius-sm); background: rgba(61, 220, 151, .08); border: 1px solid rgba(61, 220, 151, .35); color: #b8f5d9; margin-bottom: 20px; }
+.team-note .icon { margin-top: 3px; }
+.summary-compare { margin: -6px 0 12px; padding: 10px 12px; border-radius: 10px; background: rgba(61, 220, 151, .08); color: #b8f5d9; font-size: .88rem; }
+.price > span { white-space: nowrap; }
+.price b { white-space: nowrap; }

@@ -101,6 +101,22 @@
     s.addEventListener('change', function () { var row = s.closest('[style]'); if (row) { row.style.setProperty('--accent', s.value); } });
   });
 
+  /* ---------- Gerät: Endkundenpreis automatisch aus internem Preis ---------- */
+  var pInt = $('[data-price-internal]'), pCust = $('[data-price-customer]'), pAuto = $('[data-price-auto]');
+  if (pInt && pCust && pAuto) {
+    var markup = parseFloat(pCust.getAttribute('data-markup')) || 0;
+    var num = function (v) { return parseFloat(String(v).replace(/\./g, '').replace(',', '.')) || 0; };
+    var syncPrice = function () {
+      pCust.readOnly = pAuto.checked && num(pInt.value) > 0;
+      if (pCust.readOnly) {
+        pCust.value = (Math.round(num(pInt.value) * (1 + markup / 100) * 2) / 2).toFixed(2).replace('.', ',');
+      }
+    };
+    pInt.addEventListener('input', syncPrice);
+    pAuto.addEventListener('change', syncPrice);
+    syncPrice();
+  }
+
   /* ---------- Buchhaltung: Kategorien passend zur Art ---------- */
   $$('[data-tx-type]').forEach(function (group) {
     var form = group.closest('form');

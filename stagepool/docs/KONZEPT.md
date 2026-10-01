@@ -38,6 +38,8 @@ Kalenderfarben: *frei*, *teilweise frei*, *reserviert* (nur angefragt), *gebucht
 | `locations` | Standorte |
 | `categories` | Kategorien mit Icon und Farbe |
 | `products` | Geräte: Kategorie, Standort, Besitzer, Preis/Tag, Kaution, Anzahl, Texte, Foto, sichtbar |
+| `product_stock` | Bestandsposten je Gerät: Eigentümer, Standort, Stückzahl (Summe = `products.quantity`) |
+| `booking_allocations` | Zuteilung: welche Bestandsposten mit welcher Stückzahl eine Buchungsposition bedienen |
 | `bookings` | Anfragen/Buchungen: Code, Token für den Kundenlink, Status, Zeitraum, Kunde, Summen |
 | `booking_items` | Positionen inkl. Preis-Schnappschuss (spätere Preisänderungen wirken nicht rückwirkend) |
 | `booking_log` | Verlauf (wer hat wann was geändert) |
@@ -60,6 +62,13 @@ Datumswerte werden als Text `JJJJ-MM-TT` gespeichert. Dadurch funktionieren dies
 Inspiriert von Club-, Festival- und Bühnentechnik-Seiten: **dunkle Bühne**, farbige **Lichtkegel** im Hero (sanft animiert, abschaltbar über „Bewegung reduzieren“), Neon-Verläufe Magenta → Violett → Cyan, kräftige Display-Schrift (*Unbounded*) mit gut lesbarer Grotesk (*Manrope*). Geräte ohne Foto bekommen einen leuchtenden Platzhalter in der Farbe ihrer Kategorie, sodass der Katalog auch ohne Fotos stimmig wirkt. Ein Laufband zeigt die Kategorien wie auf einem Festival-Line-up.
 
 Mobile first: alle Seiten funktionieren ab 360 px Breite. Der Belegungskalender scrollt horizontal, die Gerätenamen bleiben dabei stehen.
+
+## Preislisten & Bestand
+
+- `products.price_day` = Endkundenpreis, `products.price_internal` = Teampreis (0 = zurückgerechnet aus Endkundenpreis / (1 + Aufschlag)). `price_auto = 1`: Endkundenpreis = Teampreis × (1 + `customer_markup` %), gerundet auf 0,50 €.
+- Preisstufe einer Anfrage: eingeloggtes Teammitglied → `internal`, sonst `customer` (`bookings.price_tier`, `team_user_id`). Positionen speichern den angewandten Tagespreis.
+- Verfügbarkeit wird pro Gerät über die Gesamtzahl gerechnet; Standort-Sperren reduzieren die Kapazität um die Stückzahl an diesem Standort.
+- Zuteilung (`booking_allocate`): je Position die Bestandsposten mit ausreichend freien Exemplaren (inkl. Puffer und Sperren), bevorzugt bereits genutzte Standorte. Wird bei jeder Änderung der Positionen neu berechnet und kann manuell überschrieben werden.
 
 ## Belege & Buchhaltung
 

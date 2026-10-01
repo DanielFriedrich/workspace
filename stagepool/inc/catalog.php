@@ -178,7 +178,7 @@ function render_timeline(array $products, $from, $days, $admin = false)
         $link = $admin ? url('admin/produkt.php', array('id' => $pid)) : url('produkt.php', array('id' => $pid));
         $h .= '<div class="tl-row" data-product="' . $pid . '"><div class="tl-name"><a href="' . e($link) . '">' . e($p['name']) . '</a>'
             . ((int) $p['quantity'] > 1 ? '<span class="tl-qty">' . (int) $p['quantity'] . '×</span>' : '')
-            . ($p['location_name'] ? '<small>' . e($p['location_name']) . '</small>' : '') . '</div><div class="tl-cells">';
+            . ($p['location_name'] ? '<small>' . e(product_location_label($p)) . '</small>' : '') . '</div><div class="tl-cells">';
         foreach ($dates as $d) {
             $cell = $grid[$pid][$d];
             $w = (int) date('N', strtotime($d));

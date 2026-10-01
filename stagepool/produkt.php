@@ -11,6 +11,9 @@ if (!$p) {
 }
 $pid = (int) $p['id'];
 $period = period_get();
+$isTeam = price_tier() === 'internal';
+$unit = unit_price($p);
+$locs = product_locations($pid);
 
 // Zeitraum aus Kalender-Link übernehmen
 if (input('von') !== '' && input('bis') !== '') {
@@ -82,13 +85,14 @@ view('header', array('pageTitle' => $p['name'], 'active' => 'katalog', 'descript
       <p class="product-lead"><?= e($p['short_desc']) ?></p>
 
       <dl class="facts">
-        <div><dt>Mietpreis</dt><dd><b class="price-big"><?= money($p['price_day'], true) ?></b> 1. Tag<?php if (extra_day_percent() < 100): ?><br><small class="muted">+ <?= money(rental_price($p['price_day'], 2) - (float) $p['price_day'], true) ?> je weiterer Tag</small><?php endif; ?></dd></div>
+        <div><dt><?= $isTeam ? 'Teampreis (intern)' : 'Mietpreis' ?></dt><dd><b class="price-big"><?= money($unit, true) ?></b> 1. Tag<?php if (extra_day_percent() < 100): ?><br><small class="muted">+ <?= money(rental_price($unit, 2) - $unit, true) ?> je weiterer Tag</small><?php endif; ?></dd></div>
+        <?php if ($isTeam): ?><div><dt>Endkundenpreis</dt><dd><?= money($p['price_day'], true) ?> 1. Tag<br><small class="muted">nur zur Info – wird dir nicht berechnet</small></dd></div><?php endif; ?>
         <?php if ((float) $p['deposit'] > 0): ?><div><dt>Kaution</dt><dd><?= money($p['deposit'], true) ?> pro Stück</dd></div><?php endif; ?>
         <div><dt>Im Pool</dt><dd><?= plural($qty, 'Stück', 'Stück') ?></dd></div>
-        <div><dt>Standort</dt><dd><?= icon('pin') ?><?= e($p['location_name'] ? $p['location_name'] . ($p['location_city'] ? ', ' . $p['location_city'] : '') : 'nach Absprache') ?></dd></div>
+        <div><dt><?= count($locs) > 1 ? 'Standorte' : 'Standort' ?></dt><dd><?php if (!$locs): ?><?= icon('pin') ?>nach Absprache<?php endif; foreach ($locs as $l): ?><span class="loc-line"><?= icon('pin') ?><?= e($l['name'] . ($l['city'] ? ', ' . $l['city'] : '')) ?><?= count($locs) > 1 ? ' <small class="muted">(' . $l['qty'] . ')</small>' : '' ?></span><?php endforeach; ?></dd></div>
       </dl>
 
-      <form class="book-box" method="post" action="<?= e(url('warenkorb.php')) ?>" data-book-box data-price="<?= e((float) $p['price_day']) ?>" data-extra="<?= e(extra_day_percent()) ?>" data-max="<?= $qty ?>">
+      <form class="book-box" method="post" action="<?= e(url('warenkorb.php')) ?>" data-book-box data-price="<?= e($unit) ?>" data-extra="<?= e(extra_day_percent()) ?>" data-max="<?= $qty ?>">
         <?= csrf_field() ?>
         <input type="hidden" name="action" value="add">
         <input type="hidden" name="id" value="<?= $pid ?>">
@@ -107,7 +111,7 @@ view('header', array('pageTitle' => $p['name'], 'active' => 'katalog', 'descript
           <?php else: ?><input type="hidden" name="qty" value="1" data-qty><?php endif; ?>
           <div class="book-sum" data-sum>
             <?php if ($period): ?>
-              <span><?= plural($period['days'], 'Tag', 'Tage') ?></span><b><?= money(rental_price($p['price_day'], $period['days'])) ?></b>
+              <span><?= plural($period['days'], 'Tag', 'Tage') ?></span><b><?= money(rental_price($unit, $period['days'])) ?></b>
             <?php else: ?>
               <span>Zeitraum wählen</span><b>–</b>
             <?php endif; ?>
@@ -151,10 +155,12 @@ view('header', array('pageTitle' => $p['name'], 'active' => 'katalog', 'descript
           <?php foreach ($specs as $s): ?><div><dt><?= e($s[0]) ?></dt><dd><?= e($s[1]) ?></dd></div><?php endforeach; ?>
         </dl>
       <?php endif; ?>
-      <?php if ($p['location_name']): ?>
+      <?php if ($locs): ?>
         <h2>Abholung</h2>
-        <p class="pickup"><?= icon('pin') ?><span><b><?= e($p['location_name']) ?></b><br><?= e(trim($p['location_zip'] . ' ' . $p['location_city'])) ?><?= $p['location_contact'] ? '<br><span class="muted">' . e($p['location_contact']) . '</span>' : '' ?></span></p>
-        <p class="muted small">Die genaue Adresse und den Termin bekommst du mit der Bestätigung.</p>
+        <?php foreach ($locs as $lid => $l): $info = db_one('SELECT zip, city, contact FROM #__locations WHERE id = ?', array($lid)); ?>
+          <p class="pickup"><?= icon('pin') ?><span><b><?= e($l['name']) ?></b><?= count($locs) > 1 ? ' <span class="muted">· ' . plural($l['qty'], 'Stück', 'Stück') . '</span>' : '' ?><?php if ($info): ?><br><?= e(trim($info['zip'] . ' ' . $info['city'])) ?><?= $info['contact'] ? '<br><span class="muted">' . e($info['contact']) . '</span>' : '' ?><?php endif; ?></span></p>
+        <?php endforeach; ?>
+        <p class="muted small"><?= count($locs) > 1 ? 'Von welchem Standort deine Exemplare kommen, teilen wir dir mit der Bestätigung mit – zusammen mit Adresse und Termin.' : 'Die genaue Adresse und den Termin bekommst du mit der Bestätigung.' ?></p>
       <?php endif; ?>
     </section>
   </div>
@@ -167,7 +173,7 @@ view('header', array('pageTitle' => $p['name'], 'active' => 'katalog', 'descript
         <a class="mini-card" href="<?= e(url('produkt.php', array('id' => $r['id']))) ?>" style="--accent:<?= e(accent($r)) ?>">
           <?= product_media($r) ?>
           <span class="mini-name"><?= e($r['name']) ?></span>
-          <span class="mini-price"><?= money($r['price_day'], true) ?> / Tag</span>
+          <span class="mini-price"><?= money(unit_price($r), true) ?> / Tag<?= $isTeam ? ' (Team)' : '' ?></span>
         </a>
       <?php endforeach; ?>
     </div>

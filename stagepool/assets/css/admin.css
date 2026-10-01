@@ -248,3 +248,16 @@ a.kpi:hover { border-color: var(--line-2); }
 #liste .card-admin-head .filters select { min-width: 0; }
 .tx-links { display: inline-flex; gap: 6px; margin-left: 6px; vertical-align: middle; }
 .tx-links .icon-btn-sm { width: 28px; height: 28px; }
+.tag-team { gap: 4px; background: rgba(61, 220, 151, .14); color: var(--green); }
+.tag-team .icon { width: 13px; height: 13px; }
+.alloc-item { padding: 10px 0; border-top: 1px solid var(--line); display: grid; gap: 6px; }
+.alloc-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: .9rem; }
+.alloc-row > span { display: grid; gap: 1px; }
+.alloc-row small { display: inline-flex; align-items: center; gap: 3px; }
+.stock-table input, .stock-table select { min-height: 40px; }
+.stock-table td { vertical-align: middle; }
+.check-inline { margin: 6px 0 0; font-size: .85rem; } input[readonly] { opacity: .7; }
+.alloc-row > span { display: block; }
+.alloc-row > span > .icon { margin-right: 4px; }
+.alloc-row small { display: flex; margin-top: 2px; }
+.task-list li > span .task-name { white-space: normal; }

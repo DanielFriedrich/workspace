@@ -81,7 +81,7 @@ function cart_details()
     $items = cart_items();
     $period = period_get();
     $result = array('lines' => array(), 'total' => 0.0, 'deposit' => 0.0, 'days' => $period ? $period['days'] : 0,
-        'period' => $period, 'conflicts' => 0, 'locations' => array());
+        'period' => $period, 'conflicts' => 0, 'locations' => array(), 'tier' => price_tier(), 'customer_total' => 0.0);
     if (!$items) {
         return $result;
     }
@@ -105,7 +105,10 @@ function cart_details()
             cart_set($pid, $qty);
         }
         $days = $period ? $period['days'] : 1;
-        $line = $period ? rental_price($p['price_day'], $days, $qty) : (float) $p['price_day'] * $qty;
+        $unit = unit_price($p, $result['tier']);
+        $p['unit_price'] = $unit;
+        $line = $period ? rental_price($unit, $days, $qty) : $unit * $qty;
+        $result['customer_total'] += $period ? rental_price($p['price_day'], $days, $qty) : (float) $p['price_day'] * $qty;
         $avail = $period ? $free[$pid] : null;
         $ok = $avail === null || $avail >= $qty;
         if (!$ok) {
@@ -115,7 +118,8 @@ function cart_details()
             'deposit' => (float) $p['deposit'] * $qty);
         $result['total'] += $line;
         $result['deposit'] += (float) $p['deposit'] * $qty;
-        $locKey = $p['location_name'] ? $p['location_name'] : 'Nach Absprache';
+        $plocs = product_locations($pid);
+        $locKey = $plocs ? implode(' / ', array_map(function ($l) { return $l['name']; }, $plocs)) : ($p['location_name'] ?: 'Nach Absprache');
         if (!isset($result['locations'][$locKey])) {
             $result['locations'][$locKey] = 0;
         }

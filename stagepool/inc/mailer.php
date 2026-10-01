@@ -184,6 +184,20 @@ function booking_load($id)
           WHERE bi.booking_id = ? ORDER BY bi.id',
         array((int) $id)
     );
+    $allocs = booking_allocations($id);
+    foreach ($b['items'] as $k => $it) {
+        $names = array();
+        if (isset($allocs[(int) $it['id']])) {
+            foreach ($allocs[(int) $it['id']] as $a) {
+                if ($a['location_name']) {
+                    $names[$a['location_name']] = true;
+                }
+            }
+        }
+        if ($names) {
+            $b['items'][$k]['location_name'] = implode(' / ', array_keys($names));
+        }
+    }
     return $b;
 }
 
@@ -193,14 +207,14 @@ function booking_summary_text(array $b)
     $lines[] = 'Anfrage-Nr.: ' . $b['code'];
     $lines[] = 'Zeitraum:    ' . period_de($b['start_date'], $b['end_date']) . ' (' . plural(days_inclusive($b['start_date'], $b['end_date']), 'Miettag', 'Miettage') . ')';
     $lines[] = 'Status:      ' . status_label($b['status']);
+    if (isset($b['price_tier']) && $b['price_tier'] === 'internal') {
+        $lines[] = 'Preisliste:  Interne Vermietung (Teampreise)';
+    }
     $lines[] = '';
     $lines[] = 'Geräte:';
-    $locs = array();
+    $locs = booking_pickup_locations($b['id']);
     foreach ($b['items'] as $it) {
         $lines[] = sprintf('  %d × %s – %s', $it['qty'], $it['product_name'], money($it['line_total']));
-        if ($it['location_name']) {
-            $locs[$it['location_name']] = trim($it['location_name'] . ', ' . $it['street'] . ', ' . $it['zip'] . ' ' . $it['city'], ', ');
-        }
     }
     $lines[] = '';
     $lines[] = 'Mietpreis gesamt: ' . money($b['total']);

@@ -73,7 +73,7 @@ admin_header('Anfragen & Buchungen', 'buchungen');
   <?php foreach ($rows as $b): $late = $b['status'] === 'picked_up' && $b['end_date'] < today(); ?>
     <tr class="row-link<?= $late ? ' is-late' : '' ?>" data-href="<?= e(url('admin/buchung.php', array('id' => $b['id']))) ?>">
       <td><a class="code" href="<?= e(url('admin/buchung.php', array('id' => $b['id']))) ?>"><?= e($b['code']) ?></a></td>
-      <td><?= status_badge($b['status']) ?><?= $late ? ' <span class="status status-late">überfällig</span>' : '' ?></td>
+      <td><?= status_badge($b['status']) ?><?= $b['price_tier'] === 'internal' ? ' <span class="tag tag-team">Intern</span>' : '' ?><?= $late ? ' <span class="status status-late">überfällig</span>' : '' ?></td>
       <td><?= e(period_de($b['start_date'], $b['end_date'])) ?></td>
       <td><b><?= e($b['customer_name']) ?></b><?= $b['organisation'] ? '<br><small class="muted">' . e($b['organisation']) . '</small>' : '' ?></td>
       <td><?= e($b['event_type']) ?></td>

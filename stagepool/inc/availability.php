@@ -37,18 +37,36 @@ function avail_load($from, $to, $excludeBookingId = 0)
         $byProduct[(int) $it['product_id']][] = $it;
     }
     $blocks = db_all('SELECT * FROM #__blocks WHERE start_date <= ? AND end_date >= ?', array($to, $from));
-    return array('items' => $byProduct, 'blocks' => $blocks, 'buffer' => $buf);
+    // Stückzahl je Gerät und Standort (für Standort-Sperren)
+    $stock = array();
+    foreach (db_all('SELECT product_id, location_id, SUM(quantity) AS qty FROM #__product_stock GROUP BY product_id, location_id') as $r) {
+        $stock[(int) $r['product_id']][(int) $r['location_id']] = (int) $r['qty'];
+    }
+    return array('items' => $byProduct, 'blocks' => $blocks, 'buffer' => $buf, 'stock' => $stock);
 }
 
-/** Sperrzeiten, die ein Produkt betreffen. */
-function avail_blocks_for(array $product, array $blocks)
+/**
+ * Sperrzeiten, die ein Produkt betreffen. 'cap' = gesperrte Stückzahl
+ * (null = komplett gesperrt; bei Standort-Sperren nur die Exemplare dort).
+ */
+function avail_blocks_for(array $product, array $blocks, array $stockByLocation = null)
 {
     $out = array();
     foreach ($blocks as $bl) {
-        if ($bl['scope'] === 'all'
-            || ($bl['scope'] === 'location' && (int) $bl['ref_id'] === (int) $product['location_id'] && $product['location_id'])
-            || ($bl['scope'] === 'product' && (int) $bl['ref_id'] === (int) $product['id'])) {
+        if ($bl['scope'] === 'all' || ($bl['scope'] === 'product' && (int) $bl['ref_id'] === (int) $product['id'])) {
+            $bl['cap'] = null;
             $out[] = $bl;
+        } elseif ($bl['scope'] === 'location') {
+            $lid = (int) $bl['ref_id'];
+            if ($stockByLocation) {
+                if (!empty($stockByLocation[$lid])) {
+                    $bl['cap'] = (int) $stockByLocation[$lid];
+                    $out[] = $bl;
+                }
+            } elseif ($lid === (int) $product['location_id'] && $product['location_id']) {
+                $bl['cap'] = null;
+                $out[] = $bl;
+            }
         }
     }
     return $out;
@@ -71,18 +89,31 @@ function avail_grid(array $products, $from, $to, $excludeBookingId = 0, $data = 
         $pid = (int) $p['id'];
         $qty = max(1, (int) $p['quantity']);
         $items = isset($data['items'][$pid]) ? $data['items'][$pid] : array();
-        $blocks = avail_blocks_for($p, $data['blocks']);
+        $blocks = avail_blocks_for($p, $data['blocks'], isset($data['stock'][$pid]) ? $data['stock'][$pid] : null);
         foreach ($items as $k => $it) {
             $items[$k]['b_from'] = date_add_days($it['start_date'], -$buf);
             $items[$k]['b_to'] = date_add_days($it['end_date'], $buf);
         }
         foreach ($days as $d) {
             $blockedBy = null;
+            $reduce = 0;
+            $reducedLocs = array();
             foreach ($blocks as $bl) {
                 if ($bl['start_date'] <= $d && $bl['end_date'] >= $d) {
-                    $blockedBy = $bl;
-                    break;
+                    if ($bl['cap'] === null) {
+                        $blockedBy = $bl;
+                        break;
+                    }
+                    if (!isset($reducedLocs[(int) $bl['ref_id']])) {
+                        $reducedLocs[(int) $bl['ref_id']] = true;
+                        $reduce += $bl['cap'];
+                        $blockedBy = $blockedBy ?: array('reason' => $bl['reason'], 'partial' => true);
+                    }
                 }
+            }
+            $cap = $blockedBy && empty($blockedBy['partial']) ? 0 : max(0, $qty - $reduce);
+            if ($cap <= 0 && $blockedBy) {
+                $blockedBy['partial'] = false;
             }
             $usedReal = 0;
             $usedBuf = 0;
@@ -104,14 +135,14 @@ function avail_grid(array $products, $from, $to, $excludeBookingId = 0, $data = 
                     );
                 }
             }
-            if ($blockedBy) {
+            if ($blockedBy && empty($blockedBy['partial'])) {
                 $state = 'blocked';
                 $free = 0;
             } else {
-                $free = max(0, $qty - $usedBuf);
-                if ($usedBuf >= $qty) {
-                    $state = $usedReal >= $qty ? ($firm ? 'booked' : 'requested') : 'buffer';
-                } elseif ($usedBuf > 0) {
+                $free = max(0, $cap - $usedBuf);
+                if ($usedBuf >= $cap) {
+                    $state = $usedReal >= $cap ? ($firm ? 'booked' : 'requested') : 'buffer';
+                } elseif ($usedBuf > 0 || $cap < $qty) {
                     $state = 'partial';
                 } else {
                     $state = 'free';

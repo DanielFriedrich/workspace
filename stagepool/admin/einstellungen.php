@@ -17,6 +17,7 @@ $sections = array(
         'lead_days'   => array('Vorlauf in Tagen', 'number', 'Frühester Mietbeginn ab heute. 0 = gleicher Tag, 1 = ab morgen'),
         'min_days'    => array('Mindestmietdauer (Tage)', 'number'),
         'max_days'    => array('Maximale Mietdauer online (Tage)', 'number'),
+        'customer_markup' => array('Aufschlag Endkundenpreis auf internen Teampreis (%)', 'number', 'Für Geräte mit „Endkundenpreis automatisch“. Beispiel 25: intern 20 € → Endkunde 25 €. Änderungen passen diese Preise sofort an.'),
         'extra_day_percent' => array('Preis jedes weiteren Miettags (% vom Tagespreis)', 'number', '50 = 1 Tag 100 €, 2 Tage 150 €, 3 Tage 200 €. 100 = jeder Tag voller Preis.'),
         'price_note'  => array('Hinweis zu Preisen', 'text'),
     )),
@@ -87,6 +88,13 @@ if (is_post()) {
             $value = trim(chunk_split(strtoupper(preg_replace('/\s+/', '', $value)), 4, ' '));
         }
         setting_set($key, $value);
+    }
+    if ($tab === 'regeln' && isset($_POST['customer_markup'])) {
+        settings_all(true);
+        $n = reprice_auto_products();
+        if ($n) {
+            flash('success', plural($n, 'Endkundenpreis wurde', 'Endkundenpreise wurden') . ' an den Aufschlag angepasst.');
+        }
     }
     flash('success', 'Einstellungen gespeichert.');
     redirect('admin/einstellungen.php', array('tab' => $tab));

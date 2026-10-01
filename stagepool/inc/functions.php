@@ -33,6 +33,7 @@ function settings_defaults()
         'max_days'        => '21',
         'price_note'      => 'Privatvermietung, alle Preise sind Endpreise.',
         'extra_day_percent' => '50',
+        'customer_markup' => '25',
         // Firma, Angebote & Rechnungen
         'company_name'    => '',
         'company_address' => '',

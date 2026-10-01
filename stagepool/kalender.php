@@ -17,7 +17,7 @@ foreach (catalog_products() as $p) {
     if ($catSlug !== '' && $p['category_slug'] !== $catSlug) {
         continue;
     }
-    if ($locId && (int) $p['location_id'] !== $locId) {
+    if ($locId && !product_at_location($p, $locId)) {
         continue;
     }
     $products[] = $p;

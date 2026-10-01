@@ -20,8 +20,8 @@ $owner = (int) input('besitzer');
 $rows = array();
 foreach (catalog_products(false) as $p) {
     if ($cat && (int) $p['category_id'] !== $cat) continue;
-    if ($loc && (int) $p['location_id'] !== $loc) continue;
-    if ($owner && (int) $p['owner_id'] !== $owner) continue;
+    if ($loc && !product_at_location($p, $loc)) continue;
+    if ($owner && !product_has_owner($p, $owner)) continue;
     if ($q !== '' && strpos(lower($p['name'] . ' ' . $p['short_desc']), lower($q)) === false) continue;
     $rows[] = $p;
 }
@@ -38,14 +38,14 @@ admin_header('Geräte', 'produkte');
     <label class="search"><?= icon('search') ?><input type="search" name="q" value="<?= e($q) ?>" placeholder="Gerät suchen …"></label>
     <select name="kategorie" data-autosubmit><option value="">Alle Kategorien</option><?php foreach (categories_all() as $c): ?><?= opt($c['id'], $cat, $c['name']) ?><?php endforeach; ?></select>
     <select name="standort" data-autosubmit><option value="">Alle Standorte</option><?php foreach (locations_all(false) as $l): ?><?= opt($l['id'], $loc, $l['name']) ?><?php endforeach; ?></select>
-    <select name="besitzer" data-autosubmit><option value="">Alle Besitzer</option><?php foreach (users_all() as $u): ?><?= opt($u['id'], $owner, $u['name']) ?><?php endforeach; ?></select>
+    <select name="besitzer" data-autosubmit><option value="">Alle Eigentümer</option><?php foreach (users_all() as $u): ?><?= opt($u['id'], $owner, $u['name']) ?><?php endforeach; ?></select>
   </form>
   <a class="btn btn-primary btn-sm" href="<?= e(url('admin/produkt.php')) ?>"><?= icon('plus') ?>Neues Gerät</a>
 </div>
 
 <div class="table-wrap">
 <table class="table table-admin">
-  <thead><tr><th></th><th>Gerät</th><th>Kategorie</th><th>Standort</th><th>Besitzer</th><th class="num">Stück</th><th class="num">Preis/Tag</th><th class="num">Buchungen</th><th>Sichtbar</th></tr></thead>
+  <thead><tr><th></th><th>Gerät</th><th>Kategorie</th><th>Standort</th><th>Eigentümer</th><th class="num">Stück</th><th class="num">Endkunde / intern</th><th class="num">Buchungen</th><th>Sichtbar</th></tr></thead>
   <tbody>
   <?php if (!$rows): ?><tr><td colspan="9" class="muted">Keine Geräte gefunden.</td></tr><?php endif; ?>
   <?php foreach ($rows as $p): ?>
@@ -53,10 +53,10 @@ admin_header('Geräte', 'produkte');
       <td class="thumb-cell"><?= product_media($p, 'thumb') ?></td>
       <td><a href="<?= e(url('admin/produkt.php', array('id' => $p['id']))) ?>"><b><?= e($p['name']) ?></b></a><?= (int) $p['featured'] ? ' <span class="tag">Highlight</span>' : '' ?></td>
       <td><?= e($p['category_name']) ?></td>
-      <td><?= e($p['location_name'] ?: '–') ?></td>
-      <td><?= e($p['owner_name'] ?: '–') ?></td>
+      <td><?= e(implode(', ', array_map(function ($l) { return $l['name']; }, product_locations($p['id']))) ?: '–') ?></td>
+      <td><?= e(product_owner_label($p)) ?></td>
       <td class="num"><?= (int) $p['quantity'] ?></td>
-      <td class="num"><?= money($p['price_day']) ?></td>
+      <td class="num"><?= money($p['price_day']) ?><br><small class="muted">intern <?= money(internal_price($p)) ?><?= (float) $p['price_internal'] > 0 ? '' : '*' ?></small></td>
       <td class="num"><?= isset($upcoming[(int) $p['id']]) ? $upcoming[(int) $p['id']] : 0 ?></td>
       <td>
         <form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="toggle"><input type="hidden" name="id" value="<?= (int) $p['id'] ?>"><input type="hidden" name="return" value="<?= e(current_url()) ?>">
@@ -68,5 +68,5 @@ admin_header('Geräte', 'produkte');
   </tbody>
 </table>
 </div>
-<p class="muted small">Unsichtbare Geräte erscheinen nicht auf der Website, bestehende Buchungen bleiben erhalten.</p>
+<p class="muted small">* interner Preis noch nicht gepflegt – zurückgerechnet aus Endkundenpreis − <?= e(str_replace('.', ',', (string) customer_markup())) ?> % Aufschlag. Unsichtbare Geräte erscheinen nicht auf der Website, bestehende Buchungen bleiben erhalten.</p>
 <?php admin_footer(); ?>

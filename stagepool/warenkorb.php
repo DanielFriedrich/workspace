@@ -166,7 +166,14 @@ if (is_post()) {
             }
             redirect('warenkorb.php');
         }
-        $id = booking_create($form, $wanted, $period['from'], $period['to']);
+        $teamUser = current_user();
+        if ($teamUser) {
+            // Teammitglied mietet zum internen Preis
+            $form['team_user_id'] = (int) $teamUser['id'];
+            $id = booking_create($form, $wanted, $period['from'], $period['to'], 'requested', 'team', 'internal');
+        } else {
+            $id = booking_create($form, $wanted, $period['from'], $period['to']);
+        }
         booking_unlock($lock);
 
         $booking = booking_load($id);
@@ -185,6 +192,11 @@ if (is_post()) {
 $cart = cart_details();
 $period = $cart['period'];
 $form = isset($_SESSION['sp_form']) ? $_SESSION['sp_form'] : array();
+$isTeam = $cart['tier'] === 'internal';
+if ($isTeam && !$form) {
+    $me = current_user();
+    $form = array('customer_name' => $me['name'], 'email' => $me['email'], 'phone' => $me['phone']);
+}
 $fv = function ($k, $d = '') use ($form) {
     return isset($form[$k]) ? $form[$k] : $d;
 };
@@ -197,6 +209,9 @@ view('header', array('pageTitle' => 'Deine Anfrage', 'active' => 'warenkorb'));
   <h1>Dein Event-Paket</h1>
   <p class="lead">Prüfe Zeitraum und Geräte, dann schick uns deine unverbindliche Anfrage. Ab dem Absenden ist alles für dich reserviert.</p>
 </section>
+<?php if ($isTeam): ?>
+<div class="wrap"><p class="team-note"><?= icon('users') ?><span><b>Interne Vermietung:</b> Du bist als Team angemeldet. Berechnet werden die <b>Teampreise</b>, die Endkundenpreise siehst du nur zum Vergleich. Die Anfrage erscheint im Backend als „Intern“. Stellst du für einen eigenen Kunden zusammen, trag ihn unter „Für Kunde / Projekt“ ein.</span></p></div>
+<?php endif; ?>
 
 <div class="wrap cart-layout">
   <div class="cart-main">
@@ -237,7 +252,7 @@ view('header', array('pageTitle' => 'Deine Anfrage', 'active' => 'warenkorb'));
               <a class="cart-thumb" href="<?= e(url('produkt.php', array('id' => $p['id']))) ?>"><?= product_media($p) ?></a>
               <div class="cart-info">
                 <a class="cart-name" href="<?= e(url('produkt.php', array('id' => $p['id']))) ?>"><?= e($p['name']) ?></a>
-                <span class="muted small"><?= icon('pin') ?><?= e($p['location_name'] ?: 'nach Absprache') ?> · <?= money($p['price_day'], true) ?> / Tag</span>
+                <span class="muted small"><?= icon('pin') ?><?= e(product_location_label($p)) ?> · <?= money($p['unit_price'], true) ?> / Tag<?= $isTeam ? ' <span class="muted">(Endkunde ' . money($p['price_day'], true) . ')</span>' : '' ?></span>
                 <?php if (!$line['ok']): ?>
                   <span class="conflict"><?= icon('alert') ?><?= $line['free'] > 0 ? 'Nur ' . $line['free'] . '× frei im Zeitraum – bitte Anzahl anpassen.' : 'Im Zeitraum belegt – bitte entfernen oder Zeitraum ändern.' ?></span>
                 <?php elseif ($period): ?>
@@ -254,7 +269,7 @@ view('header', array('pageTitle' => 'Deine Anfrage', 'active' => 'warenkorb'));
                   <span class="muted">1×</span><input type="hidden" name="qty[<?= (int) $p['id'] ?>]" value="1">
                 <?php endif; ?>
               </div>
-              <div class="cart-sum"><?= $period ? money($line['line']) : money($p['price_day'] * $line['qty']) . '<small>/ Tag</small>' ?></div>
+              <div class="cart-sum"><?= $period ? money($line['line']) : money($p['unit_price'] * $line['qty']) . '<small>/ Tag</small>' ?></div>
               <button class="icon-btn icon-btn-sm" type="submit" form="rm<?= (int) $p['id'] ?>" aria-label="<?= e($p['name']) ?> entfernen"><?= icon('trash') ?></button>
             </div>
           <?php endforeach; ?>
@@ -277,7 +292,7 @@ view('header', array('pageTitle' => 'Deine Anfrage', 'active' => 'warenkorb'));
         <div class="hp" aria-hidden="true"><label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
         <div class="form-grid">
           <label class="field"><span>Name *</span><input type="text" name="name" value="<?= e($fv('customer_name')) ?>" autocomplete="name" required maxlength="160"></label>
-          <label class="field"><span>Verein / Firma</span><input type="text" name="organisation" value="<?= e($fv('organisation')) ?>" autocomplete="organization" maxlength="160"></label>
+          <label class="field"><span><?= $isTeam ? 'Für Kunde / Projekt' : 'Verein / Firma' ?></span><input type="text" name="organisation" value="<?= e($fv('organisation')) ?>" autocomplete="organization" maxlength="160"></label>
           <label class="field"><span>E-Mail *</span><input type="email" name="email" value="<?= e($fv('email')) ?>" autocomplete="email" required maxlength="190"></label>
           <label class="field"><span>Telefon *</span><input type="tel" name="phone" value="<?= e($fv('phone')) ?>" autocomplete="tel" required maxlength="40"></label>
           <label class="field field-wide"><span>Rechnungsadresse <small>(optional, für Angebot &amp; Rechnung)</small></span><input type="text" name="customer_address" value="<?= e($fv('customer_address')) ?>" autocomplete="street-address" maxlength="255" placeholder="Straße Nr., PLZ Ort"></label>
@@ -318,7 +333,8 @@ view('header', array('pageTitle' => 'Deine Anfrage', 'active' => 'warenkorb'));
         <?php if ($cart['deposit'] > 0): ?><div><dt>Kaution <small>(bei Abholung)</small></dt><dd><?= money($cart['deposit']) ?></dd></div><?php endif; ?>
         <div><dt>Übergabe-Puffer</dt><dd>kostenlos</dd></div>
       </dl>
-      <div class="summary-total"><span>Mietpreis gesamt</span><b><?= $period ? money($cart['total']) : '–' ?></b></div>
+      <div class="summary-total"><span><?= $isTeam ? 'Teampreis gesamt' : 'Mietpreis gesamt' ?></span><b><?= $period ? money($cart['total']) : '–' ?></b></div>
+      <?php if ($isTeam && $period): ?><p class="summary-compare">Endkundenpreis wäre <b><?= money($cart['customer_total']) ?></b> · Differenz <?= money($cart['customer_total'] - $cart['total']) ?></p><?php endif; ?>
       <p class="muted small"><?= e(pricing_hint()) ?> <?= e(setting('price_note')) ?></p>
       <?php if ($cart['locations']): ?>
         <h3>Abholung</h3>

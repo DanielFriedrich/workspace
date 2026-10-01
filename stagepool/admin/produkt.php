@@ -23,6 +23,7 @@ if (is_post()) {
         }
         delete_upload($p['image']);
         db_exec("DELETE FROM #__blocks WHERE scope = 'product' AND ref_id = ?", array($p['id']));
+        db_exec('DELETE FROM #__product_stock WHERE product_id = ?', array($p['id']));
         db_exec('DELETE FROM #__products WHERE id = ?', array($p['id']));
         flash('success', 'Gerät gelöscht.');
         redirect('admin/produkte.php');
@@ -37,6 +38,10 @@ if (is_post()) {
         $copy['created_at'] = now();
         $copy['updated_at'] = now();
         $newId = db_insert('products', $copy);
+        foreach (db_all('SELECT owner_id, location_id, quantity, note, sort FROM #__product_stock WHERE product_id = ?', array($p['id'])) as $s) {
+            $s['product_id'] = $newId;
+            db_insert('product_stock', $s);
+        }
         flash('success', 'Kopie angelegt (noch unsichtbar). Bitte anpassen und sichtbar schalten.');
         redirect('admin/produkt.php', array('id' => $newId));
     }
@@ -45,20 +50,22 @@ if (is_post()) {
         $data = array(
             'name' => (string) input('name'),
             'category_id' => (int) input('category_id') ?: null,
-            'location_id' => (int) input('location_id') ?: null,
-            'owner_id' => (int) input('owner_id') ?: null,
             'short_desc' => (string) input('short_desc'),
             'description' => (string) input('description'),
             'specs' => (string) input('specs'),
+            'price_internal' => parse_money(input('price_internal')),
+            'price_auto' => input('price_auto') === '1' ? 1 : 0,
             'price_day' => parse_money(input('price_day')),
             'deposit' => parse_money(input('deposit')),
-            'quantity' => max(1, (int) input('quantity', 1)),
             'internal_note' => (string) input('internal_note'),
             'active' => input('active') === '1' ? 1 : 0,
             'featured' => input('featured') === '1' ? 1 : 0,
             'sort' => (int) input('sort'),
             'updated_at' => now(),
         );
+        if ($data['price_auto'] && $data['price_internal'] > 0) {
+            $data['price_day'] = markup_price($data['price_internal']);
+        }
         if ($data['name'] === '') {
             flash('error', 'Bitte einen Namen angeben.');
             $_SESSION['sp_product_form'] = $data;
@@ -70,7 +77,26 @@ if (is_post()) {
         } else {
             $data['created_at'] = now();
             $data['image'] = '';
+            $data['quantity'] = 0;
             $pid = db_insert('products', $data);
+        }
+        // Bestand je Eigentümer und Standort
+        $stockRows = array();
+        $sIds = isset($_POST['stock_id']) && is_array($_POST['stock_id']) ? $_POST['stock_id'] : array();
+        foreach ($sIds as $i => $sid) {
+            $stockRows[] = array(
+                'id' => (int) $sid,
+                'owner_id' => isset($_POST['stock_owner'][$i]) ? (int) $_POST['stock_owner'][$i] : 0,
+                'location_id' => isset($_POST['stock_location'][$i]) ? (int) $_POST['stock_location'][$i] : 0,
+                'quantity' => isset($_POST['stock_qty'][$i]) ? (int) $_POST['stock_qty'][$i] : 0,
+                'note' => isset($_POST['stock_note'][$i]) ? (string) $_POST['stock_note'][$i] : '',
+            );
+        }
+        foreach (stock_save($pid, $stockRows) as $note) {
+            flash('error', $note);
+        }
+        if (!(int) db_value('SELECT quantity FROM #__products WHERE id = ?', array($pid))) {
+            flash('error', 'Achtung: Das Gerät hat keinen Bestand (0 Stück) und kann nicht gebucht werden. Bitte unter „Bestand“ Stückzahl, Eigentümer und Standort eintragen.');
         }
         $old = $p ? $p['image'] : '';
         if (input('remove_image') === '1' && $old) {
@@ -108,6 +134,10 @@ $bookings = $p ? db_all(
 ) : array();
 $blocks = $p ? db_all("SELECT * FROM #__blocks WHERE end_date >= ? AND ((scope = 'product' AND ref_id = ?) OR (scope = 'location' AND ref_id = ?) OR scope = 'all') ORDER BY start_date",
     array(today(), $p['id'], (int) $p['location_id'])) : array();
+if ($p) {
+    $locIds = array_keys(product_locations($p['id']));
+    $blocks = db_all("SELECT * FROM #__blocks WHERE end_date >= ? AND ((scope = 'product' AND ref_id = ?) OR scope = 'all'" . ($locIds ? " OR (scope = 'location' AND ref_id IN (" . implode(',', array_map('intval', $locIds)) . "))" : '') . ') ORDER BY start_date', array(today(), $p['id']));
+}
 
 admin_header($p ? $p['name'] : 'Neues Gerät', 'produkte');
 ?>
@@ -118,11 +148,10 @@ admin_header($p ? $p['name'] : 'Neues Gerät', 'produkte');
     <div class="form-grid">
       <label class="field field-wide"><span>Name *</span><input type="text" name="name" value="<?= e($v('name')) ?>" required maxlength="160"></label>
       <label class="field"><span>Kategorie</span><select name="category_id"><option value="">–</option><?php foreach (categories_all() as $c): ?><?= opt($c['id'], $v('category_id'), $c['name']) ?><?php endforeach; ?></select></label>
-      <label class="field"><span>Standort</span><select name="location_id"><option value="">nach Absprache</option><?php foreach (locations_all(false) as $l): ?><?= opt($l['id'], $v('location_id'), $l['name']) ?><?php endforeach; ?></select></label>
-      <label class="field"><span>Preis pro Tag (€) *</span><input type="text" name="price_day" inputmode="decimal" value="<?= e(number_format((float) $v('price_day', 0), 2, ',', '')) ?>" required></label>
+      <label class="field"><span>Interner Teampreis pro Tag (€)</span><input type="text" name="price_internal" inputmode="decimal" value="<?= e(number_format((float) $v('price_internal', 0), 2, ',', '')) ?>" data-price-internal><small class="muted">Für Vermietungen innerhalb des Teams. 0 = aus Endkundenpreis zurückrechnen.</small></label>
+      <label class="field"><span>Endkundenpreis pro Tag (€) *</span><input type="text" name="price_day" inputmode="decimal" value="<?= e(number_format((float) $v('price_day', 0), 2, ',', '')) ?>" required data-price-customer data-markup="<?= e(customer_markup()) ?>">
+        <label class="check check-inline"><input type="checkbox" name="price_auto" value="1"<?= (int) $v('price_auto', $p ? 0 : 1) ? ' checked' : '' ?> data-price-auto><span>automatisch: intern + <?= e(str_replace('.', ',', (string) customer_markup())) ?> % (gerundet auf 0,50 €)</span></label></label>
       <label class="field"><span>Kaution pro Stück (€)</span><input type="text" name="deposit" inputmode="decimal" value="<?= e(number_format((float) $v('deposit', 0), 2, ',', '')) ?>"></label>
-      <label class="field"><span>Anzahl im Pool</span><input type="number" name="quantity" min="1" max="999" value="<?= (int) $v('quantity', 1) ?>"></label>
-      <label class="field"><span>Besitzer / Verantwortlich</span><select name="owner_id"><option value="">–</option><?php foreach (users_all() as $u): ?><?= opt($u['id'], $v('owner_id', $p ? '' : current_user()['id']), $u['name']) ?><?php endforeach; ?></select></label>
       <label class="field field-wide"><span>Kurzbeschreibung (Katalogkarte)</span><input type="text" name="short_desc" value="<?= e($v('short_desc')) ?>" maxlength="255"></label>
       <label class="field field-wide"><span>Beschreibung</span><textarea name="description" rows="6"><?= e($v('description')) ?></textarea><small class="muted">Absätze mit Leerzeile, Listen mit „- “, **fett**.</small></label>
       <label class="field field-wide"><span>Technische Daten</span><textarea name="specs" rows="5" placeholder="Leistung: 1500 W&#10;Gewicht: 6 kg"><?= e($v('specs')) ?></textarea><small class="muted">Eine Angabe pro Zeile, Format „Bezeichnung: Wert“.</small></label>
@@ -132,6 +161,37 @@ admin_header($p ? $p['name'] : 'Neues Gerät', 'produkte');
     <div class="check-row">
       <label class="check"><input type="checkbox" name="active" value="1"<?= (int) $v('active', 1) ? ' checked' : '' ?>><span>Auf der Website sichtbar</span></label>
       <label class="check"><input type="checkbox" name="featured" value="1"<?= (int) $v('featured', 0) ? ' checked' : '' ?>><span>Als Highlight oben zeigen</span></label>
+    </div>
+
+    <h3>Bestand: Wem gehört was, wo steht es?</h3>
+    <p class="muted small">Gleiche Geräte von mehreren Personen oder an mehreren Standorten hier als eigene Zeilen eintragen. Kunden sehen ein Gerät mit der Gesamtzahl; bei jeder Buchung wird automatisch zugeteilt, wessen Exemplare rausgehen.</p>
+    <?php
+    $stocks = $p ? stock_rows($p['id']) : array();
+    $users = users_all();
+    $locsAll = locations_all(false);
+    $blank = array('id' => 0, 'owner_id' => $p ? '' : current_user()['id'], 'location_id' => '', 'quantity' => '', 'note' => '');
+    $stocks[] = $blank;
+    if (count($stocks) < 3) {
+        $blank['owner_id'] = '';
+        $stocks[] = $blank;
+    }
+    $stockTotal = 0;
+    ?>
+    <div class="table-wrap table-wrap-flat">
+    <table class="table stock-table">
+      <thead><tr><th>Eigentümer</th><th>Standort</th><th class="num">Stück</th><th>Notiz</th></tr></thead>
+      <tbody>
+      <?php foreach ($stocks as $s): $stockTotal += (int) $s['quantity']; ?>
+        <tr>
+          <td><input type="hidden" name="stock_id[]" value="<?= (int) $s['id'] ?>"><select name="stock_owner[]"><option value="">Gemeinsamer Pool</option><?php foreach ($users as $u): ?><?= opt($u['id'], $s['owner_id'], $u['name']) ?><?php endforeach; ?></select></td>
+          <td><select name="stock_location[]"><option value="">nach Absprache</option><?php foreach ($locsAll as $l): ?><?= opt($l['id'], $s['location_id'], $l['name']) ?><?php endforeach; ?></select></td>
+          <td class="num"><input class="input-qty" type="number" name="stock_qty[]" min="0" max="999" value="<?= $s['id'] ? (int) $s['quantity'] : '' ?>" placeholder="<?= $s['id'] ? '' : 'neu' ?>"></td>
+          <td><input type="text" name="stock_note[]" value="<?= e($s['note']) ?>" placeholder="z. B. Seriennr., Zustand"></td>
+        </tr>
+      <?php endforeach; ?>
+      </tbody>
+      <tfoot><tr><th colspan="2">Gesamt im Pool</th><th class="num"><?= (int) $stockTotal ?></th><th class="muted small">Stück 0 = Zeile entfernen</th></tr></tfoot>
+    </table>
     </div>
 
     <h3>Bild</h3>

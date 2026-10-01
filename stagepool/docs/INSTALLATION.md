@@ -72,7 +72,7 @@ Unter `https://verleih.eure-domain.de/admin/` anmelden und dann:
 1. **Einstellungen → Allgemein:** Name der Plattform, Kontakt-E-Mail, Telefon, Benachrichtigungs-Adresse(n)
 2. **Einstellungen → Firma & Rechnungen:** Name, Anschrift, Steuernummer, Bankverbindung (erscheinen auf Angeboten und Rechnungen)
 3. **Einstellungen → Rechtliches:** **Impressum** und **Datenschutzerklärung** vollständig ausfüllen (in Deutschland Pflicht!)
-4. **Einstellungen → Buchungsregeln:** Puffertage (Standard 1), Preis weiterer Miettage (Standard 50 %), Vorlauf, Mindest- und Höchstdauer
+4. **Einstellungen → Buchungsregeln:** Puffertage (Standard 1), Aufschlag Endkundenpreis (Standard 25 %), Preis weiterer Miettage (Standard 50 %), Vorlauf, Mindest- und Höchstdauer
 5. **Einstellungen → E-Mail-Versand** einrichten und eine Testmail senden (siehe Abschnitt 6)
 6. **Standorte** anlegen, an denen die Geräte stehen
 7. **Team:** Zugänge für alle anlegen, die Material einbringen

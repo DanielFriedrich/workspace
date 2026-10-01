@@ -45,6 +45,9 @@ $nameParts = preg_split('/(?<=[a-zäöü])(?=[A-ZÄÖÜ])/u', $siteName, 2);
         <?= icon('bag') ?><span class="cart-label">Anfrage</span>
         <span class="cart-count<?= $hdrCart ? ' has-items' : '' ?>" data-cart-count><?= (int) $hdrCart ?></span>
       </a>
+      <?php if ($hdrUser = current_user()): ?>
+        <a class="team-chip" href="<?= e(url('admin/')) ?>" title="Du bist als Team angemeldet – es gelten die internen Teampreise."><?= icon('users') ?><span>Teampreise · <?= e(strtok($hdrUser['name'], ' ')) ?></span></a>
+      <?php endif; ?>
       <button class="nav-toggle" type="button" aria-controls="main-nav" aria-expanded="false" aria-label="Menü"><?= icon('menu') ?></button>
     </div>
   </div>

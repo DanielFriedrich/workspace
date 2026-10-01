@@ -23,10 +23,15 @@ function booking_log($bookingId, $action, $note = '')
 /**
  * Schreibt die Positionen einer Buchung neu und berechnet die Summen.
  * $wanted = [product_id => qty]
+ * $tier = 'customer' | 'internal' (null = aus der Buchung lesen)
+ * $reprice = true: alle Positionen mit aktuellem Preis neu berechnen
  */
-function booking_write_items($bookingId, array $wanted, $from, $to)
+function booking_write_items($bookingId, array $wanted, $from, $to, $tier = null, $reprice = false)
 {
     $days = days_inclusive($from, $to);
+    if ($tier === null) {
+        $tier = (string) db_value('SELECT price_tier FROM #__bookings WHERE id = ?', array((int) $bookingId)) ?: 'customer';
+    }
     $existing = array();
     foreach (db_all('SELECT * FROM #__booking_items WHERE booking_id = ?', array((int) $bookingId)) as $it) {
         $existing[(int) $it['product_id']] = $it;
@@ -37,7 +42,7 @@ function booking_write_items($bookingId, array $wanted, $from, $to)
     if ($wanted) {
         $ids = array_map('intval', array_keys($wanted));
         $products = array();
-        foreach (db_all('SELECT id, name, price_day, deposit FROM #__products WHERE id IN (' . db_in($ids) . ')', $ids) as $p) {
+        foreach (db_all('SELECT id, name, price_day, price_internal, deposit FROM #__products WHERE id IN (' . db_in($ids) . ')', $ids) as $p) {
             $products[(int) $p['id']] = $p;
         }
         foreach ($wanted as $pid => $qty) {
@@ -48,7 +53,7 @@ function booking_write_items($bookingId, array $wanted, $from, $to)
             }
             if (isset($products[$pid])) {
                 $name = $products[$pid]['name'];
-                $price = (float) $products[$pid]['price_day'];
+                $price = unit_price($products[$pid], $tier);
                 $dep = (float) $products[$pid]['deposit'];
             } elseif (isset($existing[$pid])) {
                 $name = $existing[$pid]['product_name'];
@@ -58,7 +63,7 @@ function booking_write_items($bookingId, array $wanted, $from, $to)
                 continue;
             }
             // Bestehende Positionen behalten ihren vereinbarten Tagespreis
-            if (isset($existing[$pid])) {
+            if (isset($existing[$pid]) && !$reprice) {
                 $price = (float) $existing[$pid]['price_day'];
             }
             $line = rental_price($price, $days, $qty);
@@ -70,24 +75,26 @@ function booking_write_items($bookingId, array $wanted, $from, $to)
             ));
         }
     }
+    db_exec('DELETE FROM #__booking_allocations WHERE booking_id = ?', array((int) $bookingId));
+    booking_allocate($bookingId);
     return array('total' => round($total, 2), 'deposit' => round($deposit, 2));
 }
 
 /** Legt eine Buchung an. $data enthält die Kundendaten, $wanted die Geräte. */
-function booking_create(array $data, array $wanted, $from, $to, $status = 'requested', $source = 'web')
+function booking_create(array $data, array $wanted, $from, $to, $status = 'requested', $source = 'web', $tier = 'customer')
 {
     $code = booking_new_code();
     $row = array_merge(array(
         'code' => $code, 'token' => bin2hex(random_bytes(16)), 'status' => $status,
         'start_date' => $from, 'end_date' => $to, 'customer_name' => '', 'email' => '', 'phone' => '',
         'organisation' => '', 'event_type' => '', 'handover' => 'pickup', 'delivery_address' => '', 'message' => '',
-        'total' => 0, 'deposit_total' => 0, 'price_override' => 0, 'admin_note' => '', 'source' => $source,
+        'total' => 0, 'deposit_total' => 0, 'price_override' => 0, 'admin_note' => '', 'source' => $source, 'price_tier' => $tier,
         'created_at' => now(), 'updated_at' => now(),
     ), $data);
     $id = db_insert('bookings', $row);
-    $sums = booking_write_items($id, $wanted, $from, $to);
+    $sums = booking_write_items($id, $wanted, $from, $to, $tier);
     db_update('bookings', array('total' => $sums['total'], 'deposit_total' => $sums['deposit']), 'id = ?', array($id));
-    booking_log($id, 'created', $source === 'web' ? 'Anfrage über die Website' : 'Im Backend angelegt');
+    booking_log($id, 'created', ($source === 'web' ? 'Anfrage über die Website' : ($source === 'team' ? 'Teamanfrage über die Website' : 'Im Backend angelegt')) . ($tier === 'internal' ? ' (Teampreis)' : ''));
     return $id;
 }
 

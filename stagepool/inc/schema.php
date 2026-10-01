@@ -72,6 +72,8 @@ function schema_statements($driver)
         description $text NULL,
         specs TEXT NULL,
         price_day DECIMAL(10,2) NOT NULL DEFAULT 0,
+        price_internal DECIMAL(10,2) NOT NULL DEFAULT 0,
+        price_auto TINYINT NOT NULL DEFAULT 0,
         deposit DECIMAL(10,2) NOT NULL DEFAULT 0,
         quantity INT NOT NULL DEFAULT 1,
         image VARCHAR(190) NOT NULL DEFAULT '',
@@ -101,6 +103,8 @@ function schema_statements($driver)
         delivery_address VARCHAR(255) NOT NULL DEFAULT '',
         message TEXT NULL,
         customer_address VARCHAR(255) NOT NULL DEFAULT '',
+        price_tier VARCHAR(10) NOT NULL DEFAULT 'customer',
+        team_user_id $fk NULL,
         total DECIMAL(10,2) NOT NULL DEFAULT 0,
         deposit_total DECIMAL(10,2) NOT NULL DEFAULT 0,
         price_override TINYINT NOT NULL DEFAULT 0,
@@ -147,6 +151,29 @@ function schema_statements($driver)
         created_at VARCHAR(19) NOT NULL
     )$tail";
     $s[] = "CREATE INDEX #__blocks_dates ON #__blocks (start_date, end_date)";
+
+    // Bestand je Eigentümer und Standort
+    $s[] = "CREATE TABLE IF NOT EXISTS #__product_stock (
+        id $id,
+        product_id $fk NOT NULL,
+        owner_id $fk NULL,
+        location_id $fk NULL,
+        quantity INT NOT NULL DEFAULT 0,
+        note VARCHAR(255) NOT NULL DEFAULT '',
+        sort INT NOT NULL DEFAULT 0
+    )$tail";
+    $s[] = "CREATE INDEX #__product_stock_product ON #__product_stock (product_id)";
+
+    // Zuteilung: welche Bestandsposten bei einer Buchung rausgehen
+    $s[] = "CREATE TABLE IF NOT EXISTS #__booking_allocations (
+        id $id,
+        booking_id $fk NOT NULL,
+        booking_item_id $fk NOT NULL,
+        stock_id $fk NOT NULL,
+        qty INT NOT NULL DEFAULT 1
+    )$tail";
+    $s[] = "CREATE INDEX #__booking_allocations_booking ON #__booking_allocations (booking_id)";
+    $s[] = "CREATE INDEX #__booking_allocations_stock ON #__booking_allocations (stock_id)";
 
     // Angebote & Rechnungen (Snapshot der Positionen als JSON, damit Belege unveränderlich bleiben)
     $s[] = "CREATE TABLE IF NOT EXISTS #__documents (
@@ -222,7 +249,27 @@ function schema_migrate()
 {
     schema_install(db_driver());
     schema_add_column('bookings', 'customer_address', "VARCHAR(255) NOT NULL DEFAULT ''");
+    // v3: Preisstufen, Bestand je Eigentümer/Standort
+    schema_add_column('products', 'price_internal', 'DECIMAL(10,2) NOT NULL DEFAULT 0');
+    schema_add_column('products', 'price_auto', 'TINYINT NOT NULL DEFAULT 0');
+    schema_add_column('bookings', 'price_tier', "VARCHAR(10) NOT NULL DEFAULT 'customer'");
+    schema_add_column('bookings', 'team_user_id', db_driver() === 'sqlite' ? 'INTEGER NULL' : 'INT UNSIGNED NULL');
+    schema_seed_stock();
     setting_set('schema_version', (string) SP_SCHEMA_VERSION);
+}
+
+/** Legt für Geräte ohne Bestandsposten einen Posten an und teilt bestehende Buchungen zu. */
+function schema_seed_stock()
+{
+    foreach (db_all('SELECT p.id, p.owner_id, p.location_id, p.quantity FROM #__products p
+                      WHERE NOT EXISTS (SELECT 1 FROM #__product_stock s WHERE s.product_id = p.id)') as $p) {
+        $sid = db_insert('product_stock', array('product_id' => (int) $p['id'], 'owner_id' => $p['owner_id'], 'location_id' => $p['location_id'],
+            'quantity' => max(1, (int) $p['quantity']), 'note' => '', 'sort' => 0));
+        foreach (db_all('SELECT bi.id, bi.booking_id, bi.qty FROM #__booking_items bi
+                          WHERE bi.product_id = ? AND NOT EXISTS (SELECT 1 FROM #__booking_allocations a WHERE a.booking_item_id = bi.id)', array($p['id'])) as $it) {
+            db_insert('booking_allocations', array('booking_id' => (int) $it['booking_id'], 'booking_item_id' => (int) $it['id'], 'stock_id' => $sid, 'qty' => (int) $it['qty']));
+        }
+    }
 }
 
 function schema_install($driver)
@@ -317,11 +364,28 @@ function install_demo_data($ownerId)
         $ids[] = db_insert('products', array(
             'name' => $p[0], 'category_id' => $cat[$p[1]], 'location_id' => $p[2], 'owner_id' => $ownerId,
             'short_desc' => $p[3], 'description' => $desc, 'specs' => $p[7],
-            'price_day' => $p[4], 'deposit' => $p[5], 'quantity' => $p[6], 'image' => '',
+            'price_day' => $p[4], 'price_internal' => round($p[4] * 0.8 * 2) / 2, 'price_auto' => 0,
+            'deposit' => $p[5], 'quantity' => $p[6], 'image' => '',
             'internal_note' => '', 'active' => 1, 'featured' => $p[8], 'sort' => ($i++) * 10,
             'created_at' => now(), 'updated_at' => now(),
         ));
     }
+
+    // Zweites Teammitglied als Miteigentümerin (Demo, Login mit Zufallspasswort)
+    $lisa = (int) db_value('SELECT id FROM #__users WHERE email = ?', array('lisa.demo@example.org'));
+    if (!$lisa) {
+        $lisa = db_insert('users', array('name' => 'Lisa (Demo)', 'email' => 'lisa.demo@example.org', 'phone' => '', 'role' => 'member', 'active' => 1,
+            'password_hash' => password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT), 'created_at' => now()));
+    }
+    schema_seed_stock();
+    // Beispiel: Die 8 LED-PARs gehören zwei Personen und stehen an zwei Standorten,
+    // die Gesangsmikrofone gehören zwei Personen am selben Standort.
+    db_exec('UPDATE #__product_stock SET quantity = 4 WHERE product_id = ?', array($ids[0]));
+    db_insert('product_stock', array('product_id' => $ids[0], 'owner_id' => $lisa, 'location_id' => $loc2, 'quantity' => 4, 'note' => 'Lisas PARs', 'sort' => 10));
+    db_exec('UPDATE #__product_stock SET quantity = 3 WHERE product_id = ?', array($ids[24]));
+    db_insert('product_stock', array('product_id' => $ids[24], 'owner_id' => $lisa, 'location_id' => $loc2, 'quantity' => 3, 'note' => '', 'sort' => 10));
+    stock_sync_product($ids[0]);
+    stock_sync_product($ids[24]);
 
     // Beispielbuchungen relativ zu heute
     $t = today();
@@ -353,6 +417,7 @@ function install_demo_data($ownerId)
             db_insert('booking_items', array('booking_id' => $bid, 'product_id' => $ids[$idx], 'product_name' => $p[0], 'qty' => $qty, 'price_day' => $p[4], 'days' => $days, 'line_total' => $line, 'deposit' => $p[5] * $qty));
         }
         db_update('bookings', array('total' => $total, 'deposit_total' => $dep), 'id = ?', array($bid));
+        booking_allocate($bid);
         db_insert('booking_log', array('booking_id' => $bid, 'user_id' => null, 'action' => 'created', 'note' => 'Demo-Daten', 'created_at' => now()));
     }
 

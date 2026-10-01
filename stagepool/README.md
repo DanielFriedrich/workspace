@@ -20,6 +20,10 @@ Web-Plattform, über die ihr euer gemeinsames Event-Equipment (Scheinwerfer, Neb
 |---|---|
 | ![](docs/screenshots/backend-buchhaltung.jpg) | ![](docs/screenshots/angebot-pdf.jpg) |
 
+| Als Team eingeloggt: Teampreise mit Endkundenpreis zum Vergleich |
+|---|
+| ![](docs/screenshots/team-preise.jpg) |
+
 ## Funktionen
 
 **Für Besucher**
@@ -31,6 +35,7 @@ Web-Plattform, über die ihr euer gemeinsames Event-Equipment (Scheinwerfer, Neb
 - **Belegungskalender** (Geräte × Tage) zum Stöbern, wann was frei ist
 - **Staffelpreise:** 1. Miettag voller Preis, jeder weitere Tag nur 50 % (einstellbar) – z. B. 100 € / 150 € / 200 € für 1 / 2 / 3 Tage
 - **Anfragekorb:** Zeitraum + Geräte, automatisch berechnete Summe, Kaution, Abholstandorte
+- **Teampreise:** Eingeloggte Teammitglieder sehen und mieten zum internen Preis (Endkundenpreis zum Vergleich) – z. B. wenn sie für eigene Kunden Technik zusammenstellen
 - Anfrage = **Reservierung**: Die Geräte sind ab dem Absenden für andere blockiert
 - Bestätigungs-E-Mail mit persönlichem Status-Link (inkl. Selbst-Storno)
 
@@ -42,6 +47,8 @@ Web-Plattform, über die ihr euer gemeinsames Event-Equipment (Scheinwerfer, Neb
 - Buchungen bearbeiten oder manuell anlegen (z. B. Telefonanfragen), mit Konfliktprüfung und Preisanpassung (Rabatt/Pauschale)
 - **Sperrzeiten:** einzelnes Gerät, ganzer Standort (z. B. Urlaub) oder alles
 - Belegungsplan mit Buchungsnummern, Geräte (mit Foto-Upload), Kategorien, Standorte
+- **Bestand je Eigentümer & Standort:** gleiche Geräte mehrerer Personen/Standorte als ein Gerät; automatische Zuteilung, wessen Exemplare rausgehen (änderbar), Standort-Sperren betreffen nur die Exemplare dort, Mietumsatz pro Eigentümer
+- **Zwei Preislisten:** interner Teampreis und Endkundenpreis (fest oder automatisch intern + X %)
 - Team-Zugänge für alle, die Material einbringen (Besitzer pro Gerät), Rollen Team/Admin
 - Einstellungen: Texte, Regeln (Puffer, Vorlauf, Min./Max.-Dauer), Impressum/Datenschutz, E-Mail-Versand (mail() oder SMTP)
 
@@ -49,7 +56,7 @@ Web-Plattform, über die ihr euer gemeinsames Event-Equipment (Scheinwerfer, Neb
 
 ## Schnellstart
 
-**Fertiges Upload-Paket:** [`dist/stagepool-1.1.0.zip`](dist/stagepool-1.1.0.zip) (neu bauen mit `./build-zip.sh`)
+**Fertiges Upload-Paket:** [`dist/stagepool-1.2.0.zip`](dist/stagepool-1.2.0.zip) (neu bauen mit `./build-zip.sh`)
 
 1. ZIP entpacken und den Inhalt per FTP auf den Webspace laden
 2. `https://eure-domain.de/install/` aufrufen und den Assistenten ausfüllen

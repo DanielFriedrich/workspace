@@ -26,6 +26,13 @@ Zu jeder Buchung blockt das System zusätzlich **einen Puffertag davor und danac
 
 ### Preise
 
+**Zwei Preislisten:** Jedes Gerät hat einen **internen Teampreis** und einen **Endkundenpreis**. Den Endkundenpreis tragt ihr fest ein oder lasst ihn automatisch berechnen (intern + Aufschlag, Standard 25 %, gerundet auf 0,50 €; einstellbar unter *Einstellungen → Buchungsregeln*). Ändert ihr den Aufschlag, werden alle automatischen Preise sofort angepasst.
+
+- **Nicht eingeloggt** sieht man nur Endkundenpreise.
+- **Als Team eingeloggt** (oben rechts erscheint „Teampreise · Name“) seht ihr auf der Website den Teampreis groß und den Endkundenpreis klein zum Vergleich. Der Anfragekorb rechnet mit Teampreisen und zeigt, was ein Endkunde zahlen würde. Typischer Fall: Ein Kunde fragt direkt bei dir an, du stellst ihm Technik aus dem Pool zusammen und mietest sie intern. Den Kunden trägst du unter „Für Kunde / Projekt“ ein.
+- Solche Anfragen erscheinen im Backend mit dem Kennzeichen **„Intern“**. In jeder Buchung lässt sich die Preisliste umstellen (Endkunde ↔ intern); die Preise werden dann neu berechnet.
+
+**Staffel:**
 Der erste Miettag kostet den vollen Tagespreis, **jeder weitere Tag 50 %** davon (einstellbar unter *Einstellungen → Buchungsregeln*).
 Beispiel 100 € pro Tag: 1 Tag = 100 €, 2 Tage = 150 €, 3 Tage = 200 €. Website, Anfragekorb, Buchungen und Rechnungen rechnen automatisch so.
 
@@ -139,8 +146,8 @@ Der Grund ist nur intern sichtbar. Bereits bestehende Buchungen im Zeitraum blei
 
 ## Geräte
 
-- **Neues Gerät:** Name, Kategorie, Standort, Preis pro Tag, Kaution, Anzahl, Besitzer, Texte und Foto
-- **Anzahl im Pool:** Habt ihr z. B. 8 gleiche Scheinwerfer, legt *ein* Gerät mit Anzahl 8 an. Kunden können dann 1 bis 8 Stück anfragen.
+- **Neues Gerät:** Name, Kategorie, Teampreis, Endkundenpreis, Kaution, Texte, Foto und Bestand (Eigentümer/Standort/Stück)
+- **Anzahl im Pool:** ergibt sich aus dem Bestand. Habt ihr z. B. 8 gleiche Scheinwerfer, legt *ein* Gerät an. Kunden können dann 1 bis 8 Stück anfragen.
 - **Technische Daten:** eine Zeile pro Angabe, Format `Bezeichnung: Wert`
 - **Foto:** JPG/PNG/WebP, Querformat 4:3 sieht am besten aus. Ohne Foto erscheint ein leuchtendes Kategorie-Icon.
 - **Sichtbar:** ausgeschaltete Geräte erscheinen nicht auf der Website
@@ -149,6 +156,26 @@ Der Grund ist nur intern sichtbar. Bereits bestehende Buchungen im Zeitraum blei
 - **Löschen:** Geräte mit Buchungshistorie werden nur ausgeblendet, damit alte Buchungen vollständig bleiben
 
 In der Geräteliste lässt sich nach Kategorie, Standort und **Besitzer** filtern. So sieht jede Person schnell ihr eigenes Material.
+
+---
+
+## Bestand: mehrere Eigentümer und Standorte
+
+Ein Gerät kann aus mehreren **Bestandsposten** bestehen, z. B.:
+
+| Eigentümer | Standort | Stück |
+|---|---|---|
+| Daniel | Werkstatt Mitte | 4 |
+| Lisa | Lager Süd | 4 |
+
+Kunden sehen „LED-PAR, 8 Stück“. Im Hintergrund gilt:
+
+- **Zuteilung:** Bei jeder Buchung wird automatisch festgelegt, wessen Exemplare rausgehen (bevorzugt vom selben Standort wie die übrigen Geräte). In der Buchung unter **„Wessen Geräte gehen raus?“** könnt ihr das ändern. Die Summe muss der gebuchten Anzahl entsprechen.
+- **Abholorte** in Bestätigungsmails und auf dem Status-Link ergeben sich aus der Zuteilung.
+- **Standort-Sperren** (z. B. Urlaub) sperren nur die Exemplare an diesem Standort – im Beispiel sind dann noch 4 PARs buchbar.
+- **Auswertung:** In der Buchhaltung zeigt **„Mietumsatz nach Eigentümer“**, wie viel Umsatz auf wessen Geräte entfällt (anteilig nach zugeteilten Exemplaren, inkl. interner Vermietungen).
+
+Den Bestand pflegt ihr in jedem Gerät unter **„Bestand: Wem gehört was, wo steht es?“** – eine Zeile pro Eigentümer und Standort. Stück 0 entfernt eine Zeile. Gleiche Geräte bitte **nicht** doppelt anlegen, sondern als weitere Bestandszeile.
 
 ---
 
