@@ -1,7 +1,14 @@
+<?php
+// Firmenpakete von variado – Landingpage für Unternehmenskunden
+// Aufbau wie feuer.php: eigenes, gekapseltes Styling (Präfix "vu-"), Template über header_dynamic.php und footer.php.
+  $title = "Teamentwicklung für Unternehmen";
+  $description = "Teambuilding, Achtsamkeit, Resilienz, Führung und Strategie von variado. Die ErLebenswerkstatt: sechs Pakete für 10 bis 300 Personen in der Rhön, erfahrungsbasiert und individuell zugeschnitten.";
+  $keywords = "Teambuilding Rhön, Teamentwicklung, Firmenevent, Resilienztraining, Achtsamkeit, Führungstraining, Familien-Unternehmens-Retreat, Thüringer Hütte";
+  $img = 'images/angebote/unternehmen/';
+?>
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<title>variado Firmenpakete</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -342,6 +349,9 @@
   .vu-final p{color:#C9DBE8; max-width:48ch; margin:0 auto 2.2rem; font-size:1.05rem;}
   .vu-final .line{margin-top:3rem; color:rgba(233,241,247,.55); font-size:.85rem;}
 </style>
+<?php
+  include '/volume1/web/variado/template/header_dynamic.php';
+?>
 </head>
 <body>
 <div class="vu">
@@ -359,7 +369,7 @@
 
 <nav class="vu-nav">
   <div class="vu-wrap">
-    <a href="https://www.variado.de" aria-label="variado Startseite"><img src="img/logo.png" alt="variado. Die ErLebenswerkstatt" width="98" height="40"></a>
+    <a href="https://www.variado.de" aria-label="variado Startseite"><img src="<?= $img ?>logo.png" alt="variado. Die ErLebenswerkstatt" width="98" height="40"></a>
     <div class="vu-nav-links">
       <a href="#pakete">Pakete</a>
       <a href="#gruppen">Gruppengrößen</a>
@@ -390,8 +400,8 @@
       </div>
     </div>
     <div class="vu-photos">
-      <div class="vu-blob vu-blob--lg"><img src="img/teamtraining.jpg" alt="Ein Team hebt eine Person gemeinsam durch ein Seilnetz im Wald"></div>
-      <div class="vu-blob vu-blob--sm"><img src="img/feuer.jpg" alt="Gruppe am Lagerfeuer bei Nacht"></div>
+      <div class="vu-blob vu-blob--lg"><img src="<?= $img ?>teamtraining.jpg" alt="Ein Team hebt eine Person gemeinsam durch ein Seilnetz im Wald"></div>
+      <div class="vu-blob vu-blob--sm"><img src="<?= $img ?>feuer.jpg" alt="Gruppe am Lagerfeuer bei Nacht"></div>
       <div class="vu-badge"><b>Mensch</b> · <b>Natur</b> · <b>Technik</b></div>
     </div>
   </div>
@@ -507,7 +517,7 @@
     <div class="vu-pkgs">
 
       <article class="vu-pkg" data-sizes="s m l" data-goals="team" data-pkg="Teamtag „Gemeinsam stark“">
-        <div class="vu-pkg-img"><img src="img/team-tauziehen.jpg" alt="Lachende Kolleginnen beim Tauziehen auf einer Wiese">
+        <div class="vu-pkg-img"><img src="<?= $img ?>team-tauziehen.jpg" alt="Lachende Kolleginnen beim Tauziehen auf einer Wiese">
           <div class="vu-pkg-meta"><span><svg aria-hidden="true"><use href="#vu-clock"/></svg>1 Tag</span><span><svg aria-hidden="true"><use href="#vu-group"/></svg>10–300 Personen</span></div></div>
         <div class="vu-pkg-body">
           <span class="vu-kicker m"><i></i>Teamgeist</span>
@@ -534,7 +544,7 @@
       </article>
 
       <article class="vu-pkg" data-sizes="s m" data-goals="team lead" data-pkg="Team-Klausur „Zusammenwachsen“">
-        <div class="vu-pkg-img"><img src="img/feuer.jpg" alt="Gruppe am Lagerfeuer bei Nacht mit Funkenspuren">
+        <div class="vu-pkg-img"><img src="<?= $img ?>feuer.jpg" alt="Gruppe am Lagerfeuer bei Nacht mit Funkenspuren">
           <div class="vu-pkg-meta"><span><svg aria-hidden="true"><use href="#vu-clock"/></svg>2 Tage</span><span><svg aria-hidden="true"><use href="#vu-group"/></svg>10–80 Personen</span></div></div>
         <div class="vu-pkg-body">
           <span class="vu-kicker m"><i></i>Teamkultur</span>
@@ -563,7 +573,7 @@
       </article>
 
       <article class="vu-pkg" data-sizes="s m l" data-goals="health" data-pkg="„Kraftquelle Rhön“ – Achtsamkeit &amp; Resilienz">
-        <div class="vu-pkg-img"><img src="img/bachlauf.jpg" alt="Klarer Bachlauf zwischen moosbedeckten Steinen im Wald">
+        <div class="vu-pkg-img"><img src="<?= $img ?>bachlauf.jpg" alt="Klarer Bachlauf zwischen moosbedeckten Steinen im Wald">
           <div class="vu-pkg-meta"><span><svg aria-hidden="true"><use href="#vu-clock"/></svg>1–2 Tage</span><span><svg aria-hidden="true"><use href="#vu-group"/></svg>10–300 Personen</span></div></div>
         <div class="vu-pkg-body">
           <span class="vu-kicker n"><i></i>Gesundheit &amp; Resilienz</span>
@@ -589,7 +599,7 @@
       </article>
 
       <article class="vu-pkg" data-sizes="s" data-goals="lead" data-pkg="LeaderShip „Kurs halten“">
-        <div class="vu-pkg-img"><img src="img/spaceship.jpg" alt="Teilnehmende an Konsolen im Raumschiff-Simulator">
+        <div class="vu-pkg-img"><img src="<?= $img ?>spaceship.jpg" alt="Teilnehmende an Konsolen im Raumschiff-Simulator">
           <div class="vu-pkg-meta"><span><svg aria-hidden="true"><use href="#vu-clock"/></svg>½–2 Tage</span><span><svg aria-hidden="true"><use href="#vu-group"/></svg>4–30 Personen</span></div></div>
         <div class="vu-pkg-body">
           <span class="vu-kicker t"><i></i>Führung</span>
@@ -614,7 +624,7 @@
       </article>
 
       <article class="vu-pkg" data-sizes="s" data-goals="strategy lead" data-pkg="Zukunftswerkstatt „Strategie &amp; Innovation“">
-        <div class="vu-pkg-img"><img src="img/3d-netz.jpg" alt="Workshop mit Seilnetz und Karten auf dem Boden">
+        <div class="vu-pkg-img"><img src="<?= $img ?>3d-netz.jpg" alt="Workshop mit Seilnetz und Karten auf dem Boden">
           <div class="vu-pkg-meta"><span><svg aria-hidden="true"><use href="#vu-clock"/></svg>2–3 Tage</span><span><svg aria-hidden="true"><use href="#vu-group"/></svg>5–30 Personen</span></div></div>
         <div class="vu-pkg-body">
           <span class="vu-kicker t"><i></i>Strategie &amp; Innovation</span>
@@ -639,7 +649,7 @@
       </article>
 
       <article class="vu-pkg" data-sizes="m l" data-goals="team health" data-pkg="Team-Festival „Großgruppe in Bewegung“">
-        <div class="vu-pkg-img"><img src="img/thueringer-huette.jpg" alt="Lange Menschenkette auf einer Wiese vor einem roten Holzhaus">
+        <div class="vu-pkg-img"><img src="<?= $img ?>thueringer-huette.jpg" alt="Lange Menschenkette auf einer Wiese vor einem roten Holzhaus">
           <div class="vu-pkg-meta"><span><svg aria-hidden="true"><use href="#vu-clock"/></svg>1 Tag</span><span><svg aria-hidden="true"><use href="#vu-group"/></svg>80–300 Personen</span></div></div>
         <div class="vu-pkg-body">
           <span class="vu-kicker n"><i></i>Großgruppe</span>
@@ -773,14 +783,14 @@
       <p class="vu-lede">Echte Momente aus unseren Programmen. Zum Vergrößern anklicken.</p>
     </div>
     <div class="vu-ggrid" id="vuGallery">
-      <button type="button" class="vu-g wide tall"><img src="img/thueringer-huette.jpg" alt="Menschenkette vor dem Energiehaus der Thüringer Hütte"><span>Thüringer Hütte</span></button>
-      <button type="button" class="vu-g"><img src="img/spaceship.jpg" alt="Raumschiff-Simulator"><span>Raumschiff-Simulator</span></button>
-      <button type="button" class="vu-g tall"><img src="img/teamtraining.jpg" alt="Teamübung im Seilnetz"><span>Teamtraining</span></button>
-      <button type="button" class="vu-g"><img src="img/feuer.jpg" alt="Feuerabend"><span>Feuerabend</span></button>
-      <button type="button" class="vu-g"><img src="img/3d-netz.jpg" alt="Workshop mit dem 3D-Netz"><span>3D-Netz</span></button>
-      <button type="button" class="vu-g"><img src="img/thinktank.jpg" alt="ThinkTank-Workshop am Flipchart"><span>ThinkTank</span></button>
-      <button type="button" class="vu-g"><img src="img/bachlauf.jpg" alt="Bachlauf im Wald der Rhön"><span>Natur der Rhön</span></button>
-      <button type="button" class="vu-g"><img src="img/herbst.jpg" alt="Herbstliche Buche an der Thüringer Hütte"><span>Herbst an der Hütte</span></button>
+      <button type="button" class="vu-g wide tall"><img src="<?= $img ?>thueringer-huette.jpg" alt="Menschenkette vor dem Energiehaus der Thüringer Hütte"><span>Thüringer Hütte</span></button>
+      <button type="button" class="vu-g"><img src="<?= $img ?>spaceship.jpg" alt="Raumschiff-Simulator"><span>Raumschiff-Simulator</span></button>
+      <button type="button" class="vu-g tall"><img src="<?= $img ?>teamtraining.jpg" alt="Teamübung im Seilnetz"><span>Teamtraining</span></button>
+      <button type="button" class="vu-g"><img src="<?= $img ?>feuer.jpg" alt="Feuerabend"><span>Feuerabend</span></button>
+      <button type="button" class="vu-g"><img src="<?= $img ?>3d-netz.jpg" alt="Workshop mit dem 3D-Netz"><span>3D-Netz</span></button>
+      <button type="button" class="vu-g"><img src="<?= $img ?>thinktank.jpg" alt="ThinkTank-Workshop am Flipchart"><span>ThinkTank</span></button>
+      <button type="button" class="vu-g"><img src="<?= $img ?>bachlauf.jpg" alt="Bachlauf im Wald der Rhön"><span>Natur der Rhön</span></button>
+      <button type="button" class="vu-g"><img src="<?= $img ?>herbst.jpg" alt="Herbstliche Buche an der Thüringer Hütte"><span>Herbst an der Hütte</span></button>
     </div>
   </div>
 </section>
@@ -810,7 +820,7 @@
 <!-- ================= TEAM ================= -->
 <section class="vu-band vu-band--paper" id="team">
   <div class="vu-wrap vu-team">
-    <div class="vu-team-photo"><img src="img/variado-team.jpg" alt="Das variado-Team in weinroten T-Shirts winkt in die Kamera"></div>
+    <div class="vu-team-photo"><img src="<?= $img ?>variado-team.jpg" alt="Das variado-Team in weinroten T-Shirts winkt in die Kamera"></div>
     <div>
       <div class="vu-eyebrow">Wer mit Euch arbeitet</div>
       <h2 class="vu-title">Ein Team. <em>Viele Disziplinen.</em></h2>
@@ -819,9 +829,9 @@
         <span class="vu-tag">Unternehmensberatung</span><span class="vu-tag">Business-Coaching</span><span class="vu-tag">Stressmanagement</span><span class="vu-tag">Resilienztraining</span><span class="vu-tag">Gewalt- &amp; Konfliktprävention</span><span class="vu-tag">Glücksmanagement</span><span class="vu-tag">Achtsamkeit</span><span class="vu-tag">Erlebnispädagogik</span>
       </div>
       <div class="vu-people">
-        <div class="vu-person"><img src="img/teresa.jpg" alt="Teresa Radovic"><div><b>Teresa Radovic</b><span>Buchung und Anfragen · anfrage@variado.de</span></div></div>
-        <div class="vu-person"><img src="img/jonas.jpg" alt="Jonas Dietz"><div><b>Jonas Dietz</b><span>Fragen zum Programm · jonas@variado.de</span></div></div>
-        <div class="vu-person"><img src="img/daniel.jpg" alt="Daniel Friedrich"><div><b>Daniel Friedrich</b><span>Unternehmensentwicklung · daniel@variado.de</span></div></div>
+        <div class="vu-person"><img src="<?= $img ?>teresa.jpg" alt="Teresa Radovic"><div><b>Teresa Radovic</b><span>Buchung und Anfragen · anfrage@variado.de</span></div></div>
+        <div class="vu-person"><img src="<?= $img ?>jonas.jpg" alt="Jonas Dietz"><div><b>Jonas Dietz</b><span>Fragen zum Programm · jonas@variado.de</span></div></div>
+        <div class="vu-person"><img src="<?= $img ?>daniel.jpg" alt="Daniel Friedrich"><div><b>Daniel Friedrich</b><span>Unternehmensentwicklung · daniel@variado.de</span></div></div>
       </div>
     </div>
   </div>
@@ -854,49 +864,7 @@
       <p class="vu-lede">Wir melden uns innerhalb von zwei Werktagen für ein kostenloses Vorgespräch.</p>
     </div>
     <div class="vu-form-wrap">
-      
-
-<form method="post" action="#anfrage" class="vu-form" id="vuForm" novalidate>
-  <input type="hidden" name="vu_form" value="1">
-  <input type="hidden" name="vu_ts" value="1790891653">
-
-  <div class="vu-f"><label for="vu-firma">Unternehmen*</label>
-    <input type="text" name="firma" id="vu-firma" autocomplete="organization" required value=""></div>
-  <div class="vu-f"><label for="vu-name">Ansprechperson*</label>
-    <input type="text" name="name" id="vu-name" autocomplete="name" required value=""></div>
-  <div class="vu-f"><label for="vu-email">E-Mail*</label>
-    <input type="email" name="email" id="vu-email" autocomplete="email" required value=""></div>
-  <div class="vu-f"><label for="vu-phone">Telefon</label>
-    <input type="tel" name="phone" id="vu-phone" autocomplete="tel" value=""></div>
-
-  <div class="vu-f"><label for="vu-groesse">Gruppengröße*</label>
-    <select name="groesse" id="vu-groesse" required>
-      <option value="">Bitte wählen</option>
-      <option>10–30 Personen</option><option>30–80 Personen</option><option>80–150 Personen</option><option>150–300 Personen</option>    </select></div>
-  <div class="vu-f"><label for="vu-paket">Interesse an</label>
-    <select name="paket" id="vu-paket">
-      <option selected>Noch offen, bitte beraten</option><option>Teamtag „Gemeinsam stark“</option><option>Team-Klausur „Zusammenwachsen“</option><option>„Kraftquelle Rhön“ – Achtsamkeit &amp; Resilienz</option><option>LeaderShip „Kurs halten“</option><option>Zukunftswerkstatt „Strategie &amp; Innovation“</option><option>Team-Festival „Großgruppe in Bewegung“</option><option>Familien-Unternehmens-Retreat</option><option>Eigenes Programm aus Bausteinen</option>    </select></div>
-  <div class="vu-f"><label for="vu-zeitraum">Wunschzeitraum</label>
-    <input type="text" name="zeitraum" id="vu-zeitraum" placeholder="z. B. Mai 2027" value=""></div>
-  <div class="vu-f"><label for="vu-dauer">Dauer</label>
-    <select name="dauer" id="vu-dauer">
-      <option>Halber Tag</option><option selected>1 Tag</option><option>2 Tage</option><option>3 Tage oder mehr</option><option>Noch offen</option>    </select></div>
-
-  <div class="vu-f vu-f--full"><label for="vu-message">Was soll sich in Eurem Team bewegen?</label>
-    <textarea name="message" id="vu-message" placeholder="Anlass, Ziele, besondere Wünsche …"></textarea></div>
-
-  <label class="vu-check vu-f--full" for="vu-familie"><input type="checkbox" name="familie" id="vu-familie" value="1"><span>Wir möchten Familien mitbringen (Familien-Unternehmens-Retreat).</span></label>
-
-  <!-- Honeypot-Feld (unsichtbar) -->
-  <div class="vu-hp" aria-hidden="true"><label for="email_confirm">Bitte leer lassen</label><input type="text" name="email_confirm" id="email_confirm" tabindex="-1" autocomplete="off"></div>
-
-  <label class="vu-check vu-f--full" for="vu-datenschutz"><input type="checkbox" name="datenschutz" id="vu-datenschutz" value="1" required><span>Ich habe die <a href="https://www.variado.de/datenschutzerklaerung.php" target="_blank" rel="noopener">Datenschutzerklärung</a> zur Kenntnis genommen. Ich stimme zu, dass meine Angaben zur Beantwortung meiner Anfrage elektronisch erhoben und gespeichert werden. Diese Einwilligung kann ich jederzeit per E-Mail an info@variado.de widerrufen.*</span></label>
-
-  <div class="vu-form-foot">
-    <small>*Pflichtfelder</small>
-    <button type="submit" class="vu-btn vu-btn--blue">Anfrage senden</button>
-  </div>
-</form>
+      <?php include 'kontaktformular_unternehmen.php'; ?>
     </div>
   </div>
 </section>
@@ -914,6 +882,9 @@
 
 </div><!-- /.vu -->
 
+<?php
+  include 'footer.php';
+?>
 
 <script>
 // Wechselndes Wort im Hero
@@ -1017,16 +988,5 @@ try {
 } catch (err) { console.error('Unternehmen: Lightbox', err); }
 </script>
 
-<script>
-// Nur Vorschau: Auf variado.de verschickt kontaktformular_unternehmen.php die Anfrage per E-Mail.
-document.getElementById('vuForm').addEventListener('submit', function (e) {
-  e.preventDefault();
-  var m = document.createElement('div');
-  m.className = 'vu-msg vu-msg--ok';
-  m.textContent = 'Vorschau: Auf variado.de wird die Anfrage jetzt an anfrage@variado.de gesendet und Ihr bekommt eine Bestätigung.';
-  this.parentNode.insertBefore(m, this);
-  m.scrollIntoView({behavior: 'smooth', block: 'center'});
-});
-</script>
 </body>
 </html>
