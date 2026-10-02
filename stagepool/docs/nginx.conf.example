@@ -24,7 +24,11 @@ server {
     add_header X-Frame-Options "SAMEORIGIN" always;
 
     # --- Interne Ordner und Dateien sperren -------------------------------
-    location ~ ^/(inc|config|storage|docs|dist)(/|$)  { deny all; return 404; }
+    location ^~ /inc/     { deny all; return 404; }
+    location ^~ /config/  { deny all; return 404; }
+    location ^~ /storage/ { deny all; return 404; }
+    location ^~ /docs/    { deny all; return 404; }
+    location ^~ /dist/    { deny all; return 404; }
     location ~ /\.(?!well-known)                      { deny all; return 404; }
     location ~* \.(md|sql|sqlite|lock|log|sh|example)$ { deny all; return 404; }
 

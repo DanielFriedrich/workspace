@@ -7,7 +7,7 @@
 
 define('SP_APP', true);
 define('SP_ROOT', dirname(__DIR__));
-define('SP_VERSION', '1.2.1');
+define('SP_VERSION', '1.2.2');
 define('SP_SCHEMA_VERSION', 3); // bei Schema-Änderungen erhöhen, siehe inc/schema.php
 
 require SP_ROOT . '/inc/functions.php';
@@ -26,7 +26,7 @@ require SP_ROOT . '/inc/stock.php';
 $configFile = SP_ROOT . '/config/config.php';
 if (!is_file($configFile)) {
     if (!defined('SP_INSTALLER')) {
-        header('Location: ' . base_path() . 'install/');
+        header('Location: ' . base_path() . 'install/index.php');
         exit;
     }
     $GLOBALS['sp_config'] = array();
@@ -54,7 +54,7 @@ if (cfg('debug', false)) {
     ini_set('display_errors', '0');
     ini_set('log_errors', '1');
     if (is_dir(SP_ROOT . '/storage/logs') && is_writable(SP_ROOT . '/storage/logs')) {
-        ini_set('error_log', SP_ROOT . '/storage/logs/php-error.log');
+        ini_set('error_log', log_path('php-error'));
     }
     set_exception_handler('sp_exception_handler');
 }

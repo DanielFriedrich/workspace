@@ -56,7 +56,7 @@ Web-Plattform, über die ihr euer gemeinsames Event-Equipment (Scheinwerfer, Neb
 
 ## Schnellstart
 
-**Fertiges Upload-Paket:** [`dist/stagepool-1.2.1.zip`](dist/stagepool-1.2.1.zip) (neu bauen mit `./build-zip.sh`)
+**Fertiges Upload-Paket:** [`dist/stagepool-1.2.2.zip`](dist/stagepool-1.2.2.zip) (neu bauen mit `./build-zip.sh`)
 
 1. ZIP entpacken und den Inhalt per FTP auf den Webspace laden
 2. `https://eure-domain.de/install/` aufrufen und den Assistenten ausfüllen
@@ -70,6 +70,7 @@ Die ausführliche Anleitung steht in **[docs/INSTALLATION.md](docs/INSTALLATION.
 |---|---|
 | [docs/INSTALLATION.md](docs/INSTALLATION.md) | Hosting-Anforderungen, Upload, Installation, E-Mail, HTTPS, Backup, Updates, Fehlerhilfe |
 | [docs/HANDBUCH.md](docs/HANDBUCH.md) | Bedienung des Backends für das Team |
+| [docs/SYNOLOGY.md](docs/SYNOLOGY.md) | Schritt-für-Schritt für Synology Web Station (PHP 8.2, nginx, MariaDB 10) |
 | [docs/KONZEPT.md](docs/KONZEPT.md) | Ablauf, Buchungsstatus, Verfügbarkeitslogik, Datenmodell, Design |
 
 ## Ordnerstruktur

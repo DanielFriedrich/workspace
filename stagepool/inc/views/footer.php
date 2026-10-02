@@ -28,7 +28,7 @@
       <ul>
         <li><a href="<?= e(url('impressum.php')) ?>">Impressum</a></li>
         <li><a href="<?= e(url('datenschutz.php')) ?>">Datenschutz</a></li>
-        <li><a href="<?= e(url('admin/')) ?>"><?= icon('lock') ?>Team-Login</a></li>
+        <li><a href="<?= e(url('admin/index.php')) ?>"><?= icon('lock') ?>Team-Login</a></li>
       </ul>
     </div>
   </div>

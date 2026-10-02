@@ -21,7 +21,7 @@ $checks = array(
     array('mbstring (Umlaute)', extension_loaded('mbstring'), false),
     array('JSON', function_exists('json_encode'), true),
     array('Hash (hash_hmac)', function_exists('hash_hmac') && function_exists('hash_equals'), true),
-    array('Sessions', function_exists('session_start'), true),
+    array('Sessions funktionieren', session_status() === PHP_SESSION_ACTIVE, true),
     array('GD (Bilder verkleinern, optional)', extension_loaded('gd'), false),
     array('Ordner /config beschreibbar', is_writable(SP_ROOT . '/config'), true),
     array('Ordner /storage beschreibbar', is_writable(SP_ROOT . '/storage'), true),
@@ -40,11 +40,11 @@ if (!extension_loaded('pdo_mysql') && !extension_loaded('pdo_sqlite')) {
 $existing = is_file($configFile) ? (require $configFile) : array();
 $f = array(
     'driver' => extension_loaded('pdo_mysql') ? 'mysql' : 'sqlite',
-    'host' => 'localhost', 'port' => '3306', 'name' => '', 'user' => '', 'prefix' => 'sp_',
+    'host' => 'localhost', 'port' => '3306', 'socket' => '', 'name' => '', 'user' => '', 'prefix' => 'sp_',
     'site_name' => 'Stagepool', 'admin_name' => '', 'admin_email' => '', 'demo' => '1',
 );
 if (!empty($existing['db'])) {
-    foreach (array('driver', 'host', 'port', 'name', 'user', 'prefix') as $k) {
+    foreach (array('driver', 'host', 'port', 'socket', 'name', 'user', 'prefix') as $k) {
         if (isset($existing['db'][$k])) {
             $f[$k] = (string) $existing['db'][$k];
         }
@@ -85,7 +85,7 @@ if (!$locked && $checksOk && is_post()) {
             'prefix' => $f['prefix'],
         );
     } else {
-        $dbConf = array('driver' => 'mysql', 'host' => $f['host'], 'port' => (int) $f['port'], 'name' => $f['name'],
+        $dbConf = array('driver' => 'mysql', 'host' => $f['host'], 'port' => (int) $f['port'], 'socket' => $f['socket'], 'name' => $f['name'],
             'user' => $f['user'], 'pass' => $password, 'prefix' => $f['prefix']);
         if ($f['name'] === '' || $f['user'] === '') {
             $errors[] = 'Bitte Datenbankname und Benutzer angeben.';
@@ -134,11 +134,28 @@ if (!$locked && $checksOk && is_post()) {
             }
             @chmod($configFile, 0640);
             @file_put_contents($lockFile, 'Installiert am ' . date('c') . "\n");
+            @file_put_contents(SP_ROOT . '/storage/probe.txt', 'stagepool-probe');
             $done = true;
         } catch (Exception $ex) {
             $msg = $ex->getMessage();
             if ($ex instanceof PDOException) {
                 $msg = 'Datenbankverbindung fehlgeschlagen: ' . $msg;
+                if (strpos($msg, '2002') !== false) {
+                    $found = array();
+                    foreach (array('/run/mysqld/mysqld10.sock', '/run/mysqld/mysqld.sock', '/var/run/mysqld/mysqld.sock', '/tmp/mysql.sock') as $sock) {
+                        if (@file_exists($sock)) {
+                            $found[] = $sock;
+                        }
+                    }
+                    $msg .= ' – Der Datenbankserver ist so nicht erreichbar. Synology (MariaDB 10): Server 127.0.0.1 und Port 3307 eintragen'
+                        . ($found ? ' oder Socket ' . implode(' bzw. ', $found) . ' verwenden' : '') . '. Sonst statt „localhost“ 127.0.0.1 versuchen und den Port beim Hoster prüfen.';
+                } elseif (strpos($msg, '1045') !== false) {
+                    $msg .= ' – Benutzername oder Passwort stimmen nicht, oder der Benutzer hat keine Rechte auf diese Datenbank.';
+                } elseif (strpos($msg, '1049') !== false) {
+                    $msg .= ' – Diese Datenbank gibt es noch nicht. Bitte zuerst anlegen (z. B. in phpMyAdmin) oder den Namen prüfen.';
+                } elseif (stripos($msg, 'could not find driver') !== false) {
+                    $msg .= ' – Der PHP-Datenbanktreiber fehlt. Im PHP-Profil die Erweiterung pdo_mysql (bzw. pdo_sqlite) aktivieren.';
+                }
             }
             $errors[] = $msg;
         }
@@ -202,10 +219,11 @@ if (!$locked && $checksOk && is_post()) {
         <div data-scope-field="mysql">
           <div class="form-grid">
             <label class="field"><span>Server</span><input type="text" name="host" value="<?= e($f['host']) ?>"></label>
-            <label class="field"><span>Port</span><input type="number" name="port" value="<?= e($f['port']) ?>"></label>
+            <label class="field"><span>Port</span><input type="number" name="port" value="<?= e($f['port']) ?>"><small class="muted">Synology MariaDB 10: 3307</small></label>
             <label class="field"><span>Datenbankname</span><input type="text" name="name" value="<?= e($f['name']) ?>"></label>
             <label class="field"><span>Benutzer</span><input type="text" name="user" value="<?= e($f['user']) ?>"></label>
             <label class="field field-wide"><span>Passwort</span><input type="password" name="db_pass" autocomplete="new-password"></label>
+            <label class="field field-wide"><span>Socket (optional, statt Server/Port)</span><input type="text" name="socket" value="<?= e($f['socket']) ?>" placeholder="z. B. /run/mysqld/mysqld10.sock"></label>
             <?php if (!empty($existing['db']['pass'])): ?><label class="check field-wide"><input type="checkbox" name="keep_pass" value="1" checked><span>Gespeichertes DB-Passwort verwenden, wenn leer</span></label><?php endif; ?>
           </div>
         </div>

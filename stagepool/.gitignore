@@ -7,3 +7,4 @@
 /storage/receipts/*
 !/storage/receipts/index.php
 /storage/logs/*.pdf
+/storage/probe.txt

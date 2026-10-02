@@ -40,6 +40,13 @@ function booking_rows(array $rows, $mode)
 
 admin_header('Übersicht', 'dashboard');
 ?>
+<?php if (!is_file(SP_ROOT . '/storage/probe.txt')) { @file_put_contents(SP_ROOT . '/storage/probe.txt', 'stagepool-probe'); } ?>
+<div class="flash flash-error" id="probe-warning" hidden><?= icon('alert') ?><span><b>Sicherheitswarnung:</b> Der Ordner <code>storage/</code> (Datenbank, Logs, Belege) ist von außen abrufbar. Euer Webserver wertet die mitgelieferten Sperr-Regeln nicht aus (typisch bei nginx). Bitte die Regeln aus <code>docs/nginx.conf.example</code> bzw. <code>docs/SYNOLOGY.md</code> einrichten. Details: <a href="<?= e(url('diagnose.php')) ?>">Diagnose</a>.</span></div>
+<script>
+fetch(<?= json_encode(url('storage/probe.txt')) ?> + '?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.text() : ''; }).then(function (t) {
+  if (t.indexOf('stagepool-probe') !== -1) { document.getElementById('probe-warning').hidden = false; }
+}).catch(function () {});
+</script>
 <div class="kpis">
   <a class="kpi kpi-accent" href="<?= e(url('admin/buchungen.php', array('status' => 'requested'))) ?>"><span>Offene Anfragen</span><b><?= $stats['open'] ?></b><?= icon('list') ?></a>
   <a class="kpi" href="<?= e(url('admin/buchungen.php', array('status' => 'confirmed'))) ?>"><span>Abholungen heute</span><b><?= $stats['today'] ?></b><?= icon('handover') ?></a>

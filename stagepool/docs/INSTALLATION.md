@@ -4,6 +4,10 @@ Diese Anleitung führt Schritt für Schritt durch die Einrichtung auf einem norm
 
 ---
 
+> **Synology (Web Station)?** Siehe die eigene Anleitung [SYNOLOGY.md](SYNOLOGY.md).
+>
+> **Etwas klappt nicht?** `https://eure-domain.de/diagnose.php` aufrufen – die Seite zeigt, was auf dem Server fehlt (PHP-Erweiterungen, Schreibrechte, Sessions, Datenbank, Ordner-Schutz) und testet die Datenbankverbindung. Nach der Installation ist sie nur für Admins erreichbar.
+
 ## 1. Voraussetzungen
 
 | | Minimum | Hinweis |
@@ -90,7 +94,7 @@ Die Plattform verschickt E-Mails bei neuen Anfragen (an Kunde und Team), bei Sta
 |---|---|
 | **PHP mail()** | Funktioniert bei den meisten Hostern sofort. Absender sollte eine Adresse eurer Domain sein. |
 | **SMTP** (empfohlen) | Versand über ein echtes Postfach. Landet seltener im Spam. |
-| **Nur protokollieren** | Zum Testen: E-Mails landen in `storage/logs/mail.log`. |
+| **Nur protokollieren** | Zum Testen: E-Mails landen in `storage/logs/mail-….log` (Dateiname mit zufälligem Zusatz). |
 
 Typische SMTP-Daten (bitte beim Hoster prüfen):
 
@@ -101,7 +105,7 @@ Typische SMTP-Daten (bitte beim Hoster prüfen):
 | all-inkl | `w0xxxxxx.kasserver.com` | 587 / STARTTLS |
 | Gmail (App-Passwort) | `smtp.gmail.com` | 587 / STARTTLS |
 
-Als **Absender-Adresse** dieselbe Adresse wie das SMTP-Postfach eintragen. Fehlgeschlagene Mails werden in `storage/logs/mail.log` protokolliert.
+Als **Absender-Adresse** dieselbe Adresse wie das SMTP-Postfach eintragen. Fehlgeschlagene Mails werden in `storage/logs/mail-….log` (Dateiname mit zufälligem Zusatz) protokolliert.
 
 ---
 
@@ -176,12 +180,12 @@ Viele Hoster machen zusätzlich automatische Backups. Trotzdem lohnt es sich, vo
 
 | Problem | Lösung |
 |---|---|
-| Weiße Seite / „Da ist etwas schiefgelaufen“ | `storage/logs/php-error.log` ansehen. Zum Debuggen in `config/config.php` vorübergehend `'debug' => true` setzen. |
+| Weiße Seite / „Da ist etwas schiefgelaufen“ | Vor der Installation zeigt die Fehlerseite die Ursache direkt an; danach steht sie in `storage/logs/php-error-….log`. Außerdem `diagnose.php` aufrufen. Zum Debuggen in `config/config.php` vorübergehend `'debug' => true` setzen. |
 | Installer zeigt rote Punkte bei Ordnern | Schreibrechte setzen (Abschnitt 3) |
 | CSS/Design fehlt, Links falsch | Bei Unterordner-Installation in `config/config.php` `'base_path' => '/verleih/'` setzen |
 | Links in E-Mails falsch (z. B. hinter Proxy) | `'site_url' => 'https://verleih.eure-domain.de'` in `config/config.php` |
 | Foto-Upload schlägt fehl | Datei kleiner als 10 MB? `.user.ini` mit hochgeladen? Schreibrechte für `uploads/products/`? |
-| E-Mails kommen nicht an | Spam-Ordner prüfen, auf SMTP umstellen, Testmail in den Einstellungen senden, `storage/logs/mail.log` prüfen |
+| E-Mails kommen nicht an | Spam-Ordner prüfen, auf SMTP umstellen, Testmail in den Einstellungen senden, `storage/logs/mail-….log` (Dateiname mit zufälligem Zusatz) prüfen |
 | „Die Sitzung ist abgelaufen“ | Seite neu laden. Tritt das dauerhaft auf, blockiert der Browser evtl. Cookies. |
 
 ---

@@ -134,7 +134,7 @@ admin_header('Einstellungen', 'einstellungen');
   <form class="card-admin" method="post">
     <?= csrf_field() ?><input type="hidden" name="action" value="testmail">
     <h2><?= icon('mail') ?>Versand testen</h2>
-    <p class="muted">Schickt eine Testmail an deine Login-Adresse (<?= e(current_user()['email']) ?>). Im Modus „Nur protokollieren“ landet sie in <code>storage/logs/mail.log</code>.</p>
+    <p class="muted">Schickt eine Testmail an deine Login-Adresse (<?= e(current_user()['email']) ?>). Im Modus „Nur protokollieren“ landet sie in <code>storage/logs/<?= e(basename(log_path('mail'))) ?></code>.</p>
     <button class="btn btn-ghost" type="submit">Testmail senden</button>
   </form>
 <?php endif; ?>

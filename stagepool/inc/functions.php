@@ -224,6 +224,18 @@ function json_out($data, $status = 200)
     exit;
 }
 
+/**
+ * Pfad einer Logdatei. Der Dateiname enthält einen geheimen Zusatz, damit
+ * Logs nicht erraten werden können, falls der Server den Ordner storage/
+ * nicht sperrt (z. B. nginx ohne passende Regeln).
+ */
+function log_path($name)
+{
+    $secret = cfg('secret', '');
+    $suffix = $secret !== '' ? '-' . substr(hash('sha256', 'log|' . $secret), 0, 16) : '';
+    return SP_ROOT . '/storage/logs/' . $name . $suffix . '.log';
+}
+
 function sp_exception_handler($ex)
 {
     error_log('[Stagepool] ' . get_class($ex) . ': ' . $ex->getMessage() . ' in ' . $ex->getFile() . ':' . $ex->getLine());
@@ -231,10 +243,17 @@ function sp_exception_handler($ex)
         http_response_code(500);
         header('Content-Type: text/html; charset=utf-8');
     }
+    // Vor der Installation (noch keine Zugangsdaten) oder im Debug-Modus Details zeigen
+    $details = '';
+    if (!cfg('db') || cfg('debug', false)) {
+        $details = '<pre style="text-align:left;white-space:pre-wrap;background:#14131f;padding:1rem;border-radius:12px;font-size:.85rem">'
+            . htmlspecialchars(get_class($ex) . ': ' . $ex->getMessage() . "\n" . $ex->getFile() . ':' . $ex->getLine(), ENT_QUOTES, 'UTF-8') . '</pre>';
+    }
     echo '<!doctype html><meta charset="utf-8"><title>Fehler</title>'
         . '<body style="font-family:system-ui;background:#07070c;color:#eee;display:grid;place-items:center;min-height:100vh;margin:0">'
-        . '<div style="max-width:32rem;padding:2rem;text-align:center"><h1>Da ist etwas schiefgelaufen.</h1>'
-        . '<p>Bitte versuche es gleich noch einmal. Der Fehler wurde protokolliert.</p></div></body>';
+        . '<div style="max-width:40rem;padding:2rem;text-align:center"><h1>Da ist etwas schiefgelaufen.</h1>'
+        . '<p>Bitte versuche es gleich noch einmal. Der Fehler wurde protokolliert.</p>' . $details
+        . '<p style="color:#a7a4bd;font-size:.9rem">Hilfe bei der Einrichtung: <a style="color:#22d3ee" href="' . htmlspecialchars(base_path(), ENT_QUOTES, 'UTF-8') . 'diagnose.php">diagnose.php</a> zeigt, was auf dem Server fehlt.</p></div></body>';
     exit;
 }
 

@@ -3,7 +3,7 @@ if (!defined('SP_APP')) { exit; }
 
 /**
  * E-Mail-Versand: PHP mail(), SMTP (mit STARTTLS/SSL) oder nur Protokoll
- * (storage/logs/mail.log – praktisch zum Testen).
+ * (storage/logs/mail-….log – praktisch zum Testen).
  */
 
 function mail_header_encode($text)
@@ -66,7 +66,7 @@ function send_mail($to, $subject, $body, $replyTo = '', array $attachments = arr
     foreach ($attachments as $att) {
         $logBody .= "\n[Anhang: " . $att['name'] . ', ' . round(strlen($att['data']) / 1024) . ' KB]';
         if (setting('mail_mode') === 'log' && preg_match('/^[\w.-]+$/', $att['name'])) {
-            @file_put_contents(SP_ROOT . '/storage/logs/' . date('Ymd-His') . '-' . $att['name'], $att['data']);
+            @file_put_contents(SP_ROOT . '/storage/logs/' . date('Ymd-His') . '-' . bin2hex(random_bytes(4)) . '-' . $att['name'], $att['data']);
         }
     }
 
@@ -90,7 +90,7 @@ function send_mail($to, $subject, $body, $replyTo = '', array $attachments = arr
 
 function mail_log($to, $subject, $body, $state)
 {
-    $file = SP_ROOT . '/storage/logs/mail.log';
+    $file = log_path('mail');
     $entry = '=== ' . now() . ' · ' . $state . " ===\nAn: " . $to . "\nBetreff: " . $subject . "\n\n" . $body . "\n\n";
     @file_put_contents($file, $entry, FILE_APPEND | LOCK_EX);
     return $state === 'protokolliert';

@@ -23,8 +23,14 @@ function db_connect(array $c)
         $pdo->exec('PRAGMA busy_timeout = 5000');
         return $pdo;
     }
-    $dsn = 'mysql:host=' . $c['host'] . ';port=' . (int) (isset($c['port']) ? $c['port'] : 3306)
-        . ';dbname=' . $c['name'] . ';charset=utf8mb4';
+    // Verbindung per Socket (z. B. Synology MariaDB 10: /run/mysqld/mysqld10.sock) oder per Host/Port
+    $socket = !empty($c['socket']) ? $c['socket'] : (isset($c['host']) && strpos($c['host'], '/') === 0 ? $c['host'] : '');
+    if ($socket !== '') {
+        $dsn = 'mysql:unix_socket=' . $socket . ';dbname=' . $c['name'] . ';charset=utf8mb4';
+    } else {
+        $dsn = 'mysql:host=' . $c['host'] . ';port=' . (int) (!empty($c['port']) ? $c['port'] : 3306)
+            . ';dbname=' . $c['name'] . ';charset=utf8mb4';
+    }
     $pdo = new PDO($dsn, $c['user'], $c['pass'], $options);
     $pdo->exec("SET NAMES utf8mb4");
     $pdo->exec("SET time_zone = '" . date('P') . "'");

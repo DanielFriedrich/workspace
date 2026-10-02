@@ -43,7 +43,7 @@ function admin_header($title, $active = '')
 <?= icon_sprite() ?>
 <div class="admin-shell">
   <aside class="admin-side">
-    <a class="brand" href="<?= e(url('admin/')) ?>"><span class="brand-mark"><?= icon('spot') ?></span><span class="brand-name"><?= e(setting('site_name')) ?><small>Backend</small></span></a>
+    <a class="brand" href="<?= e(url('admin/index.php')) ?>"><span class="brand-mark"><?= icon('spot') ?></span><span class="brand-name"><?= e(setting('site_name')) ?><small>Backend</small></span></a>
     <nav class="admin-nav" aria-label="Backend">
       <?php foreach (admin_nav() as $item): ?>
         <a href="<?= e(url('admin/' . $item[0])) ?>"<?= $active === $item[3] ? ' aria-current="page"' : '' ?>>
