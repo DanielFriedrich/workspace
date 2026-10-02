@@ -10,7 +10,7 @@ Ein rundes, zentralsymmetrisches Lernspiel, in dem man sich vom äußeren Ring (
 |---|---|---|
 | **Entropie** als Hauptwährung, durch Tippen und Generatoren erzeugt | **✨ Funken**: „Funken schlagen“ per Klick, gelöste Knoten produzieren automatisch | Der Name *Spark* wird zur Spielmechanik. Das Klicken fühlt sich direkt belohnend an. |
 | **Ideen** als zweite Währung für den Technologiebaum | **✦ Synergiepunkte**: gibt es nur für Balance (Ring-Harmonie) und Brücken zwischen den Bereichen | Die zweite Währung belohnt genau das, worum es variado geht: Verbindung und Gleichgewicht. |
-| **Evolutionsbaum** mit Knoten, die man nacheinander freischaltet | **Radialer Baum** mit 3 Ästen × 5 Ringen, im Zickzack zur Mitte | Die Evolution von „Zelle zu Singularität“ wird zur Entwicklung von „Funke zu Synergie“. |
+| **Evolutionsbaum** mit Knoten, die man nacheinander freischaltet | **Radialer Baum**: 3 Bereiche × 5 Ringe, außen je zwei Äste, die sich zur Mitte vereinen | Die Evolution von „Zelle zu Singularität“ wird zur Entwicklung von „Funke zu Synergie“. |
 | **Generatoren** aufwerten | **Knoten stärken** (5 Stufen, +60 % Produktion je Stufe) | Gibt den Idle-Tiefgang und einen Grund, zurückzukehren. |
 | **Meilensteine** schalten Neues frei | **Ring-Tore**: Ring 4 braucht 2 ✦, Ring 5 braucht 6 ✦ | Die inneren Ringe erreicht nur, wer verbindet und nicht einseitig vorprescht. |
 | **Offline-Ertrag** | 50 % der Produktion, bis zu 4 Stunden | „Willkommen zurück!“-Moment |
@@ -21,22 +21,20 @@ Bewusst **nicht** übernommen: Prestige-Reset/Metabits, In-App-Käufe und Endlos
 
 ## 3. Aufbau des Spielbretts
 
-```
-                 MENSCH (oben)
-          Ring 1  Staunen        👀 Neugier · 🌈 Licht & Farben · 🔧 Werkzeug
-          Ring 2  Verstehen      🤝 Gemeinschaft · 💧 Kreisläufe · ⚡ Energie
-                    ⬡ Brücken: Waldbaden · Bionik · Digitale Balance
-          Ring 3  Erleben        🤹 Kreativität · 🔥 Feuer · 💻 Algorithmus
-          Ring 4  Gestalten      🌱 Resilienz · 🐝 Artenvielfalt · ♻️ Ressourcen   (🔒 2 ✦)
-                    ⬡ Brücken: Erlebnispädagogik · Sonnenenergie · Maker-Team
-          Ring 5  Verantworten   💪 Selbstwirksamkeit · 🌍 Bewahren · ⚖️ Verantwortung (🔒 6 ✦)
-                              ✦ SYNERGIE ✦
-   NATUR (unten links)                          TECHNIK (unten rechts)
-```
+Das Brett ist wie das variado-Logo angeordnet: **Technik oben links, Mensch oben rechts, Natur unten**. Jeder Bereich wächst wie ein Baum von außen nach innen: zwei Äste in den äußeren Ringen, die sich dann zu einem Stamm zur Mitte vereinen.
 
-Die Ringnamen folgen dem variado-Lernbogen *Wahrnehmen → Verstehen → Handeln* und der ErLebenswerkstatt-Mission (Aha-Momente, Selbstwirksamkeit, Verantwortung).
+| Ring | Phase | Technik | Natur | Mensch |
+|---|---|---|---|---|
+| 1 | Wahrnehmen | 🔧 Was ist Technik? · ⏳ Zeitreise | 🔥 Im Zeichen des Feuers · 💧 Wasserkreislauf | 🪶 Ankommen · 🤝 Teamgeist |
+| 2 | Verstehen | ⚡ Energie wandeln · 🌬️ Erneuerbar? | ⛰️ Land der offenen Fernen · 🌿 Kräuterwanderung | ✨ Goldene Regeln · 🧠 Unruhe verstehen |
+| | ⬡ Sonderaufgaben | 🖥️ Bildschirmpause (M∩T) | 🦎 Bionik (N∩T) | 👁️ Sinnesspaziergang (M∩N) |
+| 3 | Erleben | 🧭 Werkzeug, nicht Chef | 🌳 Netzwerk Wald | 🛡️ Wir sind NEO-BIG |
+| 4 | Gestalten (🔒 2 ✦) | ♻️ Ressourcen | ☀️ Die Kraft der Sonne | 🤹 Kreativität |
+| | ⬡ Brücken | 🚀 Vom Problem zur Erfindung (M∩T) | 🏡 Das Erdhaus (N∩T) | 🔗 Unser Erbe (M∩N) |
+| 5 | Verantworten (🔒 6 ✦) | 💡 Wunderwelt Licht | 🐝 Bewahren | ❤️ Dankbarkeit |
+| ✦ | Synergie | Puzzle aus den drei Logo-Teilen + Abschlussfrage | | |
 
-**Brücken (⬡)** liegen genau auf den Grenzen zwischen zwei Bereichen. Sie sind die „Sonderaufgaben“ an den Überschneidungen Mensch∩Natur, Natur∩Technik und Mensch∩Technik. Sie öffnen sich erst, wenn *beide* angrenzenden Knoten gelöst sind.
+**Brücken (⬡)** liegen genau auf den Grenzen zwischen zwei Bereichen. Sie öffnen sich erst, wenn *beide* angrenzenden Knoten gelöst sind. Fürs Zentrum braucht man mindestens eine Brücke je Bereichspaar.
 
 ## 4. Das Bamboleo-Prinzip
 
@@ -51,15 +49,23 @@ Damit ist Balance keine Strafe-Regel, sondern der schnellste Weg: Wer ausgeglich
 
 ## 5. Aufgaben
 
-21 Aufgaben (15 Kernknoten + 6 Brücken) + 1 Finale. Die Inhalte stammen aus der variado-Philosophie, dem Businessplan und dem Glücks-Ratgeber:
+Jeder der 27 Knoten hat einen **Aufgaben-Pool** mit zwei Aufgaben (insgesamt 54 + Finale). Beim ersten Durchgang kommt die erste, beim nächsten Durchgang automatisch die zweite. Im Dialog kann man mit „🔄 Andere Aufgabe“ auch sofort wechseln.
 
-* **Mensch**: Neugier („Alle Fragen sind gute Fragen“), Gemeinschaft (Genossenschaft), Kreativität (Zirkuspädagogik), Resilienz („Beziehung vor Regel“), Selbstwirksamkeit (ErLebenswerkstatt)
-* **Natur**: Licht & Farben („Wunderwelt Licht“), Wasserkreislauf, Feuer („Im Zeichen des Feuers“), Artenvielfalt, Nachhaltigkeit (NEO-BIG)
-* **Technik**: Hebel, Energie (Pizzaofen-Beispiel aus dem Wiki), Algorithmus, Ressourcen/CO₂, verantwortungsvolle Technik
-* **Brücken**: Waldbaden („Natur reguliert“), Bionik, Digitale Balance, Erlebnispädagogik, Sonnenenergie, Maker-Team (Diversität)
-* **Finale**: Was bedeutet Synergie bei variado?
+Die Aufgabenarten und viele Aufgaben stammen aus der zweiten Spielversion des Teams und wurden um weitere im selben Stil ergänzt:
 
-Aufgabentypen: Multiple Choice, **Reihenfolge sortieren** und **Reflexion** (ohne falsche Antwort). Nach jeder Lösung gibt es eine kurze Erklärung („Aha …“). Falsche Antworten kosten nichts, das Spiel ermutigt zum Weiterprobieren.
+| Typ | So funktioniert's | Beispiele |
+|---|---|---|
+| Quiz | eine richtige Antwort wählen, dann „Prüfen“ | Rhön als Biosphärenreservat, Erdhaus, Unruhe verstehen |
+| Mehrfachauswahl | genau *n* richtige Antworten wählen | Verbrennungsdreieck, Teamgeist, Stromkreis mit Glühbirne, die aufleuchtet |
+| Reihenfolge | Einträge der Reihe nach antippen, richtige Anfänge bleiben stehen | Zeitreise der Werkzeuge, Wasserkreislauf, NEO-BIG, Coyote-Teaching |
+| Zuordnen | links antippen, dann rechts das Gegenstück | Energie wandeln, Kräuter, Goldene Regeln, Bionik, Sinne |
+| Sortieren | jeden Eintrag einer Kategorie zuweisen | erneuerbar/fossil, Laub-/Nadelbaum |
+| Schätzen | Schieberegler mit Toleranz | Lichtlaufzeit der Sonne, Höhe der Wasserkuppe |
+| Atemübung | drei geführte Atemzüge | Ankommen |
+| Reflexion | eigener Satz oder freie Wahl, kein Falsch | Dankbarkeit, Selbstwirksamkeit, Staunen |
+| Finale | variado-Logo als Puzzle legen, dann Synergie-Frage | Zentrum |
+
+Nach jeder Lösung erscheint ein **„💡 Wusstest du?“**-Kasten mit Hintergrundwissen, oft mit Bezug zu variado-Angeboten, zur Thüringer Hütte oder zum Glücks-Ratgeber. Falsche Antworten kosten nichts, das Spiel ermutigt zum Weiterprobieren.
 
 ## 6. Einordnung der beiden Vorversionen
 

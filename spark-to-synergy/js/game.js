@@ -11,10 +11,12 @@
   const PAIRS = [['mensch', 'natur'], ['technik', 'natur'], ['mensch', 'technik']];
   const CX = 500, CY = 500;
   const RING_R = [430, 350, 276, 206, 140];
-  const CORE_NODE_R = [36, 34, 32, 30, 28];
-  const ZIG = [0, -15, 13, -13, 0];
+  const CORE_NODE_R = [33, 31, 32, 30, 28];
+  // Winkelversatz für die zwei Äste in Ring 1 und 2 (slot a/b)
+  const SLOT_OFFSET = [22, 19, 0, 0, 0];
   const CENTER_R = 60;
-  const SAVE_KEY = 's2s-save-v1';
+  const SAVE_KEY = 's2s-save-v2';
+  const ROUND_KEY = 's2s-round';
   const SVG_NS = 'http://www.w3.org/2000/svg';
 
   const $ = (sel) => document.querySelector(sel);
@@ -62,20 +64,20 @@
   const NODES = {};
   C.nodes.forEach((n) => {
     const sec = C.sectors[n.sector];
-    const angle = sec.angle + ZIG[n.ring];
-    const prev = C.nodes.find((m) => m.sector === n.sector && m.ring === n.ring - 1);
+    const offset = n.slot === 'a' ? -SLOT_OFFSET[n.ring] : n.slot === 'b' ? SLOT_OFFSET[n.ring] : 0;
+    const angle = sec.angle + offset;
     NODES[n.id] = {
-      ...n, kind: 'core', angle, ...polar(RING_R[n.ring], angle),
+      ...n, kind: 'core', angle, offset, ...polar(RING_R[n.ring], angle),
       r: CORE_NODE_R[n.ring], color: sec.color,
       cost: E.coreCost[n.ring], output: E.coreOutput[n.ring],
-      requires: prev ? [prev.id] : []
+      requires: n.requires || []
     };
   });
   C.bridges.forEach((b) => {
     const angle = midAngle(C.sectors[b.sectors[0]].angle, C.sectors[b.sectors[1]].angle);
     const radius = RING_R[b.ring] - 30;
     NODES[b.id] = {
-      ...b, kind: 'bridge', angle, ...polar(radius, angle),
+      ...b, kind: 'bridge', angle, offset: 0, ...polar(radius, angle),
       r: 27, color: C.sectors[b.sectors[0]].color, color2: C.sectors[b.sectors[1]].color,
       cost: E.bridgeCost[b.ring], output: E.bridgeOutput[b.ring]
     };
@@ -83,6 +85,8 @@
   const CORE_IDS = C.nodes.map((n) => n.id);
   const BRIDGE_IDS = C.bridges.map((b) => b.id);
   const ALL_IDS = [...CORE_IDS, ...BRIDGE_IDS];
+  const PER_SECTOR = CORE_IDS.filter((id) => NODES[id].sector === 'mensch').length;
+  const RING_IDS = [0, 1, 2, 3, 4].map((r) => CORE_IDS.filter((id) => NODES[id].ring === r));
 
   /* ------------------------------------------------------------------ */
   /* Spielstand                                                          */
@@ -91,13 +95,23 @@
     funken: 0, total: 0, solved: {}, answered: {}, level: {}, sp: 0,
     harmony: [false, false, false, false, false],
     mistakes: 0, taps: 0, start: Date.now(), last: Date.now(),
-    won: false, wonAt: null, code: null, submitted: false, sound: true, seenHelp: false
+    won: false, wonAt: null, code: null, submitted: false, sound: true, seenHelp: false,
+    pick: {}, round: readRound()
   });
+  // Durchgang zählen: bei jedem neuen Spiel kommt aus jedem Aufgaben-Pool die nächste Aufgabe
+  function readRound() { try { return Number(localStorage.getItem(ROUND_KEY)) || 0; } catch (e) { return 0; } }
+  function nextRound() { try { localStorage.setItem(ROUND_KEY, String(readRound() + 1)); } catch (e) { /* ignorieren */ } }
   let S = fresh();
   try {
     const raw = localStorage.getItem(SAVE_KEY);
     if (raw) S = Object.assign(fresh(), JSON.parse(raw));
   } catch (e) { /* kein Speicher verfügbar */ }
+  const taskIndex = (id) => {
+    const pool = NODES[id].tasks;
+    if (S.pick[id] === undefined) S.pick[id] = S.round % pool.length;
+    return S.pick[id] % pool.length;
+  };
+  const taskFor = (id) => NODES[id].tasks[taskIndex(id)];
   const save = () => {
     S.last = Date.now();
     try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { /* ignorieren */ }
@@ -217,17 +231,24 @@
       return { x0: n.x - R, y0: n.y - R, x1: n.x + R, y1: n.y + R };
     });
     obstacles.push({ x0: CX - 70, y0: CY - 70, x1: CX + 70, y1: CY + 70 });
+    // Bereichsnamen am Rand freihalten
+    SECTORS.forEach((sec) => {
+      const p = polar(492, C.sectors[sec].angle);
+      obstacles.push({ x0: p.x - 95, y0: p.y - 22, x1: p.x + 95, y1: p.y + 22, label: true });
+    });
     const area = (a, b) => Math.max(0, Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0)) * Math.max(0, Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0));
     const order = [...CORE_IDS.slice().sort((a, b) => NODES[a].ring - NODES[b].ring), ...BRIDGE_IDS];
     order.forEach((id) => {
       const n = NODES[id];
       const parts = n.title.split('|');
-      const lines = parts.length > 1 ? [parts[0].endsWith('-') ? parts[0] : `${parts[0]}-`, parts[1]] : [n.title];
+      const lines = parts.length < 2 ? [n.title]
+        : parts[1].startsWith(' ') ? [parts[0], parts[1].trim()]
+          : [parts[0].endsWith('-') ? parts[0] : `${parts[0]}-`, parts[1]];
       const w = Math.max(...lines.map((l) => l.length * 9.4), 64);
       const hgt = (lines.length + 1) * LH;
       const gap = n.r + 8;
       // Bevorzugte Richtung: zur Mittellinie des Bereichs bzw. bei Brücken nach außen
-      const tangentX = -Math.sin((n.angle - 90) * Math.PI / 180) * (ZIG[n.ring] > 0 ? -1 : 1);
+      const tangentX = -Math.sin((n.angle - 90) * Math.PI / 180) * (n.offset < 0 ? -1 : 1);
       const prefRight = n.kind === 'core' ? tangentX >= 0 : n.x >= CX;
       const cands = [
         { k: 'right', dir: { x: 1, y: 0 }, box: { x0: n.x + gap, x1: n.x + gap + w, y0: n.y - hgt / 2, y1: n.y + hgt / 2 }, anchor: 'start', x: gap, y: -hgt / 2 + 14 },
@@ -239,14 +260,12 @@
       let best = null;
       cands.forEach((c, i) => {
         let score = i * 5;
-        obstacles.forEach((o) => { score += area(c.box, o); });
-        [[c.box.x0, c.box.y0], [c.box.x1, c.box.y0], [c.box.x0, c.box.y1], [c.box.x1, c.box.y1]].forEach(([x, y]) => {
-          const d = Math.hypot(x - CX, y - CY);
-          if (d > 462) score += (d - 462) * 40;
-        });
+        obstacles.forEach((o) => { score += area(c.box, o) * (o.label ? 2 : 1); });
+        // nicht über den Bildrand hinaus
+        score += (Math.max(0, -10 - c.box.x0) + Math.max(0, c.box.x1 - 1010) + Math.max(0, -10 - c.box.y0) + Math.max(0, c.box.y1 - 1010)) * 400;
         if (!best || score < best.score) best = { ...c, score };
       });
-      obstacles.push(best.box);
+      obstacles.push({ ...best.box, label: true });
       LABELS[id] = { lines, lh: LH, anchor: best.anchor, x: best.x, y: best.y, dir: best.dir };
     });
   }
@@ -518,8 +537,8 @@
     SECTORS.forEach((s) => {
       const row = h('div', 'bal-row');
       row.innerHTML = `<span style="color:${C.sectors[s].color}">${sectorLabel(s)}</span>
-        <div class="bal-track"><div class="bal-fill" style="width:${(c[s] / 5) * 100}%;background:${C.sectors[s].color}"></div></div>
-        <span class="bal-num">${c[s]}/5</span>`;
+        <div class="bal-track"><div class="bal-fill" style="width:${(c[s] / PER_SECTOR) * 100}%;background:${C.sectors[s].color}"></div></div>
+        <span class="bal-num">${c[s]}/${PER_SECTOR}</span>`;
       bars.appendChild(row);
     });
     const badge = $('#balance-badge');
@@ -562,7 +581,7 @@
       li.innerHTML = `<span class="tick">${ok ? '✅' : '◻️'}</span><span>${label}</span>`;
       gl.appendChild(li);
     };
-    SECTORS.forEach((s) => goal(c[s] === 5, `${sectorLabel(s)}: alle 5 Ringe <span class="muted">(${c[s]}/5)</span>`));
+    SECTORS.forEach((s) => goal(c[s] === PER_SECTOR, `${sectorLabel(s)}: alle ${PER_SECTOR} Knoten <span class="muted">(${c[s]}/${PER_SECTOR})</span>`));
     PAIRS.forEach((p) => goal(bridgePairDone(p), `Brücke ${sectorLabel(p[0])} ∩ ${sectorLabel(p[1])}`));
     goal(S.won, 'Letzte Aufgabe im Zentrum');
 
@@ -661,7 +680,7 @@
       const box = h('div', 'info-box');
       box.innerHTML = `<b>✓ Gelöst.</b> Dieser Knoten erzeugt jetzt <b>${fmt(nodeOutput(id) * balanceFactor())} Funken/Sek.</b>`;
       body.appendChild(box);
-      const learn = h('div', 'info-box', `<b>Das hast du gelernt:</b><br>${esc(n.task.explain)}`);
+      const learn = h('div', 'info-box', `<b>Das hast du gelernt:</b><br>${esc(taskFor(id).fact)}`);
       body.appendChild(learn);
       const up = h('div', 'info-box');
       if (lvl >= E.maxUpgrade) {
@@ -697,17 +716,19 @@
     }
 
     if (S.answered[id]) {
-      body.appendChild(h('div', 'feedback ok', `<b>✓ Aufgabe gelöst</b>${esc(n.task.explain)}`));
+      body.appendChild(h('div', 'fact', `<span class="eyebrow">✓ Aufgabe gelöst · 💡 Wusstest du?</span><p>${esc(taskFor(id).fact)}</p>`));
       body.appendChild(unlockFooter(id));
       return;
     }
 
-    renderTask(body, n.task, () => {
+    renderTask(body, taskFor(id), () => {
       S.answered[id] = true;
       save();
       body.appendChild(unlockFooter(id));
       refreshBoard();
-    });
+    }, n.tasks.length > 1 ? {
+      onSwap: () => { S.pick[id] = taskIndex(id) + 1; save(); renderNodeBody(id); }
+    } : {});
   }
 
   function unlockFooter(id) {
@@ -734,7 +755,7 @@
     const body = $('#task-body');
     const st = status(openId);
     if (body.dataset.state !== st && !(body.dataset.state === 'ready' && st === 'visible') && !(body.dataset.state === 'visible' && st === 'ready')) {
-      if (!body.querySelector('.opts, .order-slots') || S.answered[openId]) renderNodeBody(openId);
+      if (!body.querySelector('.task-ui') || S.answered[openId]) renderNodeBody(openId);
       return;
     }
     body.querySelectorAll('.unlock-btn').forEach((b) => b._update && b._update());
@@ -742,114 +763,380 @@
   }
 
   /* ---------- Aufgaben ---------- */
-  function renderTask(container, task, onSolved) {
-    container.appendChild(h('p', 'task-q', esc(task.q)));
-    if (task.type === 'order') renderOrder(container, task, onSolved);
-    else renderChoice(container, task, onSolved);
-  }
+  const DEBUG = { fastBreath: false };
 
-  function renderChoice(container, task, onSolved) {
-    const reflect = task.type === 'reflect';
-    const opts = h('div', 'opts');
-    const order = reflect ? task.options.map((_, i) => i) : shuffle(task.options.map((_, i) => i));
-    const fb = h('div', 'feedback');
-    fb.hidden = true;
-    order.forEach((idx, pos) => {
-      const b = h('button', 'opt', `<span class="key">${'ABCD'[pos]}</span><span>${esc(task.options[idx])}</span>`);
-      b.addEventListener('click', () => {
-        if (reflect || idx === task.correct) {
-          b.classList.add('right');
-          opts.querySelectorAll('.opt').forEach((o) => { o.disabled = true; });
-          fb.className = 'feedback ok';
-          fb.innerHTML = `<b>${reflect ? '💡 Schön!' : '✓ Richtig! Aha …'}</b>${esc(task.explain)}`;
-          fb.hidden = false;
-          sfx.right();
-          onSolved();
-        } else {
-          b.classList.add('wrong');
-          b.disabled = true;
-          S.mistakes++;
-          fb.className = 'feedback no';
-          fb.innerHTML = '<b>Nicht ganz.</b>Kein Problem – Fehler gehören zum Lernen. Versuch es noch einmal!';
-          fb.hidden = false;
-          sfx.wrong();
-        }
-      });
-      opts.appendChild(b);
-    });
-    container.appendChild(opts);
-    container.appendChild(fb);
-  }
-
-  function renderOrder(container, task, onSolved) {
-    const n = task.items.length;
-    const slots = new Array(n).fill(null);
-    const fixed = new Array(n).fill(false);
-    let pool = shuffle(task.items.map((_, i) => i));
-    if (pool.every((v, i) => v === i)) pool = pool.reverse();
-    const slotWrap = h('div', 'order-slots');
-    const poolWrap = h('div', 'pool');
-    const fb = h('div', 'feedback');
-    fb.hidden = true;
-    container.appendChild(h('p', 'small muted', 'Tippe die Schritte der Reihe nach an. Antippen eines Platzes legt den Schritt zurück.'));
-    container.appendChild(slotWrap);
-    container.appendChild(poolWrap);
-    container.appendChild(fb);
-    let done = false;
-
-    const draw = () => {
-      slotWrap.innerHTML = '';
-      slots.forEach((v, i) => {
-        const s = h('div', `slot ${v !== null ? 'filled' : ''} ${fixed[i] ? 'right' : ''}`, `<span class="n">${i + 1}</span><span>${v !== null ? esc(task.items[v]) : '…'}</span>`);
-        if (v !== null && !fixed[i] && !done) {
-          s.addEventListener('click', () => { pool.push(v); slots[i] = null; draw(); });
-        }
-        slotWrap.appendChild(s);
-      });
-      poolWrap.innerHTML = '';
-      pool.forEach((v) => {
-        const b = h('button', 'opt', `<span>${esc(task.items[v])}</span>`);
-        b.addEventListener('click', () => {
-          const free = slots.indexOf(null);
-          if (free === -1) return;
-          slots[free] = v;
-          pool = pool.filter((p) => p !== v);
-          draw();
-          if (slots.indexOf(null) === -1) check();
-        });
-        poolWrap.appendChild(b);
-      });
-    };
-
-    const check = () => {
-      const correct = slots.map((v, i) => v === i);
-      if (correct.every(Boolean)) {
-        done = true;
-        fixed.fill(true);
-        draw();
-        fb.className = 'feedback ok';
-        fb.innerHTML = `<b>✓ Richtig! Aha …</b>${esc(task.explain)}`;
-        fb.hidden = false;
+  // Gemeinsamer Ablauf aller Aufgabentypen: Antwort geben → „Prüfen“ → Feedback bzw. „Wusstest du?“
+  function renderTask(container, task, onSolved, opts = {}) {
+    const q = h('p', 'task-q', esc(task.q));
+    const ui = h('div', 'task-ui');
+    const fb = h('div', 'task-fb');
+    const foot = h('div', 'task-footer check-foot');
+    container.append(q, ui, fb, foot);
+    const view = VIEWS[task.type](task, { fb, q });
+    view.mount(ui);
+    const note = h('span', 'costline', task.note ? esc(task.note) : '');
+    foot.appendChild(note);
+    if (opts.onSwap) {
+      const swap = h('button', 'btn btn-ghost', '🔄 Andere Aufgabe');
+      swap.type = 'button';
+      swap.title = 'Eine andere Aufgabe für diesen Knoten';
+      swap.addEventListener('click', opts.onSwap);
+      foot.appendChild(swap);
+    }
+    const check = h('button', 'btn btn-primary', view.checkLabel || 'Prüfen');
+    check.type = 'button';
+    foot.appendChild(check);
+    const sync = () => { check.disabled = !view.ready(); };
+    view.onChange = sync;
+    sync();
+    check.addEventListener('click', () => {
+      if (!view.ready()) return;
+      const ok = view.check();
+      if (ok === null) { fb.innerHTML = ''; sync(); return; }
+      if (ok) {
+        foot.remove();
+        if (view.lock) view.lock();
+        fb.innerHTML = `<div class="feedback ok"><b>${task.type === 'reflect' || task.type === 'breathe' ? '💛 Schön!' : '✓ Richtig!'}</b></div>
+          ${task.fact ? `<div class="fact"><span class="eyebrow">💡 Wusstest du?</span><p>${esc(task.fact)}</p></div>` : ''}`;
         sfx.right();
         onSolved();
-        return;
+      } else {
+        S.mistakes++;
+        sfx.wrong();
+        fb.innerHTML = `<div class="feedback no"><b>${esc(view.wrongText || 'Noch nicht ganz.')}</b>Fehler gehören dazu – sie helfen dir zu lernen. Versuch es nochmal.</div>`;
+        if (view.afterWrong) view.afterWrong();
+        sync();
       }
-      S.mistakes++;
-      sfx.wrong();
-      const right = correct.filter(Boolean).length;
-      fb.className = 'feedback no';
-      fb.innerHTML = `<b>${right} von ${n} stehen richtig.</b>Die richtigen bleiben liegen – ordne den Rest noch einmal.`;
-      fb.hidden = false;
-      slotWrap.querySelectorAll('.slot').forEach((s, i) => s.classList.add(correct[i] ? 'right' : 'wrong'));
-      setTimeout(() => {
-        slots.forEach((v, i) => {
-          if (correct[i]) fixed[i] = true;
-          else { pool.push(v); slots[i] = null; }
-        });
-        draw();
-      }, 1100);
-    };
-    draw();
+    });
+  }
+
+  const optBtn = (cls, mark, text, attrs = '') => `<button type="button" class="opt ${cls}" ${attrs}><span class="mark">${mark}</span><span>${esc(text)}</span></button>`;
+  const base = (o) => Object.assign({ onChange() {} }, o);
+
+  const VIEWS = {
+    quiz(t) {
+      const order = shuffle(t.options.map((_, i) => i));
+      let sel = null, box;
+      const v = base({
+        mount(b) {
+          box = b;
+          b.innerHTML = `<div class="opts">${order.map((i, k) => optBtn('', 'ABCDEF'[k], t.options[i], `data-i="${i}"`)).join('')}</div>`;
+          b.querySelectorAll('.opt').forEach((btn) => btn.addEventListener('click', () => {
+            sel = +btn.dataset.i;
+            b.querySelectorAll('.opt').forEach((x) => { x.classList.toggle('sel', x === btn); x.classList.remove('wrong'); });
+            v.onChange();
+          }));
+        },
+        ready: () => sel !== null,
+        check: () => sel === t.answer,
+        lock() { box.querySelectorAll('.opt').forEach((x) => { x.disabled = true; if (+x.dataset.i === t.answer) x.classList.add('right'); }); },
+        afterWrong() { box.querySelector(`.opt[data-i="${sel}"]`).classList.add('wrong'); }
+      });
+      return v;
+    },
+
+    multi(t) {
+      const order = shuffle(t.options.map((_, i) => i));
+      const sel = new Set();
+      const need = t.answers.length;
+      let box;
+      const v = base({
+        mount(b) {
+          box = b;
+          b.innerHTML = `${t.visual === 'bulb' ? bulbSvg() : ''}<p class="small muted hint-line">Wähle ${need} Antworten.</p><div class="opts">${order.map((i) => optBtn('square', '✓', t.options[i], `data-i="${i}" aria-pressed="false"`)).join('')}</div>`;
+          b.querySelectorAll('.opt').forEach((btn) => btn.addEventListener('click', () => {
+            const i = +btn.dataset.i;
+            if (sel.has(i)) sel.delete(i); else sel.add(i);
+            btn.classList.toggle('sel', sel.has(i));
+            btn.setAttribute('aria-pressed', sel.has(i));
+            b.querySelectorAll('.opt').forEach((x) => x.classList.remove('wrong'));
+            v.onChange();
+          }));
+        },
+        ready: () => sel.size > 0,
+        check() {
+          const ok = sel.size === need && t.answers.every((a) => sel.has(a));
+          if (ok && t.visual === 'bulb') box.querySelector('.bulb')?.classList.add('on');
+          return ok;
+        },
+        lock() { box.querySelectorAll('.opt').forEach((x) => { x.disabled = true; if (sel.has(+x.dataset.i)) x.classList.add('right'); }); },
+        get wrongText() { return sel.size !== need ? `Gesucht sind genau ${need} Antworten.` : 'Mindestens eine Auswahl passt nicht.'; },
+        afterWrong() { sel.forEach((i) => { if (!t.answers.includes(i)) box.querySelector(`.opt[data-i="${i}"]`).classList.add('wrong'); }); }
+      });
+      return v;
+    },
+
+    order(t) {
+      let shown = shuffle(t.items.map((_, i) => i));
+      if (shown.every((x, i) => x === i)) shown = shown.reverse();
+      let seq = [], box, done = false;
+      const v = base({
+        mount(b) {
+          box = b;
+          v.redraw();
+        },
+        redraw() {
+          box.innerHTML = `<p class="small muted hint-line">Tippe die Einträge der Reihe nach an. Nochmal tippen nimmt ihn (und alle danach) zurück.</p>
+            <div class="opts">${shown.map((i) => { const k = seq.indexOf(i); return optBtn(`${k >= 0 ? 'sel' : ''} ${done ? 'right' : ''}`, k >= 0 ? k + 1 : '', t.items[i], `data-i="${i}"`); }).join('')}</div>
+            ${done ? '' : '<button type="button" class="btn btn-ghost btn-small" data-reset>Reihenfolge zurücksetzen</button>'}`;
+          box.querySelectorAll('.opt').forEach((btn) => btn.addEventListener('click', () => {
+            if (done) return;
+            const i = +btn.dataset.i;
+            const k = seq.indexOf(i);
+            if (k >= 0) seq = seq.slice(0, k); else seq.push(i);
+            v.redraw(); v.onChange();
+          }));
+          box.querySelector('[data-reset]')?.addEventListener('click', () => { seq = []; v.redraw(); v.onChange(); });
+        },
+        ready: () => seq.length === t.items.length,
+        check: () => seq.every((i, k) => i === k),
+        lock() { done = true; v.redraw(); },
+        wrongText: 'Die Reihenfolge stimmt noch nicht.',
+        afterWrong() {
+          let k = 0;
+          while (k < seq.length && seq[k] === k) k++;
+          seq = seq.slice(0, k);
+          v.redraw();
+          if (k > 0) box.insertAdjacentHTML('afterbegin', `<div class="feedback hint">Die ersten ${k} Einträge stimmen und bleiben stehen.</div>`);
+        }
+      });
+      return v;
+    },
+
+    pairs(t) {
+      const rightOrder = shuffle(t.right.map((_, i) => i));
+      const match = {};
+      let pickL = 0, box, done = false;
+      const hues = ['#E9C46A', '#8fd3ff', '#b6f09c', '#f7a8d8', '#c9a4f5'];
+      const ownerOf = (j) => Object.keys(match).find((k) => match[k] === j);
+      const v = base({
+        mount(b) { box = b; v.redraw(); },
+        redraw() {
+          box.innerHTML = `<p class="small muted hint-line">Tippe links einen Begriff an und dann rechts das passende Gegenstück.</p>
+            <div class="pairs"><div class="col">${t.left.map((l, i) => {
+              const hue = match[i] !== undefined ? hues[i] : null;
+              return `<button type="button" class="opt ${pickL === i && !done ? 'sel' : ''} ${done ? 'right' : ''}" data-l="${i}" ${hue ? `style="--pair:${hue}"` : ''}><span class="mark ${hue ? 'paired' : ''}"></span><span>${esc(l)}</span></button>`;
+            }).join('')}</div><div class="col">${rightOrder.map((j) => {
+              const li = ownerOf(j);
+              const hue = li !== undefined ? hues[li] : null;
+              return `<button type="button" class="opt ${done ? 'right' : ''}" data-r="${j}" ${hue ? `style="--pair:${hue}"` : ''}><span class="mark ${hue ? 'paired' : ''}"></span><span>${esc(t.right[j])}</span></button>`;
+            }).join('')}</div></div>`;
+          if (done) return;
+          box.querySelectorAll('[data-l]').forEach((btn) => btn.addEventListener('click', () => {
+            const i = +btn.dataset.l;
+            delete match[i];
+            pickL = i;
+            v.redraw(); v.onChange();
+          }));
+          box.querySelectorAll('[data-r]').forEach((btn) => btn.addEventListener('click', () => {
+            const j = +btn.dataset.r;
+            const owner = ownerOf(j);
+            if (owner !== undefined) delete match[owner];
+            if (pickL !== null) {
+              match[pickL] = j;
+              const next = t.left.findIndex((_, i) => match[i] === undefined);
+              pickL = next >= 0 ? next : null;
+            }
+            v.redraw(); v.onChange();
+          }));
+        },
+        ready: () => Object.keys(match).length === t.left.length,
+        check: () => t.left.every((_, i) => match[i] === i),
+        lock() { done = true; v.redraw(); },
+        wrongText: 'Nicht alle Paare passen.',
+        afterWrong() {
+          t.left.forEach((_, i) => { if (match[i] !== i) delete match[i]; });
+          pickL = t.left.findIndex((_, i) => match[i] === undefined);
+          v.redraw();
+        }
+      });
+      return v;
+    },
+
+    sort(t) {
+      const items = shuffle(t.items.map((_, i) => i));
+      const pick = {};
+      let box;
+      const v = base({
+        mount(b) {
+          box = b;
+          b.innerHTML = `<div class="sort-list">${items.map((i) => `<div class="sort-row" data-row="${i}"><span>${esc(t.items[i][0])}</span><div class="seg" role="group" aria-label="${esc(t.items[i][0])}">${t.cats.map((c, ci) => `<button type="button" data-i="${i}" data-c="${ci}" aria-pressed="false">${esc(c)}</button>`).join('')}</div></div>`).join('')}</div>`;
+          b.querySelectorAll('.seg button').forEach((btn) => btn.addEventListener('click', () => {
+            const i = +btn.dataset.i;
+            pick[i] = +btn.dataset.c;
+            btn.parentElement.querySelectorAll('button').forEach((x) => { x.classList.toggle('on', x === btn); x.setAttribute('aria-pressed', x === btn); });
+            btn.closest('.sort-row').classList.remove('wrong');
+            v.onChange();
+          }));
+        },
+        ready: () => Object.keys(pick).length === t.items.length,
+        check: () => t.items.every((it, i) => pick[i] === it[1]),
+        lock() { box.querySelectorAll('.sort-row').forEach((r) => r.classList.add('right')); box.querySelectorAll('button').forEach((x) => { x.disabled = true; }); },
+        wrongText: 'Ein paar Einträge liegen im falschen Fach (rot markiert).',
+        afterWrong() { t.items.forEach((it, i) => { if (pick[i] !== it[1]) box.querySelector(`[data-row="${i}"]`).classList.add('wrong'); }); }
+      });
+      return v;
+    },
+
+    estimate(t) {
+      let val = t.start, touched = false, box;
+      const v = base({
+        mount(b) {
+          box = b;
+          b.innerHTML = `<div class="estimate"><output id="est-out" for="est-range">${val} ${esc(t.unit)}</output>
+            <input type="range" id="est-range" min="${t.min}" max="${t.max}" step="${t.step || 1}" value="${val}" aria-label="Schätzung in ${esc(t.unit)}">
+            <div class="scale"><span>${t.min}</span><span>${t.max}</span></div></div>`;
+          const r = b.querySelector('#est-range');
+          r.addEventListener('input', () => { val = +r.value; touched = true; b.querySelector('#est-out').textContent = `${val} ${t.unit}`; v.onChange(); });
+        },
+        ready: () => touched,
+        check: () => Math.abs(val - t.answer) <= t.tolerance,
+        lock() {
+          const r = box.querySelector('#est-range');
+          r.disabled = true;
+          box.querySelector('#est-out').textContent = `${t.answer} ${t.unit}`;
+        },
+        get wrongText() { return val > t.answer ? 'Zu hoch geschätzt.' : 'Zu niedrig geschätzt.'; }
+      });
+      return v;
+    },
+
+    breathe(t) {
+      let done = false, running = false;
+      const v = base({
+        checkLabel: 'Fertig',
+        mount(b) {
+          const phase = DEBUG.fastBreath ? 150 : 4000;
+          b.innerHTML = `<div class="breath"><div class="breath-circle"><span>Bereit?</span></div>
+            <div class="breath-count">${t.breaths} Atemzüge · ca. ${t.breaths * 8} Sekunden</div>
+            <button type="button" class="btn btn-primary" data-go>Übung starten</button></div>`;
+          const c = b.querySelector('.breath-circle'), tx = c.querySelector('span'), cn = b.querySelector('.breath-count'), go = b.querySelector('[data-go]');
+          go.addEventListener('click', () => {
+            if (running) return;
+            running = true;
+            go.hidden = true;
+            let i = 0;
+            const cycle = () => {
+              if (!document.body.contains(c)) return;
+              if (i >= t.breaths) { tx.textContent = 'Schön.'; cn.textContent = 'Du bist angekommen.'; done = true; v.onChange(); return; }
+              cn.textContent = `Atemzug ${i + 1} von ${t.breaths}`;
+              c.classList.add('in');
+              tx.textContent = 'Einatmen';
+              setTimeout(() => {
+                if (!document.body.contains(c)) return;
+                c.classList.remove('in');
+                tx.textContent = 'Ausatmen';
+                setTimeout(() => { i++; cycle(); }, phase);
+              }, phase);
+            };
+            cycle();
+          });
+        },
+        ready: () => done,
+        check: () => true
+      });
+      return v;
+    },
+
+    reflect(t) {
+      // Mit options: jede Auswahl zählt. Ohne options: eigener kurzer Satz (minLength Zeichen).
+      if (t.options) {
+        const v = VIEWS.quiz({ ...t, answer: -1 });
+        v.checkLabel = 'Weiter';
+        v.check = () => true;
+        v.lock = () => {};
+        return v;
+      }
+      let txt = '';
+      const v = base({
+        checkLabel: 'Fertig',
+        mount(b) {
+          b.innerHTML = `<label for="reflect-text" class="eyebrow">Dein Satz</label>
+            <textarea id="reflect-text" maxlength="280" placeholder="${esc(t.placeholder || '')}"></textarea>`;
+          const ta = b.querySelector('#reflect-text');
+          setTimeout(() => ta.focus({ preventScroll: true }), 60);
+          ta.addEventListener('input', () => { txt = ta.value.trim(); v.onChange(); });
+        },
+        ready: () => txt.length >= (t.minLength || 1),
+        check: () => true,
+        lock() { const ta = document.querySelector('#reflect-text'); if (ta) ta.disabled = true; }
+      });
+      return v;
+    },
+
+    // Finale: erst das variado-Puzzle legen, dann die Synergie-Frage
+    final(t, ctx) {
+      const target = { tl: 'technik', tr: 'mensch', b: 'natur' };
+      const placed = { tl: null, tr: null, b: null };
+      const slotPaths = {
+        tl: 'M0 0 L-39.84 23 A46 46 0 0 1 0 -46 Z',
+        tr: 'M0 0 L0 -46 A46 46 0 0 1 39.84 23 Z',
+        b: 'M0 0 L39.84 23 A46 46 0 0 1 -39.84 23 Z'
+      };
+      const slotName = { tl: 'oben links', tr: 'oben rechts', b: 'unten' };
+      let pick = null, step = 1, quizView = null, box;
+      const pieces = shuffle(['technik', 'mensch', 'natur']);
+      const v = base({
+        mount(b) { box = b; v.redraw(); },
+        redraw() {
+          if (step === 2) return;
+          const left = pieces.filter((k) => !Object.values(placed).includes(k));
+          box.innerHTML = `<div class="puzzle"><svg viewBox="-56 -56 112 112" role="group" aria-label="Puzzle mit drei Plätzen">
+            ${Object.keys(slotPaths).map((s) => {
+              const k = placed[s];
+              return `<g class="slot" data-s="${s}" tabindex="0" role="button" aria-label="Platz ${slotName[s]}${k ? `: ${C.sectors[k].label}` : ', frei'}"><path d="${slotPaths[s]}" fill="${k ? C.sectors[k].color : '#1c3a31'}" stroke="#0b1814" stroke-width="3"/></g>`;
+            }).join('')}
+            <circle r="9" fill="#E9C46A" stroke="#0b1814" stroke-width="3"/></svg>
+            <div class="opts">${left.map((k) => `<button type="button" class="opt piece ${pick === k ? 'sel' : ''}" data-k="${k}" style="--piece:${C.sectors[k].color}"><span class="mark"></span><span>${C.sectors[k].label}</span></button>`).join('') || '<div class="feedback hint">Alle Teile liegen. Prüfe, ob sie richtig sitzen.</div>'}</div></div>
+            <div class="feedback hint">Tipp: Schau auf dein Spielfeld. Es ist genauso aufgebaut wie das variado-Logo.</div>`;
+          box.querySelectorAll('[data-k]').forEach((btn) => btn.addEventListener('click', () => { pick = btn.dataset.k; v.redraw(); }));
+          box.querySelectorAll('.slot').forEach((g) => {
+            const act = () => {
+              const s = g.dataset.s;
+              if (pick) { placed[s] = pick; pick = null; } else if (placed[s]) placed[s] = null;
+              v.redraw(); v.onChange();
+            };
+            g.addEventListener('click', act);
+            g.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); act(); } });
+          });
+        },
+        ready: () => (step === 1 ? Object.values(placed).every(Boolean) : quizView.ready()),
+        check() {
+          if (step === 1) {
+            if (Object.keys(target).every((s) => placed[s] === target[s])) {
+              step = 2;
+              ctx.q.textContent = `Das Puzzle sitzt! ${t.q2}`;
+              quizView = VIEWS.quiz({ options: t.options, answer: t.answer });
+              quizView.onChange = () => v.onChange();
+              quizView.mount(box);
+              return null;
+            }
+            v.wrongText = 'Die Teile sitzen noch nicht richtig.';
+            Object.keys(placed).forEach((s) => { if (placed[s] !== target[s]) placed[s] = null; });
+            v.redraw();
+            return false;
+          }
+          v.wrongText = 'Das ist noch nicht die variado-Synergie.';
+          return quizView.check();
+        },
+        lock() { if (quizView) quizView.lock(); },
+        afterWrong() { if (step === 2) quizView.afterWrong(); }
+      });
+      return v;
+    }
+  };
+
+  function bulbSvg() {
+    return `<svg class="bulb" viewBox="0 0 320 110" aria-hidden="true">
+      <rect x="20" y="30" width="46" height="50" rx="6" fill="#1c3a31" stroke="#7d968c" stroke-width="2"/>
+      <text x="43" y="61" text-anchor="middle" font-size="14" fill="#cfe6dc">+ −</text>
+      <path d="M66 45 H150 M190 45 H250 M66 70 H250" stroke="#cfe6dc" stroke-width="3" fill="none"/>
+      <path d="M150 45 l8 -7 M190 45 l-8 -7" stroke="#cfe6dc" stroke-width="3"/>
+      <text x="170" y="30" text-anchor="middle" font-size="11" fill="#E9C46A">Lücke</text>
+      <circle class="bulb-glow" cx="262" cy="55" r="34" fill="#E9C46A"/>
+      <circle cx="262" cy="52" r="16" fill="#10231d" stroke="#E9C46A" stroke-width="2.5"/>
+      <rect x="254" y="66" width="16" height="10" rx="2" fill="#7d968c"/>
+      <path d="M250 45 V52 M250 70 V66" stroke="#cfe6dc" stroke-width="3"/></svg>`;
   }
 
   /* ------------------------------------------------------------------ */
@@ -884,7 +1171,7 @@
     // Ring-Harmonie prüfen
     for (let r = 0; r < 5; r++) {
       if (S.harmony[r]) continue;
-      if (SECTORS.every((s) => CORE_IDS.some((cid) => NODES[cid].sector === s && NODES[cid].ring === r && S.solved[cid]))) {
+      if (RING_IDS[r].every((cid) => S.solved[cid])) {
         S.harmony[r] = true;
         S.sp += E.harmonySynergy;
         setTimeout(() => {
@@ -935,7 +1222,7 @@
     if (!centerReady()) {
       const missing = [];
       const c = counts();
-      SECTORS.forEach((s) => { if (c[s] < 5) missing.push(`${sectorLabel(s)} (${c[s]}/5)`); });
+      SECTORS.forEach((s) => { if (c[s] < PER_SECTOR) missing.push(`${sectorLabel(s)} (${c[s]}/${PER_SECTOR})`); });
       PAIRS.forEach((p) => { if (!bridgePairDone(p)) missing.push(`Brücke ${sectorLabel(p[0])} ∩ ${sectorLabel(p[1])}`); });
       toast(`✦ <b>Die Synergie ist noch verschlossen.</b> Es fehlt: ${esc(missing.join(', '))}.`);
       return;
@@ -946,7 +1233,7 @@
     const body = $('#task-body');
     body.innerHTML = '';
     body.dataset.state = 'final';
-    renderTask(body, { ...C.final, type: 'choice' }, () => {
+    renderTask(body, { ...C.final, type: 'final' }, () => {
       const foot = h('div', 'task-footer');
       const btn = h('button', 'btn btn-primary btn-wide', '✦ Synergie aktivieren');
       btn.addEventListener('click', () => { hideModal($('#task-modal')); celebrate(); });
@@ -970,6 +1257,7 @@
   function celebrate() {
     S.won = true;
     S.wonAt = Date.now();
+    nextRound();
     S.code = S.code || makeCode();
     save();
     document.body.classList.add('celebrate');
@@ -1222,6 +1510,7 @@
   $('#btn-reset').addEventListener('click', () => showModal('#reset-modal'));
   $('#reset-confirm').addEventListener('click', () => {
     try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* ignorieren */ }
+    if (!S.won) nextRound();
     S = fresh();
     S.seenHelp = true;
     save();
@@ -1267,7 +1556,9 @@
   // Für Tests & Moderation (z. B. in Workshops): window.S2S.debug.solveAll()
   window.S2S = {
     state: () => S,
+    taskFor,
     debug: {
+      fastBreath: (on = true) => { DEBUG.fastBreath = on; },
       addFunken: (n) => { S.funken += n; refreshAll(); },
       solveAll: () => {
         ALL_IDS.forEach((id) => { S.solved[id] = true; S.answered[id] = true; S.level[id] = S.level[id] || 0; });

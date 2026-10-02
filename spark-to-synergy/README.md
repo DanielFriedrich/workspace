@@ -36,13 +36,15 @@ Soll das Gewinnspiel über einen eigenen Endpunkt laufen, trägt man in `js/cont
 
 Alle Texte, Fragen und Zahlen stehen in **`js/content.js`**:
 
-* `nodes`: 15 Kernknoten (Bereich, Ring, Icon, Titel, Aufgabe)
-* `bridges`: 6 Sonderaufgaben an den Überschneidungen
-* `final`: die letzte Aufgabe im Zentrum
+* `nodes`: 21 Kernknoten (Bereich, Ring, Ast `slot`, Voraussetzungen, Icon, Titel, Aufgaben-Pool `tasks`)
+* `bridges`: 6 Sonderaufgaben/Brücken an den Überschneidungen
+* `final`: Logo-Puzzle und letzte Frage im Zentrum
 * `economy`: Kosten, Produktion, Synergie-Tore und Balance-Regeln
 * `meta`: Kontakt-E-Mail, Datenschutz-Link, Endpunkt
 
-Aufgabentypen: `choice` (eine richtige Antwort), `order` (Reihenfolge, `items` in richtiger Reihenfolge angeben) und `reflect` (keine falsche Antwort). Ein `|` im Titel markiert die Umbruchstelle auf dem Spielbrett (z. B. `'Erlebnis|pädagogik'`).
+Aufgabentypen: `quiz`, `multi` (optional `visual: 'bulb'`), `order`, `pairs`, `sort`, `estimate`, `breathe`, `reflect`. Jede Aufgabe hat ein `fact` für den „Wusstest du?“-Kasten. Die genauen Felder stehen oben in `content.js`. Neue Aufgaben einfach in den `tasks`-Pool eines Knotens hängen: Bei jedem neuen Durchgang kommt die nächste Aufgabe aus dem Pool.
+
+Ein `|` im Titel markiert die Umbruchstelle auf dem Spielbrett: `'Kräuter|wanderung'` trennt mit Bindestrich, `'Land der| offenen Fernen'` bricht ohne Bindestrich um.
 
 ## Für Moderation & Tests
 
@@ -51,6 +53,7 @@ In der Browser-Konsole:
 ```js
 S2S.debug.addFunken(10000)  // Funken hinzufügen
 S2S.debug.solveAll()        // alles lösen → Zentrum ist bereit
+S2S.debug.fastBreath()      // Atemübung im Schnelldurchlauf
 ```
 
 Der Spielstand liegt im `localStorage` des Browsers. Mit ↺ oben rechts startet man neu.
